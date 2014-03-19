@@ -6,7 +6,7 @@
 __pycache__
 
 # The ajaxwrapper.py is personal
-# cgi-bin/ajaxwrapper.py
+cgi-bin/ajaxwrapper.py
 
 # Directories #
 /build/
