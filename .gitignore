@@ -5,6 +5,8 @@
 *.pyc
 __pycache__
 
+# The ajaxwrapper.py is personal
+ajaxwrapper.py
 
 # Directories #
 /build/
