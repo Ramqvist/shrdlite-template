@@ -8,8 +8,7 @@ public class Planner {
 		
 	}
 
-	public Plan solve(Object object) {
-		// TODO Auto-generated method stub
+	public Plan solve(Goal goal) {
 		return null;
 	}
 	
