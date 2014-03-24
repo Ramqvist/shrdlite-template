@@ -52,7 +52,6 @@ public class Shrdlite {
             List goals = new ArrayList();
             // Interpreter interpreter = new Interpreter(world, holding, objects);
             for (Term tree : trees) {
-            	tree.to
                 // for (Goal goal : interpreter.interpret(tree)) {
                 //     goals.add(goal);
                 // }
