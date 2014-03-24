@@ -42,7 +42,6 @@ public class Shrdlite {
         List tstrs = new ArrayList();
         result.put("trees", tstrs);
         for (Term t : trees) {
-        	System.out.println(t.toString());
             tstrs.add(t.toString());
         }
 
@@ -51,12 +50,12 @@ public class Shrdlite {
 
         } else {
             List goals = new ArrayList();
-//            Interpreter interpreter = new Interpreter(world, holding, objects);
+            Interpreter interpreter = new Interpreter(world, holding, objects);
             for (Term tree : trees) {
-//                for (Goal goal : interpreter.interpret(tree)) {
-//                	goals.add(goal);
-//                }
-                goals.add(true);
+                for (Goal goal : interpreter.interpret(tree)) {
+                	goals.add(goal);
+                }
+//                goals.add(true);
             }
             result.put("goals", goals);
 
