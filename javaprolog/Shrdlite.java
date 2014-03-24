@@ -42,6 +42,7 @@ public class Shrdlite {
         List tstrs = new ArrayList();
         result.put("trees", tstrs);
         for (Term t : trees) {
+        	System.out.println(t.toString());
             tstrs.add(t.toString());
         }
 
