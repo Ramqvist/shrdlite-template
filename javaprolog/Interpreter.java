@@ -1,9 +1,10 @@
+import gnu.prolog.term.AtomTerm;
+import gnu.prolog.term.AtomicTerm;
 import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.Term;
+import gnu.prolog.term.VariableTerm;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.json.simple.JSONArray;
@@ -99,16 +100,73 @@ public class Interpreter {
 	}
 	
 	public List<Goal> interpret(Term tree) {
-		CompoundTerm cterm = (CompoundTerm) tree;
+//		System.out.println("DEREFERENCE");
+//		System.out.println(Arrays.asList(cterm.args));
+//		System.out.println();
 		
-		System.out.println("DEREFERENCE");
-		System.out.println(Arrays.asList(cterm.args));
-		System.out.println();
+		walkTree(tree);
 		
 		List<Goal> goalList = new ArrayList<Goal>();
 		return goalList;
 	}
 
-	
+	public void walkTree(Term term) {
+		if (term instanceof CompoundTerm) {
+			CompoundTerm cterm = (CompoundTerm) term;
+			switch(cterm.tag.functor.toString()) {
+			case "move":
+				System.out.println("saw move");
+				walkTree(cterm.args[0]);
+				walkTree(cterm.args[1]);
+				break;
+			case "relative":
+				System.out.println("saw relative");
+				walkTree(cterm.args[0]);
+				walkTree(cterm.args[1]);
+				break;
+			case "basic_entity":
+				System.out.println("saw basic_entity");
+				walkTree(cterm.args[0]);
+				walkTree(cterm.args[1]);
+				break;
+			case "relative_entity":
+				System.out.println("saw relative_entity");
+				walkTree(cterm.args[0]);
+				walkTree(cterm.args[1]);
+				walkTree(cterm.args[2]);
+				break;
+			case "object":
+				System.out.println("saw object");
+				walkTree(cterm.args[0]);
+				walkTree(cterm.args[1]);
+				walkTree(cterm.args[2]);
+				break;
+			}
+//		} else if (term instanceof AtomTerm) {
+//			AtomTerm aterm = (AtomTerm) term;
+//			switch(aterm.value) {
+//			case "floor":
+//				System.out.println("FOUND FLOOR");
+//				break;
+//			case "the":
+//			case "any":
+//			case "all":
+//				break;
+//			case "beside":
+//			case "leftof":
+//			case "rightof":
+//			case "above":
+//			case "ontop":
+//			case "under":
+//			case "inside":
+//				break;
+//			case "small":
+//			case "large":
+//			}
+		} else if (term instanceof VariableTerm) {
+			
+		}
+		System.out.println();
+	}
 	
 }
