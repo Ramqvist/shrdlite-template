@@ -17,6 +17,7 @@ public class Interpreter {
 		convertFromJSON(world, objects);
 	}
 	
+	/** Converts the given JSON input to a two-dimensional list of {@link Entity} objects.*/
 	private void convertFromJSON(JSONArray world, JSONObject objects) {
 		for (int i = 0; i < world.size(); i++) {
 			JSONArray stack = (JSONArray) world.get(i);
