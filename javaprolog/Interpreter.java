@@ -14,7 +14,10 @@ public class Interpreter {
 	List<List<Entity>> world = new ArrayList<List<Entity>>();
 
 	public Interpreter(JSONArray world, String holding, JSONObject objects) {
-		//Parse to internal representation of the world?
+		convertFromJSON(world, objects);
+	}
+	
+	private void convertFromJSON(JSONArray world, JSONObject objects) {
 		for (int i = 0; i < world.size(); i++) {
 			JSONArray stack = (JSONArray) world.get(i);
 			
