@@ -1,5 +1,4 @@
 import gnu.prolog.term.AtomTerm;
-import gnu.prolog.term.AtomicTerm;
 import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.Term;
 import gnu.prolog.term.VariableTerm;
@@ -31,65 +30,7 @@ public class Interpreter {
 			for (int j = 0; j < stack.size(); j++) {
 				String name = (String) stack.get(j);
 				JSONObject entityDescription = (JSONObject) objects.get(name);
-				
-				String form = (String) entityDescription.get("form");
-				Entity.FORM eForm = Entity.FORM.BRICK;
-				switch(form) {
-				case "brick":
-					eForm = Entity.FORM.BRICK;
-					break;
-				case "plank":
-					eForm = Entity.FORM.PLANK;
-					break;
-				case "ball":
-					eForm = Entity.FORM.BALL;
-					break;
-				case "table":
-					eForm = Entity.FORM.TABLE;
-					break;
-				case "pyramid":
-					eForm = Entity.FORM.PYRAMID;
-					break;
-				case "box":
-					eForm = Entity.FORM.BOX;
-					break;
-				}
-				
-				String size = (String) entityDescription.get("size");
-				Entity.SIZE eSize = Entity.SIZE.LARGE;
-				switch(size) {
-				case "large":
-					eSize = Entity.SIZE.LARGE;
-					break;
-				case "small":
-					eSize = Entity.SIZE.SMALL;
-					break;
-				}
-				
-				String color = (String) entityDescription.get("color");
-				Entity.COLOR eColor = Entity.COLOR.GREEN;
-				switch(color) {
-				case "green":
-					eColor = Entity.COLOR.GREEN;
-					break;
-				case "white":
-					eColor = Entity.COLOR.WHITE;
-					break;
-				case "red":
-					eColor = Entity.COLOR.RED;
-					break;
-				case "black":
-					eColor = Entity.COLOR.BLACK;
-					break;
-				case "blue":
-					eColor = Entity.COLOR.BLUE;
-					break;
-				case "yellow":
-					eColor = Entity.COLOR.YELLOW;
-					break;
-				}
-				
-				Entity newEntity = new Entity(eForm, eSize, eColor);
+				Entity newEntity = new Entity((String) entityDescription.get("form"), (String) entityDescription.get("size"), (String) entityDescription.get("color"));
 				column.add(newEntity);
 			}
 			
@@ -100,71 +41,93 @@ public class Interpreter {
 	}
 	
 	public List<Goal> interpret(Term tree) {
-//		System.out.println("DEREFERENCE");
-//		System.out.println(Arrays.asList(cterm.args));
-//		System.out.println();
-		
-		walkTree(tree);
-		
+		System.out.println("=================");
+		System.out.println("START OF INTERPRET");
+		System.out.println();
+		List<Relation> relations = new ArrayList<>();
+		walkTree(tree, relations);
+		System.out.println(relations);
+		System.out.println();
+		System.out.println("END OF INTERPRET");
+		System.out.println("================");
+		System.out.println();
+		latestEntity = null;
+		latestRelation = null;
 		List<Goal> goalList = new ArrayList<Goal>();
 		return goalList;
 	}
 
-	public void walkTree(Term term) {
+	private Entity latestEntity;
+	private Relation.TYPE latestRelation;
+	
+	public void walkTree(Term term, List<Relation> relations) {
 		if (term instanceof CompoundTerm) {
 			CompoundTerm cterm = (CompoundTerm) term;
 			switch(cterm.tag.functor.toString()) {
 			case "move":
 				System.out.println("saw move");
-				walkTree(cterm.args[0]);
-				walkTree(cterm.args[1]);
+				walkTree(cterm.args[0], relations);
+				walkTree(cterm.args[1], relations);
 				break;
 			case "relative":
 				System.out.println("saw relative");
-				walkTree(cterm.args[0]);
-				walkTree(cterm.args[1]);
+				latestRelation = Relation.parseType(cterm.args[0].toString());
+				walkTree(cterm.args[1], relations);
 				break;
 			case "basic_entity":
 				System.out.println("saw basic_entity");
-				walkTree(cterm.args[0]);
-				walkTree(cterm.args[1]);
+				walkTree(cterm.args[0], relations);
+				walkTree(cterm.args[1], relations);
 				break;
 			case "relative_entity":
 				System.out.println("saw relative_entity");
-				walkTree(cterm.args[0]);
-				walkTree(cterm.args[1]);
-				walkTree(cterm.args[2]);
+				walkTree(cterm.args[0], relations);
+				walkTree(cterm.args[1], relations);
+				walkTree(cterm.args[2], relations);
 				break;
 			case "object":
 				System.out.println("saw object");
-				walkTree(cterm.args[0]);
-				walkTree(cterm.args[1]);
-				walkTree(cterm.args[2]);
+				Entity entity = new Entity(cterm.args[0].toString(), cterm.args[1].toString(), cterm.args[2].toString());
+				if (latestEntity != null) {
+					Relation relation = new Relation(latestEntity, entity, latestRelation);
+					relations.add(relation);
+					latestRelation = null;
+				}
+				latestEntity = entity;
+				System.out.println("latest entity changed to " + latestEntity);
+				// compare to world
+				List<Entity> matchedEntities = new ArrayList<>();
+				System.out.println(entity);
+				for (List<Entity> column : world) {
+					System.out.println(column);
+					if (column.contains(entity)) {
+						matchedEntities.add(entity);
+					}
+				}
+				
+//				// check ambiguity
+//				if (matchedEntities.size() > 1) {
+//					System.out.println("Ambiguity, these objects match this entity " + entity);
+//					System.out.println(matchedEntities);
+//				}
+				
+				if (matchedEntities.isEmpty()) {
+					// TODO get real man
+					System.out.println("error, object not found in world");
+				} else {
+					System.out.println("object exists in world: " + entity);
+				}
 				break;
 			}
-//		} else if (term instanceof AtomTerm) {
-//			AtomTerm aterm = (AtomTerm) term;
-//			switch(aterm.value) {
-//			case "floor":
-//				System.out.println("FOUND FLOOR");
-//				break;
-//			case "the":
-//			case "any":
-//			case "all":
-//				break;
-//			case "beside":
-//			case "leftof":
-//			case "rightof":
-//			case "above":
-//			case "ontop":
-//			case "under":
-//			case "inside":
-//				break;
-//			case "small":
-//			case "large":
-//			}
-		} else if (term instanceof VariableTerm) {
-			
+		} else if (term instanceof AtomTerm) {
+			AtomTerm aterm = (AtomTerm) term;
+			switch(aterm.value) {
+			case "floor":
+				System.out.println("saw floor");
+				latestEntity = new Entity(Entity.FORM.FLOOR, Entity.SIZE.UNDEFINED, Entity.COLOR.UNDEFINED);
+				System.out.println("latest entity changed to " + latestEntity);
+				break;
+			}
 		}
 		System.out.println();
 	}

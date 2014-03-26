@@ -5,15 +5,15 @@
 public class Entity {
 
 	public enum FORM {
-		BRICK, PLANK, BALL, TABLE, PYRAMID, BOX
+		BRICK, PLANK, BALL, TABLE, PYRAMID, BOX, FLOOR
 	}
 
 	public enum SIZE {
-		LARGE, SMALL
+		LARGE, SMALL, UNDEFINED
 	}
 
 	public enum COLOR {
-		RED, BLACK, BLUE, GREEN, YELLOW, WHITE
+		RED, BLACK, BLUE, GREEN, YELLOW, WHITE, UNDEFINED
 	}
 
 	private FORM form;
@@ -24,6 +24,63 @@ public class Entity {
 		this.size = size;
 		this.form = form;
 		this.color = color;
+	}
+	
+	public Entity(String form, String size, String color) {
+		switch(form) {
+		case "brick":
+			this.form = Entity.FORM.BRICK;
+			break;
+		case "plank":
+			this.form = Entity.FORM.PLANK;
+			break;
+		case "ball":
+			this.form = Entity.FORM.BALL;
+			break;
+		case "table":
+			this.form = Entity.FORM.TABLE;
+			break;
+		case "pyramid":
+			this.form = Entity.FORM.PYRAMID;
+			break;
+		case "box":
+			this.form = Entity.FORM.BOX;
+			break;
+		}
+		
+		switch(size) {
+		case "large":
+			this.size = Entity.SIZE.LARGE;
+			break;
+		case "small":
+			this.size = Entity.SIZE.SMALL;
+			break;
+		default:
+			this.size = Entity.SIZE.UNDEFINED;
+		}
+			
+		switch(color) {
+		case "green":
+			this.color = Entity.COLOR.GREEN;
+			break;
+		case "white":
+			this.color = Entity.COLOR.WHITE;
+			break;
+		case "red":
+			this.color = Entity.COLOR.RED;
+			break;
+		case "black":
+			this.color = Entity.COLOR.BLACK;
+			break;
+		case "blue":
+			this.color = Entity.COLOR.BLUE;
+			break;
+		case "yellow":
+			this.color = Entity.COLOR.YELLOW;
+			break;
+		default:
+			this.color = Entity.COLOR.UNDEFINED;
+		}
 	}
 
 	public COLOR getColor() {
@@ -71,13 +128,13 @@ public class Entity {
 			return false;
 		}
 		Entity other = (Entity) obj;
-		if (color != other.color) {
+		if (color != other.color && color != Entity.COLOR.UNDEFINED && other.color != Entity.COLOR.UNDEFINED) {
 			return false;
 		}
 		if (form != other.form) {
 			return false;
 		}
-		if (size != other.size) {
+		if (size != other.size && size != Entity.SIZE.UNDEFINED && other.size != Entity.SIZE.UNDEFINED) {
 			return false;
 		}
 		return true;

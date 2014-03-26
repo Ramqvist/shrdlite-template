@@ -5,7 +5,7 @@
 public class Relation {
 	
 	public enum TYPE {
-	    ON_TOP_OF, ABOVE, UNDER, BESIDE, LEFT_OF, RIGHT_OF
+	    ON_TOP_OF, ABOVE, UNDER, BESIDE, LEFT_OF, RIGHT_OF, INSIDE, UNDEFINED
 	}
 	
 	private TYPE type;
@@ -17,7 +17,32 @@ public class Relation {
 		this.b = b;
 		this.type = type;
 	}
+	
+	public Relation(Entity a, Entity b, String type) {
+		this(a, b, parseType(type));
+	}
 
+	public static TYPE parseType(String type) {
+		switch(type) {
+		case "beside":
+			return TYPE.BESIDE;
+		case "leftof":
+			return TYPE.LEFT_OF;
+		case "rightof":
+			return TYPE.RIGHT_OF;
+		case "above":
+			return TYPE.ABOVE;
+		case "ontop":
+			return TYPE.ON_TOP_OF;
+		case "under":
+			return TYPE.UNDER;
+		case "inside":
+			return TYPE.INSIDE;
+		default:
+			return TYPE.UNDEFINED;
+		}
+	}
+	
 	public TYPE getType() {
 		return type;
 	}
