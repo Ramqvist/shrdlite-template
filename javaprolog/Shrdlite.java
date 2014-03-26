@@ -43,6 +43,9 @@ public class Shrdlite {
         result.put("trees", tstrs);
         for (Term t : trees) {
             tstrs.add(t.toString());
+            // DEBUG OUTPUT
+            System.out.println(t.toString());
+            System.out.println();
         }
 
         if (trees.isEmpty()) {

@@ -5,7 +5,7 @@
 public class Entity {
 	
 	public enum FORM {
-	    ON_TOP_OF, ABOVE, UNDER, BESIDE, LEFT_OF, RIGHT_OF
+	    BRICK, PLANK, BALL, TABLE, PYRAMID, BOX
 	}
 	
 	public enum SIZE {
@@ -38,5 +38,9 @@ public class Entity {
 		return size;
 	}
 	
-
+	@Override
+	public String toString() {
+		return "Entity: " + size + " " + color + " " + form;
+	}
+	
 }
