@@ -34,4 +34,9 @@ public class Relation {
 		return b;
 	}
 	
+	@Override
+	public String toString() {
+		return "(" + type + " " + a + " " + b + ")";
+	}
+	
 }

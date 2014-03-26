@@ -1,6 +1,9 @@
+import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.Term;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.json.simple.JSONArray;
@@ -96,9 +99,12 @@ public class Interpreter {
 	}
 	
 	public List<Goal> interpret(Term tree) {
-		String s = tree.toString();
-		//Split words to tree?
-		//Parse to Goal
+		CompoundTerm cterm = (CompoundTerm) tree;
+		
+		System.out.println("DEREFERENCE");
+		System.out.println(Arrays.asList(cterm.args));
+		System.out.println();
+		
 		List<Goal> goalList = new ArrayList<Goal>();
 		return goalList;
 	}
