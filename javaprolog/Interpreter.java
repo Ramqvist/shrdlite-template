@@ -45,22 +45,28 @@ public class Interpreter {
 	
 	public List<Goal> interpret(Term tree) {
 		relations = new ArrayList<>();
+		
+		System.out.println();
 		System.out.println("=================");
 		System.out.println("START OF INTERPRET");
 		System.out.println();
+		
 		try {
 			walkTree(tree);
 		} catch (InterpretationException e) {
 			e.printStackTrace();
 		}
+		
 		System.out.println();
 		System.out.println("END OF INTERPRET");
 		System.out.println("================");
 		System.out.println();
+		
 		List<Goal> goalList = new ArrayList<Goal>();		
 		goalList.add(new Goal(relations));
-		// TODO handle error somehow
+		
 		System.out.println(goalList.get(0));
+		
 		return goalList;
 	}
 	
@@ -68,6 +74,8 @@ public class Interpreter {
 	
 	public class InterpretationException extends Exception {
 		
+		private static final long serialVersionUID = 2280978916235342656L;
+
 		public InterpretationException(String message) {
 			super(message);
 		}
@@ -87,6 +95,9 @@ public class Interpreter {
 				relation = (Relation) walkTree(cterm.args[1]); // ALWAYS RELATIVE
 				finalRelation = new Relation(entity, relation.getEntityB(), relation.getType());
 				relations.add(finalRelation);
+				
+				// TODO: Check if this relation makes sense in the world.
+				
 				System.out.println("MOVE Added new relation to relations: " + finalRelation);
 				return finalRelation;
 			case "relative":
@@ -107,9 +118,12 @@ public class Interpreter {
 				walkTree(cterm.args[0]); // ALWAYS QUANTIFIER
 				entity = (Entity) walkTree(cterm.args[1]); // ALWAYS OBJECT (our class is called Entity)
 				relation = (Relation) walkTree(cterm.args[2]); // ALWAYS RELATIVE
-				Relation newRelation = new Relation(entity, relation.getEntityB(), relation.getType());
-				relations.add(newRelation);
-				System.out.println("RELATIVE_ENTITY Added new relation to relations: " + newRelation);
+				finalRelation = new Relation(entity, relation.getEntityB(), relation.getType());
+				
+				// TODO: Check if this relation makes sense in the world.
+				
+				relations.add(finalRelation);
+				System.out.println("RELATIVE_ENTITY Added new relation to relations: " + finalRelation);
 				return entity;
 			case "object":
 				System.out.println("saw object");
@@ -124,15 +138,14 @@ public class Interpreter {
 					}
 				}
 				
-//				// check ambiguity
-//				if (matchedEntities.size() > 1) {
-//					System.out.println("Ambiguity, these objects match this entity " + entity);
-//					System.out.println(matchedEntities);
-//				}
+				// TODO: Better matching. A box on the floor should only match boxes that stand on the floor.
 				
 				if (matchedEntities.isEmpty()) {
 					throw new InterpretationException("Error: [" + entity + "] does not exists in the world.");
+				} else if (matchedEntities.size() > 1) {
+					//throw new InterpretationException("Ambiguity Error: [" + entity + "] matches several items in the world: " + matchedEntities + ".");
 				}
+				
 				System.out.println("Success: [" + entity + "] exists in the world as [" + matchedEntities.get(0) + "].");
 				return matchedEntities.get(0);
 			}

@@ -53,7 +53,7 @@ public class Shrdlite {
             result.put("output", "Parse error!");
 
         } else {
-            List goals = new ArrayList();
+            List<Goal> goals = new ArrayList<>();
             Interpreter interpreter = new Interpreter(world, holding, objects);
             for (Term tree : trees) {
                 for (Goal goal : interpreter.interpret(tree)) {
