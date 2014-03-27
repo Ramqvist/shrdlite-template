@@ -67,24 +67,24 @@ public class Interpreter {
 			switch(cterm.tag.functor.toString()) {
 			case "move":
 				System.out.println("saw move");
-				walkTree(cterm.args[0], relations);
-				walkTree(cterm.args[1], relations);
+				walkTree(cterm.args[0], relations); // EITHER FLOOR, BASIC_ENTITY OR RELATIVE_ENTITY
+				walkTree(cterm.args[1], relations); // ALWAYS RELATIVE
 				break;
 			case "relative":
 				System.out.println("saw relative");
-				latestRelation = Relation.parseType(cterm.args[0].toString());
-				walkTree(cterm.args[1], relations);
+				latestRelation = Relation.parseType(cterm.args[0].toString()); // ALWAYS RELATION
+				walkTree(cterm.args[1], relations); // EITHER FLOOR, BASIC_ENTITY OR RELATIVE_ENTITY
 				break;
 			case "basic_entity":
 				System.out.println("saw basic_entity");
-				walkTree(cterm.args[0], relations);
-				walkTree(cterm.args[1], relations);
+				walkTree(cterm.args[0], relations); // ALWAYS QUANTIFIER
+				walkTree(cterm.args[1], relations); // ALWAYS OBJECT (our class is called Entity)
 				break;
 			case "relative_entity":
 				System.out.println("saw relative_entity");
-				walkTree(cterm.args[0], relations);
-				walkTree(cterm.args[1], relations);
-				walkTree(cterm.args[2], relations);
+				walkTree(cterm.args[0], relations); // ALWAYS QUANTIFIER
+				walkTree(cterm.args[1], relations); // ALWAYS OBJECT (our class is called Entity)
+				walkTree(cterm.args[2], relations); // ALWAYS RELATIVE
 				break;
 			case "object":
 				System.out.println("saw object");
