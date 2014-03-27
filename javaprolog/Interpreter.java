@@ -48,20 +48,33 @@ public class Interpreter {
 		System.out.println("=================");
 		System.out.println("START OF INTERPRET");
 		System.out.println();
-		walkTree(tree);
+		try {
+			walkTree(tree);
+		} catch (InterpretationException e) {
+			e.printStackTrace();
+		}
 		System.out.println();
 		System.out.println("END OF INTERPRET");
 		System.out.println("================");
 		System.out.println();
 		List<Goal> goalList = new ArrayList<Goal>();		
 		goalList.add(new Goal(relations));
+		// TODO handle error somehow
 		System.out.println(goalList.get(0));
 		return goalList;
 	}
 	
 	private Entity undefinedEntity = new Entity(Entity.FORM.UNDEFINED, Entity.SIZE.UNDEFINED, Entity.COLOR.UNDEFINED);
 	
-	public Object walkTree(Term term) {
+	public class InterpretationException extends Exception {
+		
+		public InterpretationException(String message) {
+			super(message);
+		}
+		
+	}
+	
+	public Object walkTree(Term term) throws InterpretationException {
 		Relation relation, finalRelation;
 		Entity entity;
 		
@@ -118,13 +131,10 @@ public class Interpreter {
 //				}
 				
 				if (matchedEntities.isEmpty()) {
-					// TODO get real man
-					System.out.println("Error: [" + entity + "] does not exists in the world.");
-				} else {
-					System.out.println("Success: [" + entity + "] exists in the world as [" + matchedEntities.get(0) + "].");
-					return matchedEntities.get(0);
+					throw new InterpretationException("Error: [" + entity + "] does not exists in the world.");
 				}
-				break;
+				System.out.println("Success: [" + entity + "] exists in the world as [" + matchedEntities.get(0) + "].");
+				return matchedEntities.get(0);
 			}
 		} else if (term instanceof AtomTerm) {
 			AtomTerm aterm = (AtomTerm) term;
