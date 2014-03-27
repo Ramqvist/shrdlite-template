@@ -44,6 +44,7 @@ public class Shrdlite {
         for (Term t : trees) {
             tstrs.add(t.toString());
             // DEBUG OUTPUT
+            System.out.println("Tree " + (trees.indexOf(t) + 1));
             System.out.println(t.toString());
             System.out.println();
         }
@@ -69,15 +70,17 @@ public class Shrdlite {
                 result.put("output", "Ambiguity error!");
 
             } else {
-//                Planner planner = new Planner(world, holding, objects);
-//                Plan plan = planner.solve(goals.get(0));
+                Planner planner = new Planner(world, holding, objects);
+                List<Relation> exampleGoals = new ArrayList<>();
+                exampleGoals.add(new Relation(new Entity("ball", "white", "large"), new Entity("box", "large", "yellow"), Relation.TYPE.INSIDE));
+                Plan plan = planner.solve(new Goal(exampleGoals));
                 int column = 0;
                 while (((JSONArray)world.get(column)).isEmpty()) column++;
-                List plan = new ArrayList(); 
-                plan.add("I pick up . . ."); 
-                plan.add("pick " + column);
-                plan.add(". . . and then I drop down"); 
-                plan.add("drop " + column);
+//                List plan = new ArrayList(); 
+//                plan.add("I pick up . . ."); 
+//                plan.add("pick " + column);
+//                plan.add(". . . and then I drop down"); 
+//                plan.add("drop " + column);
                 result.put("plan", plan);
 
                 if (plan.isEmpty()) {
@@ -88,7 +91,7 @@ public class Shrdlite {
             }
         }
 
-        System.out.print(result);
+        System.out.println(result);
     }
 
     public static String readFromStdin() throws IOException {

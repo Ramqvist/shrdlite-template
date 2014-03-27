@@ -36,6 +36,7 @@ public class Interpreter {
 			
 			this.world.add(column);
 		}
+		System.out.println("World Representation");		
 		System.out.println(this.world);
 		System.out.println();
 	}
@@ -113,9 +114,9 @@ public class Interpreter {
 				
 				if (matchedEntities.isEmpty()) {
 					// TODO get real man
-					System.out.println("error, object not found in world");
+					System.out.println("Error: [" + entity + "] does not exists in the world.");
 				} else {
-					System.out.println("object exists in world: " + entity);
+					System.out.println("Success: [" + entity + "] exists in the world.");
 				}
 				break;
 			}
