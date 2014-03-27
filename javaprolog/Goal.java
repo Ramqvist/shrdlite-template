@@ -16,4 +16,9 @@ public class Goal {
 		return relations;
 	}
 	
+	@Override
+	public String toString() {
+		return "Goal: " + relations.toString();
+	}
+	
 }

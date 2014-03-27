@@ -41,62 +41,61 @@ public class Interpreter {
 		System.out.println();
 	}
 	
+	List<Relation> relations = new ArrayList<>();
+	
 	public List<Goal> interpret(Term tree) {
 		System.out.println("=================");
 		System.out.println("START OF INTERPRET");
 		System.out.println();
-		List<Relation> relations = new ArrayList<>();
-		walkTree(tree, relations);
-		System.out.println(relations);
+		walkTree(tree);
 		System.out.println();
 		System.out.println("END OF INTERPRET");
 		System.out.println("================");
 		System.out.println();
-		latestEntity = null;
-		latestRelation = null;
 		List<Goal> goalList = new ArrayList<Goal>();
+		goalList.add(new Goal(relations));
+		System.out.println(goalList.get(0));
 		return goalList;
 	}
-
-	private Entity latestEntity;
-	private Relation.TYPE latestRelation;
 	
-	public void walkTree(Term term, List<Relation> relations) {
+	private Entity undefinedEntity = new Entity(Entity.FORM.UNDEFINED, Entity.SIZE.UNDEFINED, Entity.COLOR.UNDEFINED);
+	
+	public Object walkTree(Term term) {
+		Relation relation;
+		Entity entity;
+		
 		if (term instanceof CompoundTerm) {
 			CompoundTerm cterm = (CompoundTerm) term;
 			switch(cterm.tag.functor.toString()) {
 			case "move":
 				System.out.println("saw move");
-				walkTree(cterm.args[0], relations); // EITHER FLOOR, BASIC_ENTITY OR RELATIVE_ENTITY
-				walkTree(cterm.args[1], relations); // ALWAYS RELATIVE
+				entity = (Entity) walkTree(cterm.args[0]); // EITHER FLOOR, BASIC_ENTITY OR RELATIVE_ENTITY
+				relation = (Relation) walkTree(cterm.args[1]); // ALWAYS RELATIVE
 				break;
 			case "relative":
 				System.out.println("saw relative");
-				latestRelation = Relation.parseType(cterm.args[0].toString()); // ALWAYS RELATION
-				walkTree(cterm.args[1], relations); // EITHER FLOOR, BASIC_ENTITY OR RELATIVE_ENTITY
-				break;
+				Relation.TYPE relationType = (Relation.TYPE) walkTree(cterm.args[0]); // ALWAYS RELATION
+				entity = (Entity) walkTree(cterm.args[1]); // EITHER FLOOR, BASIC_ENTITY OR RELATIVE_ENTITY
+				System.out.println(relationType);
+				System.out.println(entity);
+				relation = new Relation(undefinedEntity, entity, relationType);
+				relations.add(relation);
+				return relation;
 			case "basic_entity":
 				System.out.println("saw basic_entity");
-				walkTree(cterm.args[0], relations); // ALWAYS QUANTIFIER
-				walkTree(cterm.args[1], relations); // ALWAYS OBJECT (our class is called Entity)
-				break;
+				walkTree(cterm.args[0]); // ALWAYS QUANTIFIER
+				entity = (Entity) walkTree(cterm.args[1]); // ALWAYS OBJECT (our class is called Entity)
+				return entity;
 			case "relative_entity":
 				System.out.println("saw relative_entity");
-				walkTree(cterm.args[0], relations); // ALWAYS QUANTIFIER
-				walkTree(cterm.args[1], relations); // ALWAYS OBJECT (our class is called Entity)
-				walkTree(cterm.args[2], relations); // ALWAYS RELATIVE
-				break;
+				walkTree(cterm.args[0]); // ALWAYS QUANTIFIER
+				entity = (Entity) walkTree(cterm.args[1]); // ALWAYS OBJECT (our class is called Entity)
+				relation = (Relation) walkTree(cterm.args[2]); // ALWAYS RELATIVE
+				return entity;
 			case "object":
 				System.out.println("saw object");
-				Entity entity = new Entity(cterm.args[0].toString(), cterm.args[1].toString(), cterm.args[2].toString());
-				if (latestEntity != null) {
-					Relation relation = new Relation(latestEntity, entity, latestRelation);
-					relations.add(relation);
-					latestRelation = null;
-				}
-				latestEntity = entity;
-				System.out.println("latest entity changed to " + latestEntity);
-				// compare to world
+				entity = new Entity(cterm.args[0].toString(), cterm.args[1].toString(), cterm.args[2].toString());
+
 				List<Entity> matchedEntities = new ArrayList<>();
 				System.out.println(entity);
 				for (List<Entity> column : world) {
@@ -117,6 +116,7 @@ public class Interpreter {
 					System.out.println("Error: [" + entity + "] does not exists in the world.");
 				} else {
 					System.out.println("Success: [" + entity + "] exists in the world.");
+					return entity;
 				}
 				break;
 			}
@@ -125,12 +125,13 @@ public class Interpreter {
 			switch(aterm.value) {
 			case "floor":
 				System.out.println("saw floor");
-				latestEntity = new Entity(Entity.FORM.FLOOR, Entity.SIZE.UNDEFINED, Entity.COLOR.UNDEFINED);
-				System.out.println("latest entity changed to " + latestEntity);
-				break;
+				return new Entity(Entity.FORM.FLOOR, Entity.SIZE.UNDEFINED, Entity.COLOR.UNDEFINED);				
 			}
+			// This static method handles the parsing of type values.
+			return Relation.parseType(aterm.value);
 		}
 		System.out.println();
+		return null;
 	}
 	
 }

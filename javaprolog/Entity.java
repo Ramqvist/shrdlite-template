@@ -5,7 +5,7 @@
 public class Entity {
 
 	public enum FORM {
-		BRICK, PLANK, BALL, TABLE, PYRAMID, BOX, FLOOR
+		BRICK, PLANK, BALL, TABLE, PYRAMID, BOX, FLOOR, UNDEFINED
 	}
 
 	public enum SIZE {
@@ -84,15 +84,15 @@ public class Entity {
 	}
 
 	public COLOR getColor() {
-		return color;
+		return color == null ? COLOR.UNDEFINED : color;
 	}
 
 	public FORM getForm() {
-		return form;
+		return form == null ? FORM.UNDEFINED : form;
 	}
 
 	public SIZE getSize() {
-		return size;
+		return size == null ? SIZE.UNDEFINED : size;
 	}
 
 	@Override
