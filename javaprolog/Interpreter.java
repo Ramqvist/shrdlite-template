@@ -41,9 +41,10 @@ public class Interpreter {
 		System.out.println();
 	}
 	
-	List<Relation> relations = new ArrayList<>();
+	List<Relation> relations; 
 	
 	public List<Goal> interpret(Term tree) {
+		relations = new ArrayList<>();
 		System.out.println("=================");
 		System.out.println("START OF INTERPRET");
 		System.out.println();
@@ -52,7 +53,7 @@ public class Interpreter {
 		System.out.println("END OF INTERPRET");
 		System.out.println("================");
 		System.out.println();
-		List<Goal> goalList = new ArrayList<Goal>();
+		List<Goal> goalList = new ArrayList<Goal>();		
 		goalList.add(new Goal(relations));
 		System.out.println(goalList.get(0));
 		return goalList;
@@ -61,7 +62,7 @@ public class Interpreter {
 	private Entity undefinedEntity = new Entity(Entity.FORM.UNDEFINED, Entity.SIZE.UNDEFINED, Entity.COLOR.UNDEFINED);
 	
 	public Object walkTree(Term term) {
-		Relation relation;
+		Relation relation, finalRelation;
 		Entity entity;
 		
 		if (term instanceof CompoundTerm) {
@@ -71,15 +72,17 @@ public class Interpreter {
 				System.out.println("saw move");
 				entity = (Entity) walkTree(cterm.args[0]); // EITHER FLOOR, BASIC_ENTITY OR RELATIVE_ENTITY
 				relation = (Relation) walkTree(cterm.args[1]); // ALWAYS RELATIVE
-				break;
+				finalRelation = new Relation(entity, relation.getEntityB(), relation.getType());
+				relations.add(finalRelation);
+				System.out.println("MOVE Added new relation to relations: " + finalRelation);
+				return finalRelation;
 			case "relative":
 				System.out.println("saw relative");
 				Relation.TYPE relationType = (Relation.TYPE) walkTree(cterm.args[0]); // ALWAYS RELATION
 				entity = (Entity) walkTree(cterm.args[1]); // EITHER FLOOR, BASIC_ENTITY OR RELATIVE_ENTITY
-				System.out.println(relationType);
-				System.out.println(entity);
+				System.out.println("in relative, got relationtype: " + relationType);
+				System.out.println("in relative, got entity: " + entity);
 				relation = new Relation(undefinedEntity, entity, relationType);
-				relations.add(relation);
 				return relation;
 			case "basic_entity":
 				System.out.println("saw basic_entity");
@@ -91,6 +94,9 @@ public class Interpreter {
 				walkTree(cterm.args[0]); // ALWAYS QUANTIFIER
 				entity = (Entity) walkTree(cterm.args[1]); // ALWAYS OBJECT (our class is called Entity)
 				relation = (Relation) walkTree(cterm.args[2]); // ALWAYS RELATIVE
+				Relation newRelation = new Relation(entity, relation.getEntityB(), relation.getType());
+				relations.add(newRelation);
+				System.out.println("RELATIVE_ENTITY Added new relation to relations: " + newRelation);
 				return entity;
 			case "object":
 				System.out.println("saw object");
@@ -101,7 +107,7 @@ public class Interpreter {
 				for (List<Entity> column : world) {
 					System.out.println(column);
 					if (column.contains(entity)) {
-						matchedEntities.add(entity);
+						matchedEntities.add(column.get(column.indexOf(entity)));
 					}
 				}
 				
@@ -115,8 +121,8 @@ public class Interpreter {
 					// TODO get real man
 					System.out.println("Error: [" + entity + "] does not exists in the world.");
 				} else {
-					System.out.println("Success: [" + entity + "] exists in the world.");
-					return entity;
+					System.out.println("Success: [" + entity + "] exists in the world as [" + matchedEntities.get(0) + "].");
+					return matchedEntities.get(0);
 				}
 				break;
 			}
