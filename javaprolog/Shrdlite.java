@@ -59,7 +59,6 @@ public class Shrdlite {
                 for (Goal goal : interpreter.interpret(tree)) {
                 	goals.add(goal);
                 }
-//                goals.add(true);
             }
             result.put("goals", goals);
 
@@ -76,11 +75,6 @@ public class Shrdlite {
                 Plan plan = planner.solve(new Goal(exampleGoals));
                 int column = 0;
                 while (((JSONArray)world.get(column)).isEmpty()) column++;
-//                List plan = new ArrayList(); 
-//                plan.add("I pick up . . ."); 
-//                plan.add("pick " + column);
-//                plan.add(". . . and then I drop down"); 
-//                plan.add("drop " + column);
                 result.put("plan", plan);
 
                 if (plan.isEmpty()) {
