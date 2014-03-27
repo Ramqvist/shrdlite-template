@@ -76,7 +76,6 @@ public class Shrdlite {
                 int column = 0;
                 while (((JSONArray)world.get(column)).isEmpty()) column++;
                 result.put("plan", plan);
-
                 if (plan.isEmpty()) {
                     result.put("output", "Planning error!");
                 } else {
