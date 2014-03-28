@@ -82,6 +82,20 @@ public class Interpreter {
 		
 	}
 	
+	/*
+	 * TREE 1
+	 * utterance: put the white ball in a box THAT IS on the floor
+	 * goal that we want: (inside [large white ball] [large red box])
+	 * 
+	 * We got: Goal: [(INSIDE Entity: LARGE WHITE BALL Entity: LARGE RED BOX)]
+	 * 
+	 * TREE 2
+	 * utterance: put the white ball THAT IS in a box on the floor <- TREE 2
+	 * goal that we want: (ontopof [large white ball] [floor])
+	 * 
+	 * We got: Goal: [(ON_TOP_OF Entity: LARGE WHITE BALL Entity: UNDEFINED UNDEFINED FLOOR)]
+	 */
+	
 	public Object walkTree(Term term) throws InterpretationException {
 		Relation relation, finalRelation;
 		Entity entity;
@@ -122,9 +136,9 @@ public class Interpreter {
 				
 				// TODO: Check if this relation makes sense in the world.
 				
-				relations.add(finalRelation);
+				//relations.add(finalRelation); probably not needed, as this relation is only checked against the world here
 				System.out.println("RELATIVE_ENTITY Added new relation to relations: " + finalRelation);
-				return entity;
+				return finalRelation.getEntityA();
 			case "object":
 				System.out.println("saw object");
 				entity = new Entity(cterm.args[0].toString(), cterm.args[1].toString(), cterm.args[2].toString());

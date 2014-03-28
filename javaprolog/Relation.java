@@ -55,8 +55,16 @@ public class Relation {
 		return a;
 	}
 	
+	public void setEntityA(Entity a) {
+		this.a = a;
+	}
+	
 	public Entity getEntityB() {
 		return b;
+	}
+	
+	public void setEntityB(Entity b) {
+		this.b = b;
 	}
 
 	/* (non-Javadoc)
