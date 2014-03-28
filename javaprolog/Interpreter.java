@@ -44,15 +44,16 @@ public class Interpreter {
 	List<Relation> relations; 
 	
 	public List<Goal> interpret(Term tree) {
+		List<Goal> goalList = new ArrayList<Goal>();
 		relations = new ArrayList<>();
 		
-		System.out.println();
 		System.out.println("=================");
 		System.out.println("START OF INTERPRET");
 		System.out.println();
 		
 		try {
 			walkTree(tree);
+			goalList.add(new Goal(relations));
 		} catch (InterpretationException e) {
 			e.printStackTrace();
 		}
@@ -62,10 +63,12 @@ public class Interpreter {
 		System.out.println("================");
 		System.out.println();
 		
-		List<Goal> goalList = new ArrayList<Goal>();		
-		goalList.add(new Goal(relations));
+		if (goalList.size() > 0)
+			System.out.println(goalList.get(0));
+		else
+			System.out.println("No goal could be produced.");
 		
-		System.out.println(goalList.get(0));
+		System.out.println();
 		
 		return goalList;
 	}
@@ -85,16 +88,12 @@ public class Interpreter {
 	/*
 	 * TREE 1
 	 * utterance: put the white ball in a box THAT IS on the floor
-	 * goal that we want: (inside [large white ball] [large red box])
-	 * 
-	 * We got: Goal: [(INSIDE Entity: LARGE WHITE BALL Entity: LARGE RED BOX)]
 	 * 
 	 * TREE 2
 	 * utterance: put the white ball THAT IS in a box on the floor <- TREE 2
-	 * goal that we want: (ontopof [large white ball] [floor])
-	 * 
-	 * We got: Goal: [(ON_TOP_OF Entity: LARGE WHITE BALL Entity: UNDEFINED UNDEFINED FLOOR)]
 	 */
+	
+	private Relation givenRelation;
 	
 	public Object walkTree(Term term) throws InterpretationException {
 		Relation relation, finalRelation;
@@ -114,7 +113,7 @@ public class Interpreter {
 				 * class, ConstraintCheck. No need to clutter up our code with checking logic here.
 				 */
 				if (!ConstraintCheck.isValidRelations(relations))
-					throw new InterpretationException("error in move lol");
+					throw new InterpretationException("error in move lol"); // TODO
 				
 				System.out.println("MOVE Added new relation to relations: " + finalRelation);
 				return finalRelation;
@@ -129,41 +128,67 @@ public class Interpreter {
 			case "basic_entity":
 				System.out.println("saw basic_entity");
 				walkTree(cterm.args[0]); // ALWAYS QUANTIFIER
+				givenRelation = null; // needs to be null here so case "object": behaves correctly.
 				entity = (Entity) walkTree(cterm.args[1]); // ALWAYS OBJECT (our class is called Entity)
 				return entity;
 			case "relative_entity":
 				System.out.println("saw relative_entity");
 				walkTree(cterm.args[0]); // ALWAYS QUANTIFIER
+				givenRelation = relation = (Relation) walkTree(cterm.args[2]); // ALWAYS RELATIVE
 				entity = (Entity) walkTree(cterm.args[1]); // ALWAYS OBJECT (our class is called Entity)
-				relation = (Relation) walkTree(cterm.args[2]); // ALWAYS RELATIVE
 				finalRelation = new Relation(entity, relation.getEntityB(), relation.getType());
 				
 				/*Here we check if this relation makes sense in the world. This check is done by another 
 				 * class, ConstraintCheck. No need to clutter up our code with checking logic here.
 				 */
 				if (!ConstraintCheck.isValidRelations(relations))
-					throw new InterpretationException("error lol");
+					throw new InterpretationException("error lol"); // TODO
 				
-				//relations.add(finalRelation); probably not needed, as this relation is only checked against the world here
 				System.out.println("RELATIVE_ENTITY Added new relation to relations: " + finalRelation);
 				return finalRelation.getEntityA();
 			case "object":
+				/*
+				 * When this case has been reached from a relative_entity, the relation in relative_entity must be given to
+				 * in this case so that we here can correctly decide what object we want.
+				 */
 				System.out.println("saw object");
 				entity = new Entity(cterm.args[0].toString(), cterm.args[1].toString(), cterm.args[2].toString());
 
+				
+				
 				List<Entity> matchedEntities = new ArrayList<>();
-				System.out.println(entity);
-				for (List<Entity> column : world) {
-					System.out.println(column);
-					if (column.contains(entity)) {
-						matchedEntities.add(column.get(column.indexOf(entity)));
+				
+				// TODO Add all cases. Refactor? This looks like shit, tbh.
+				if (givenRelation != null) {
+					System.out.println("GivenRelation: " + givenRelation);
+					// If a relation is given, we need to make sure that we only match against objects that also match the given relation.
+					for (List<Entity> column : world) {
+						System.out.println(column);
+						if (column.contains(entity)) {
+							if (givenRelation.getType() == Relation.TYPE.ON_TOP_OF && givenRelation.getEntityB().getForm().equals(Entity.FORM.FLOOR)) {
+								// Relation says the entity should be on top of floor, is it?
+								if (column.indexOf(entity) == 0)
+									matchedEntities.add(column.get(column.indexOf(entity)));
+							} else if (givenRelation.getType() == Relation.TYPE.INSIDE && givenRelation.getEntityB().getForm() == Entity.FORM.BOX) {
+								// Relation says the entity should be inside a box, is it?
+								if (column.indexOf(entity) > 0 && column.get(column.indexOf(entity) - 1).getForm().equals(Entity.FORM.BOX))
+									matchedEntities.add(column.get(column.indexOf(entity)));
+							}
+						}
+					}
+				} else {
+					// If no relation is given, we can match against any object.
+					System.out.println(entity);
+					for (List<Entity> column : world) {
+						System.out.println(column);
+						if (column.contains(entity)) {
+							matchedEntities.add(column.get(column.indexOf(entity)));
+						}
 					}
 				}
 				
-				// TODO: Better matching. A box on the floor should only match boxes that stand on the floor.
-				
 				if (matchedEntities.isEmpty()) {
-					throw new InterpretationException("Error: [" + entity + "] does not exists in the world.");
+					throw new InterpretationException("Error: [" + entity + "] does not match anything that exists in the world.");
 				} else if (matchedEntities.size() > 1) {
 					//throw new InterpretationException("Ambiguity Error: [" + entity + "] matches several items in the world: " + matchedEntities + ".");
 				}
