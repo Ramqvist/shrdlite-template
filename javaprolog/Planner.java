@@ -9,7 +9,7 @@ public class Planner {
 	}
 
 	public Plan solve(Goal goal) {
-		return null;
+		return new Plan();
 	}
 	
 }

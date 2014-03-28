@@ -113,7 +113,8 @@ public class Interpreter {
 				/*Here we check if this relation makes sense in the world. This check is done by another 
 				 * class, ConstraintCheck. No need to clutter up our code with checking logic here.
 				 */
-				ConstraintCheck.isValidRelations(relations);
+				if (!ConstraintCheck.isValidRelations(relations))
+					throw new InterpretationException("error in move lol");
 				
 				System.out.println("MOVE Added new relation to relations: " + finalRelation);
 				return finalRelation;
@@ -140,7 +141,8 @@ public class Interpreter {
 				/*Here we check if this relation makes sense in the world. This check is done by another 
 				 * class, ConstraintCheck. No need to clutter up our code with checking logic here.
 				 */
-				ConstraintCheck.isValidRelations(relations);
+				if (!ConstraintCheck.isValidRelations(relations))
+					throw new InterpretationException("error lol");
 				
 				//relations.add(finalRelation); probably not needed, as this relation is only checked against the world here
 				System.out.println("RELATIVE_ENTITY Added new relation to relations: " + finalRelation);
