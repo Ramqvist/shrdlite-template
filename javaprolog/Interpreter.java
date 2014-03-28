@@ -110,7 +110,10 @@ public class Interpreter {
 				finalRelation = new Relation(entity, relation.getEntityB(), relation.getType());
 				relations.add(finalRelation);
 				
-				// TODO: Check if this relation makes sense in the world.
+				/*Here we check if this relation makes sense in the world. This check is done by another 
+				 * class, ConstraintCheck. No need to clutter up our code with checking logic here.
+				 */
+				ConstraintCheck.isValidRelations(relations);
 				
 				System.out.println("MOVE Added new relation to relations: " + finalRelation);
 				return finalRelation;
@@ -134,7 +137,10 @@ public class Interpreter {
 				relation = (Relation) walkTree(cterm.args[2]); // ALWAYS RELATIVE
 				finalRelation = new Relation(entity, relation.getEntityB(), relation.getType());
 				
-				// TODO: Check if this relation makes sense in the world.
+				/*Here we check if this relation makes sense in the world. This check is done by another 
+				 * class, ConstraintCheck. No need to clutter up our code with checking logic here.
+				 */
+				ConstraintCheck.isValidRelations(relations);
 				
 				//relations.add(finalRelation); probably not needed, as this relation is only checked against the world here
 				System.out.println("RELATIVE_ENTITY Added new relation to relations: " + finalRelation);
