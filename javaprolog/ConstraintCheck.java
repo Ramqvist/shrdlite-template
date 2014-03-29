@@ -9,18 +9,16 @@ import java.util.List;
  * 
  * The world is ruled by physical laws that constrain the placement and movement of the objects:
 
-    The floor can support any number of objects. (SKIP)
-    All objects must be supported by something. (SKIP)
-    The arm can only hold one object at the time. (SKIP)
-    The arm can only pick up free objects. (SKIP)
+    The floor can support any number of objects. 	(SKIP)
+    All objects must be supported by something. 	(SKIP)
+    The arm can only hold one object at the time. 	(SKIP)
+    The arm can only pick up free objects. 			(SKIP)
     Objects are “in” boxes, but “on” other objects.
     Balls must be in boxes or on the floor, otherwise they roll away.
     Balls cannot support anything.
     Small objects cannot support large objects.
     Boxes cannot contain pyramids or planks of the same size. 
     Boxes can only be supported by tables or planks of the same size, but large boxes can also be supported by large bricks.
-
- *
  */
 public class ConstraintCheck {
 	
@@ -31,17 +29,37 @@ public class ConstraintCheck {
 	public static void main(String[] args) {
 		
 		//TEST BALL CANNOT SUPPORT
+		testBallCannotSupport();
+	}
+	
+	private static void testBallCannotSupport() {
 		List<Entity> entityList = new ArrayList<Entity>();
+		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
 		entityList.add(new Entity(Entity.FORM.BALL, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
 		entityList.add(new Entity(Entity.FORM.BALL, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
 		
 		if(!isValidColumn(entityList)) {
-			System.out.println("Chinqui! GREAT SUCCESS!!!");
+			System.out.println("Yakshemaish! GREAT SUCCESS!!!");
+		} else {
+			System.err.println("TEST BALL CANNOT SUPPORT FAILED");
+		}
+
+		entityList = new ArrayList<Entity>();
+		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+		entityList.add(new Entity(Entity.FORM.BALL, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+		
+		if(isValidColumn(entityList)) {
+			System.out.println("Yakshemaish! GREAT SUCCESS!!!");
 		} else {
 			System.err.println("TEST BALL CANNOT SUPPORT FAILED");
 		}
 	}
-	
+
+	/**
+	 * @return Checks if the given Column represented as a List of Entities is valid under the constraints. 
+	 */
 	public static boolean isValidColumn(List<Entity> entityList) {
 		if(entityList == null) {
 			System.err.println("NullPointer in isValidColumn!");
@@ -53,7 +71,7 @@ public class ConstraintCheck {
 		//If Any ball is NOT the last Entity, then the Column is not Valid!
 		for (int i = 0; i < entityList.size(); i++) {
 			Entity e = entityList.get(i);
-			if(e.getForm() == Entity.FORM.BALL && ( (i+1) == entityList.size()) ) {
+			if(e.getForm() == Entity.FORM.BALL && i+1 != entityList.size()) {
 				return false;
 			}
 		}
@@ -69,7 +87,10 @@ public class ConstraintCheck {
 		
 		return true;
 	}
-	
+
+	/**
+	 * @return Checks if the Relations are valid under the constraints. 
+	 */
 	public static boolean isValidRelations(List<Relation> relations) {
 		if(relations == null) {
 			System.err.println("NullPointer in isValidRelations!");

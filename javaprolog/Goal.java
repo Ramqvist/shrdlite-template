@@ -20,5 +20,44 @@ public class Goal {
 	public String toString() {
 		return "Goal: " + relations.toString();
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((relations == null) ? 0 : relations.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Goal)) {
+			return false;
+		}
+		Goal other = (Goal) obj;
+		if (relations == null) {
+			if (other.relations != null) {
+				return false;
+			}
+		} else if (!relations.equals(other.relations)) {
+			return false;
+		}
+		return true;
+	}
+	
+	
 	
 }
