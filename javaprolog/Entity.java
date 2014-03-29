@@ -1,5 +1,8 @@
 /**
- * An Entity.
+ * An Entity, defined by it's form, size and color.
+ * 
+ * An entity is considered equal to another entity if it has the same form as
+ * the other entity.
  * 
  */
 public class Entity {
@@ -20,14 +23,53 @@ public class Entity {
 	private COLOR color;
 	private SIZE size;
 
+	/**
+	 * Returns a new Entity with UNDEFINED form, UNDEFINED color and UNDEFINED
+	 * size.
+	 */
+	public Entity() {
+		this.size = SIZE.UNDEFINED;
+		this.form = FORM.UNDEFINED;
+		this.color = COLOR.UNDEFINED;
+	}
+
+	/**
+	 * Returns a new Entity with the given form, size and color.
+	 * 
+	 * @param form
+	 *            the given form, of type {@link Entity.FORM}
+	 * @param size
+	 *            the given size, of type {@link Entity.SIZE}
+	 * @param color
+	 *            the given color, of type {@link Entity.COLOR}
+	 */
 	public Entity(FORM form, SIZE size, COLOR color) {
 		this.size = size;
 		this.form = form;
 		this.color = color;
 	}
-	
+
+	/**
+	 * Returns a new Entity with the given form, size and color. The parameters
+	 * are parsed to match the correct types. The given strings should match the
+	 * string representations of the possible values of the FORM, SIZE and COLOR
+	 * enums.
+	 * 
+	 * The given strings are converted to lower case automatically.
+	 * 
+	 * @param form
+	 *            the given form, in plaintext.
+	 * @param size
+	 *            the given size, in plaintext.
+	 * @param color
+	 *            the given color, in plaintext.
+	 */
 	public Entity(String form, String size, String color) {
-		switch(form) {
+		form = form.toLowerCase();
+		size = size.toLowerCase();
+		color = color.toLowerCase();
+
+		switch (form) {
 		case "brick":
 			this.form = Entity.FORM.BRICK;
 			break;
@@ -47,8 +89,8 @@ public class Entity {
 			this.form = Entity.FORM.BOX;
 			break;
 		}
-		
-		switch(size) {
+
+		switch (size) {
 		case "large":
 			this.size = Entity.SIZE.LARGE;
 			break;
@@ -58,8 +100,8 @@ public class Entity {
 		default:
 			this.size = Entity.SIZE.UNDEFINED;
 		}
-			
-		switch(color) {
+
+		switch (color) {
 		case "green":
 			this.color = Entity.COLOR.GREEN;
 			break;
@@ -100,9 +142,6 @@ public class Entity {
 		return "Entity: " + size + " " + color + " " + form;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -113,9 +152,6 @@ public class Entity {
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -139,7 +175,5 @@ public class Entity {
 		}
 		return true;
 	}
-	
-	
-	
+
 }

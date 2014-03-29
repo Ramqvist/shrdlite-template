@@ -1,41 +1,34 @@
 import java.util.List;
 
 /**
- * Goal is represented as a list of relations. 
- *
+ * Goal is represented as a list of relations.
+ * 
  */
 public class Goal {
-	
+
 	private List<Relation> relations;
 
 	public Goal(List<Relation> relations) {
 		this.relations = relations;
 	}
-	
+
 	public List<Relation> getRelations() {
 		return relations;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Goal: " + relations.toString();
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((relations == null) ? 0 : relations.hashCode());
+		result = prime * result + ((relations == null) ? 0 : relations.hashCode());
 		return result;
 	}
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
@@ -57,7 +50,5 @@ public class Goal {
 		}
 		return true;
 	}
-	
-	
-	
+
 }

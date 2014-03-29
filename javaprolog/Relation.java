@@ -1,29 +1,29 @@
 /**
  * Object representing a relation between two objects.
- *
+ * 
  */
 public class Relation {
-	
+
 	public enum TYPE {
-	    ON_TOP_OF, ABOVE, UNDER, BESIDE, LEFT_OF, RIGHT_OF, INSIDE, UNDEFINED
+		ON_TOP_OF, ABOVE, UNDER, BESIDE, LEFT_OF, RIGHT_OF, INSIDE, UNDEFINED
 	}
-	
+
 	private TYPE type;
 	private Entity a;
 	private Entity b;
-	
+
 	public Relation(Entity a, Entity b, TYPE type) {
 		this.a = a;
 		this.b = b;
 		this.type = type;
 	}
-	
+
 	public Relation(Entity a, Entity b, String type) {
 		this(a, b, parseType(type));
 	}
 
 	public static TYPE parseType(String type) {
-		switch(type) {
+		switch (type) {
 		case "beside":
 			return TYPE.BESIDE;
 		case "leftof":
@@ -42,7 +42,7 @@ public class Relation {
 			return TYPE.UNDEFINED;
 		}
 	}
-	
+
 	public TYPE getType() {
 		return type;
 	}
@@ -50,24 +50,26 @@ public class Relation {
 	public void setType(TYPE type) {
 		this.type = type;
 	}
-	
+
 	public Entity getEntityA() {
 		return a;
 	}
-	
+
 	public void setEntityA(Entity a) {
 		this.a = a;
 	}
-	
+
 	public Entity getEntityB() {
 		return b;
 	}
-	
+
 	public void setEntityB(Entity b) {
 		this.b = b;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -80,7 +82,9 @@ public class Relation {
 		return result;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
@@ -106,13 +110,10 @@ public class Relation {
 			return false;
 		return true;
 	}
-	
-	
-	
-	
+
 	@Override
 	public String toString() {
 		return "(" + type + " " + a + " " + b + ")";
 	}
-	
+
 }
