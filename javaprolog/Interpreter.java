@@ -55,7 +55,7 @@ public class Interpreter {
 			walkTree(tree);
 			goalList.add(new Goal(relations));
 		} catch (InterpretationException e) {
-			e.printStackTrace();
+			System.out.println(e);
 		}
 		
 		System.out.println();
@@ -165,14 +165,65 @@ public class Interpreter {
 					for (List<Entity> column : world) {
 						System.out.println(column);
 						if (column.contains(entity)) {
-							if (givenRelation.getType() == Relation.TYPE.ON_TOP_OF && givenRelation.getEntityB().getForm().equals(Entity.FORM.FLOOR)) {
-								// Relation says the entity should be on top of floor, is it?
-								if (column.indexOf(entity) == 0)
-									matchedEntities.add(column.get(column.indexOf(entity)));
-							} else if (givenRelation.getType() == Relation.TYPE.INSIDE && givenRelation.getEntityB().getForm() == Entity.FORM.BOX) {
-								// Relation says the entity should be inside a box, is it?
-								if (column.indexOf(entity) > 0 && column.get(column.indexOf(entity) - 1).getForm().equals(Entity.FORM.BOX))
-									matchedEntities.add(column.get(column.indexOf(entity)));
+							if (givenRelation.getType().equals(Relation.TYPE.ON_TOP_OF)) {
+								if (givenRelation.getEntityB().getForm().equals(Entity.FORM.FLOOR)) {
+									// Relation says the entity should be on top of floor, is it?
+									if (column.indexOf(entity) == 0)
+										matchedEntities.add(column.get(column.indexOf(entity)));
+								}
+							} else if (givenRelation.getType().equals(Relation.TYPE.INSIDE)) {
+								if (givenRelation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
+									// Relation says the entity should be inside a box, is it?
+									if (column.indexOf(entity) > 0 && column.get(column.indexOf(entity) - 1).getForm().equals(Entity.FORM.BOX))
+										matchedEntities.add(column.get(column.indexOf(entity)));
+								}
+							} else if (givenRelation.getType().equals(Relation.TYPE.ABOVE)) {
+								if (givenRelation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
+
+								}
+							} else if (givenRelation.getType().equals(Relation.TYPE.UNDER)) {
+								if (givenRelation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
+
+								}
+							} else if (givenRelation.getType().equals(Relation.TYPE.BESIDE)) {
+								// Relation says the entity should be beside another entity, is it?
+								if (world.indexOf(column) + 1 < world.size()) {
+									// Is it to the right of this entity?
+									if (world.get(world.indexOf(column) + 1).contains(givenRelation.getEntityB())) {
+										matchedEntities.add(column.get(column.indexOf(entity)));
+									}
+								} else if (world.indexOf(column) - 1 >= 0) {
+									// Is is to the left of this entity?
+									if (world.get(world.indexOf(column) - 1).contains(givenRelation.getEntityB())) {
+										matchedEntities.add(column.get(column.indexOf(entity)));
+									}
+								}
+							} else if (givenRelation.getType().equals(Relation.TYPE.LEFT_OF)) {
+								// Relation says the entity should be left of another entity, is it?
+								int position = world.indexOf(column) + 1;
+								List<Entity> rightOfColumn;
+								
+								while (position < world.size()) {
+									rightOfColumn = world.get(position);
+									if (rightOfColumn.contains(givenRelation.getEntityB())) {
+										matchedEntities.add(column.get(column.indexOf(entity)));
+										break;
+									} else
+										position += 1;
+								}
+							} else if (givenRelation.getType().equals(Relation.TYPE.RIGHT_OF)) {
+								// Relation says the entity should be right of another entity, is it?
+								int position = world.indexOf(column) - 1;
+								List<Entity> leftOfColumn;
+								
+								while (position >= 0) {
+									leftOfColumn = world.get(position);
+									if (leftOfColumn.contains(givenRelation.getEntityB())) {
+										matchedEntities.add(column.get(column.indexOf(entity)));
+										break;
+									} else
+										position -= 1;
+								}
 							}
 						}
 					}
@@ -188,7 +239,10 @@ public class Interpreter {
 				}
 				
 				if (matchedEntities.isEmpty()) {
-					throw new InterpretationException("Error: [" + entity + "] does not match anything that exists in the world.");
+					if (givenRelation == null)
+						throw new InterpretationException("[" + entity + "] does not match anything in the world.");
+					else
+						throw new InterpretationException("The " + givenRelation + " relation does not match anything in the world.");
 				} else if (matchedEntities.size() > 1) {
 					//throw new InterpretationException("Ambiguity Error: [" + entity + "] matches several items in the world: " + matchedEntities + ".");
 				}

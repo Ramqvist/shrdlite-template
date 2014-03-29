@@ -84,7 +84,7 @@ public class Shrdlite {
             }
         }
 
-        System.out.println(result);
+        System.out.print(result);
     }
 
     public static String readFromStdin() throws IOException {
