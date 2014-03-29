@@ -99,6 +99,18 @@ public class ConstraintCheck {
 		if(relations.isEmpty()) {
 			return true;
 		}
+		for (Relation relation : relations) {
+			if (relation.getEntityA().getForm().equals(Entity.FORM.PLANK) || relation.getEntityA().getForm().equals(Entity.FORM.PYRAMID)) {
+				if (relation.getEntityA().getSize().equals(relation.getEntityB().getSize()))
+					// Boxes cannot contain planks or pyramids of the same size as the box.
+					return false;
+				else if (relation.getEntityB().getSize().equals(Entity.SIZE.SMALL)) {
+					if (relation.getEntityA().getSize().equals(Entity.SIZE.LARGE))
+						// I assume that a small box cannot contain large planks or pyramids?
+						return false;
+				}
+			}
+		}
 		return true;
 	}
 }

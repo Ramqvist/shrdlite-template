@@ -120,8 +120,8 @@ public class Interpreter {
 			case "relative":
 				System.out.println("saw relative");
 				Relation.TYPE relationType = (Relation.TYPE) walkTree(cterm.args[0]); // ALWAYS RELATION
-				entity = (Entity) walkTree(cterm.args[1]); // EITHER FLOOR, BASIC_ENTITY OR RELATIVE_ENTITY
 				System.out.println("in relative, got relationtype: " + relationType);
+				entity = (Entity) walkTree(cterm.args[1]); // EITHER FLOOR, BASIC_ENTITY OR RELATIVE_ENTITY
 				System.out.println("in relative, got entity: " + entity);
 				relation = new Relation(undefinedEntity, entity, relationType);
 				return relation;
@@ -154,36 +154,41 @@ public class Interpreter {
 				System.out.println("saw object");
 				entity = new Entity(cterm.args[0].toString(), cterm.args[1].toString(), cterm.args[2].toString());
 
-				
-				
 				List<Entity> matchedEntities = new ArrayList<>();
 				
-				// TODO Add all cases. Refactor? This looks like shit, tbh.
 				if (givenRelation != null) {
 					System.out.println("GivenRelation: " + givenRelation);
 					// If a relation is given, we need to make sure that we only match against objects that also match the given relation.
 					for (List<Entity> column : world) {
-						System.out.println(column);
 						if (column.contains(entity)) {
 							if (givenRelation.getType().equals(Relation.TYPE.ON_TOP_OF)) {
 								if (givenRelation.getEntityB().getForm().equals(Entity.FORM.FLOOR)) {
-									// Relation says the entity should be on top of floor, is it?
+									// The floor is a special case, since it is not represented in our world.
 									if (column.indexOf(entity) == 0)
+										matchedEntities.add(column.get(column.indexOf(entity)));
+								} else if (!givenRelation.getEntityB().getForm().equals(Entity.FORM.BOX)){
+									// An entity is never on top of a box.
+									if (column.indexOf(entity) > 0 && column.get(column.indexOf(entity) - 1).getForm().equals(givenRelation.getEntityB().getForm()))
+										// Check for entities below this entity.
 										matchedEntities.add(column.get(column.indexOf(entity)));
 								}
 							} else if (givenRelation.getType().equals(Relation.TYPE.INSIDE)) {
+								// Entities are always inside boxes, nothing else. Only boxes.
 								if (givenRelation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
-									// Relation says the entity should be inside a box, is it?
 									if (column.indexOf(entity) > 0 && column.get(column.indexOf(entity) - 1).getForm().equals(Entity.FORM.BOX))
 										matchedEntities.add(column.get(column.indexOf(entity)));
 								}
 							} else if (givenRelation.getType().equals(Relation.TYPE.ABOVE)) {
-								if (givenRelation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
-
+								// Check for entities below this entity.
+								for (int i = column.indexOf(entity); i >= 0; i--) {
+									if (column.get(i).getForm().equals(givenRelation.getEntityB().getForm()))
+										matchedEntities.add(column.get(column.indexOf(entity)));
 								}
 							} else if (givenRelation.getType().equals(Relation.TYPE.UNDER)) {
-								if (givenRelation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
-
+								// Check for entities above this entity.
+								for (int i = column.indexOf(entity); i < column.size(); i++) {
+									if (column.get(i).getForm().equals(givenRelation.getEntityB().getForm()))
+										matchedEntities.add(column.get(column.indexOf(entity)));
 								}
 							} else if (givenRelation.getType().equals(Relation.TYPE.BESIDE)) {
 								// Relation says the entity should be beside another entity, is it?
@@ -200,29 +205,17 @@ public class Interpreter {
 								}
 							} else if (givenRelation.getType().equals(Relation.TYPE.LEFT_OF)) {
 								// Relation says the entity should be left of another entity, is it?
-								int position = world.indexOf(column) + 1;
-								List<Entity> rightOfColumn;
-								
-								while (position < world.size()) {
-									rightOfColumn = world.get(position);
-									if (rightOfColumn.contains(givenRelation.getEntityB())) {
+								for (int i = world.indexOf(column) + 1; i < world.size(); i++){
+									if (world.get(i).contains(givenRelation.getEntityB())) {
 										matchedEntities.add(column.get(column.indexOf(entity)));
-										break;
-									} else
-										position += 1;
+									}
 								}
 							} else if (givenRelation.getType().equals(Relation.TYPE.RIGHT_OF)) {
-								// Relation says the entity should be right of another entity, is it?
-								int position = world.indexOf(column) - 1;
-								List<Entity> leftOfColumn;
-								
-								while (position >= 0) {
-									leftOfColumn = world.get(position);
-									if (leftOfColumn.contains(givenRelation.getEntityB())) {
+								// Relation says the entity should be right of another entity, is it								
+								for (int i = world.indexOf(column) - 1; i >= 0; i--){
+									if (world.get(i).contains(givenRelation.getEntityB())) {
 										matchedEntities.add(column.get(column.indexOf(entity)));
-										break;
-									} else
-										position -= 1;
+									}
 								}
 							}
 						}
@@ -231,10 +224,8 @@ public class Interpreter {
 					// If no relation is given, we can match against any object.
 					System.out.println(entity);
 					for (List<Entity> column : world) {
-						System.out.println(column);
-						if (column.contains(entity)) {
+						if (column.contains(entity))
 							matchedEntities.add(column.get(column.indexOf(entity)));
-						}
 					}
 				}
 				
