@@ -152,6 +152,12 @@ public class Entity {
 		return result;
 	}
 
+	/*
+	 * Two entities are considered equal if at least their form fields match.
+	 * 
+	 * (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {

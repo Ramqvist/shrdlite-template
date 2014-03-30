@@ -41,6 +41,7 @@ public class Shrdlite {
         List<Term> trees = parser.parseSentence("command", utterance);
         List tstrs = new ArrayList();
         result.put("trees", tstrs);
+        System.out.println();
         for (Term t : trees) {
             tstrs.add(t.toString());
             // DEBUG OUTPUT
