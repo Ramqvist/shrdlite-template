@@ -213,7 +213,7 @@ public class Interpreter {
 				System.out.println("saw object");
 				entity = new Entity(cterm.args[0].toString(), cterm.args[1].toString(), cterm.args[2].toString());
 
-				List<Entity> matchedEntities = checkRelations(entity, givenRelation);
+				List<Entity> matchedEntities = matchEntityAndRelation(entity, givenRelation);
 
 				if (matchedEntities.isEmpty()) {
 					if (givenRelation == null)
@@ -257,7 +257,7 @@ public class Interpreter {
 		return null;
 	}
 
-	private List<Entity> checkRelations(Entity entity, Relation relation) {
+	private List<Entity> matchEntityAndRelation(Entity entity, Relation relation) {
 		List<Entity> matchedEntities = new ArrayList<>();
 
 		if (relation != null) {
