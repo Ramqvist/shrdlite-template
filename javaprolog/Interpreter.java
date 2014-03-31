@@ -48,9 +48,9 @@ public class Interpreter {
 
 			this.world.add(column);
 		}
-		System.out.println("World Representation");
-		System.out.println(this.world);
-		System.out.println();
+		// System.out.println("World Representation");
+		// System.out.println(this.world);
+		// System.out.println();
 	}
 
 	List<Relation> relations;
@@ -69,28 +69,28 @@ public class Interpreter {
 		List<Goal> goalList = new ArrayList<Goal>();
 		relations = new ArrayList<>();
 
-		System.out.println("=================");
-		System.out.println("START OF INTERPRET");
-		System.out.println();
+		// System.out.println("=================");
+		// System.out.println("START OF INTERPRET");
+		// System.out.println();
 
 		try {
 			walkTree(tree);
 			goalList.add(new Goal(relations));
 		} catch (InterpretationException e) {
-			System.out.println(e);
+			// System.out.println(e);
 		}
 
-		System.out.println();
-		System.out.println("END OF INTERPRET");
-		System.out.println("================");
-		System.out.println();
+		// System.out.println();
+		// System.out.println("END OF INTERPRET");
+		// System.out.println("================");
+		// System.out.println();
 
-		if (goalList.size() > 0)
-			System.out.println(goalList.get(0));
-		else
-			System.out.println("No goal could be produced.");
+		// if (goalList.size() > 0)
+		// System.out.println(goalList.get(0));
+		// else
+		// System.out.println("No goal could be produced.");
 
-		System.out.println();
+		// System.out.println();
 
 		return goalList;
 	}
@@ -142,7 +142,7 @@ public class Interpreter {
 				 * Take has one child, which is always either floor,
 				 * basic_entity or relative_entity.
 				 */
-				System.out.println("saw take");
+				// System.out.println("saw take");
 				entity = (Entity) walkTree(cterm.args[0]);
 				/*
 				 * TODO: HOW DO WE EXPLAIN THIS AS A RELATION? Same goes for the
@@ -161,7 +161,7 @@ public class Interpreter {
 				 * The right child is always relative. For us, this means it is
 				 * always a Relation.
 				 */
-				System.out.println("saw move");
+				// System.out.println("saw move");
 				entity = (Entity) walkTree(cterm.args[0]);
 				moveRelation = true;
 				relation = (Relation) walkTree(cterm.args[1]);
@@ -180,7 +180,8 @@ public class Interpreter {
 				if (!ConstraintCheck.isValidRelations(relations))
 					throw new InterpretationException("The created relation " + relations + " don't match the rules of the world.");
 
-				System.out.println("MOVE: Added new relation to relations: " + finalRelation);
+				// System.out.println("MOVE: Added new relation to relations: "
+				// + finalRelation);
 				return finalRelation;
 			case "relative":
 				/*
@@ -190,7 +191,7 @@ public class Interpreter {
 				 * The right child is always either floor, basic_entity or
 				 * relative_entity. For us, this means it is always an Entity.
 				 */
-				System.out.println("saw relative");
+				// System.out.println("saw relative");
 				Relation.TYPE relationType = (Relation.TYPE) walkTree(cterm.args[0]);
 				relativeChild = true;
 				entity = (Entity) walkTree(cterm.args[1]);
@@ -203,7 +204,7 @@ public class Interpreter {
 				 * The right child is always an object. For us, this means it is
 				 * an Entity.
 				 */
-				System.out.println("saw basic_entity");
+				// System.out.println("saw basic_entity");
 				walkTree(cterm.args[0]);
 				entity = (Entity) walkTree(cterm.args[1]);
 				return entity;
@@ -218,7 +219,7 @@ public class Interpreter {
 				 * The right child is always an object. For us, this means it is
 				 * an Entity.
 				 */
-				System.out.println("saw relative_entity");
+				// System.out.println("saw relative_entity");
 				walkTree(cterm.args[0]);
 				givenRelation = relation = (Relation) walkTree(cterm.args[2]);
 				entity = (Entity) walkTree(cterm.args[1]);
@@ -258,7 +259,7 @@ public class Interpreter {
 				 * This is done by setting the givenRelation object to the given
 				 * relation.
 				 */
-				System.out.println("saw object");
+				// System.out.println("saw object");
 				entity = new Entity(cterm.args[0].toString(), cterm.args[1].toString(), cterm.args[2].toString());
 
 				List<Entity> matchedEntities = Relation.matchEntityAndRelation(entity, givenRelation, world);
@@ -279,7 +280,8 @@ public class Interpreter {
 					returnEntity = matchedEntities.get(0);
 				}
 
-				System.out.println("Success: [" + entity + "] exists in the world as [" + returnEntity + "].");
+				// System.out.println("Success: [" + entity +
+				// "] exists in the world as [" + returnEntity + "].");
 				givenRelation = null; // Reset the givenRelation value.
 				return returnEntity;
 			}
@@ -287,20 +289,20 @@ public class Interpreter {
 			AtomTerm aterm = (AtomTerm) term;
 			switch (aterm.value) {
 			case "floor":
-				System.out.println("saw floor");
+//				System.out.println("saw floor");
 				return new Entity(Entity.FORM.FLOOR, Entity.SIZE.UNDEFINED, Entity.COLOR.UNDEFINED);
 			case "the":
-				System.out.println("saw the");
+//				System.out.println("saw the");
 				// "The" means that there should only be one item that matches
 				// the description. If more than one item matches the
 				// description, we should ask clarification question(s):
 				break;
 			case "any":
-				System.out.println("saw any");
+//				System.out.println("saw any");
 				// "Any" should work as this currently does.
 				break;
 			case "all":
-				System.out.println("saw all");
+//				System.out.println("saw all");
 				// "All" should create one relation for each item that matches
 				// the description.
 				break;
@@ -308,7 +310,7 @@ public class Interpreter {
 			// This static method handles the parsing of type values.
 			return Relation.parseType(aterm.value);
 		}
-		System.out.println();
+//		System.out.println();
 		return null;
 	}
 

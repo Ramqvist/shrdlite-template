@@ -213,7 +213,7 @@ public class Relation {
 			}
 		} else {
 			// If no relation is given, we can match against any object.
-			System.out.println("No relation given, matching " + entity + " against all objects in the world.");
+//			System.out.println("No relation given, matching " + entity + " against all objects in the world.");
 			for (List<Entity> column : world) {
 				if (column.contains(entity))
 					matchedEntities.add(column.get(column.indexOf(entity)));

@@ -1,4 +1,3 @@
-
 // First compile the program:
 // javac -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. Shrdlite.java
 
@@ -22,82 +21,78 @@ import org.json.simple.JSONArray;
 public class Shrdlite {
 
 	public static void main(String[] args) throws PrologException, ParseException, IOException {
-        JSONObject jsinput   = (JSONObject) JSONValue.parse(readFromStdin());
-        JSONArray  utterance = (JSONArray)  jsinput.get("utterance");
-        JSONArray  world     = (JSONArray)  jsinput.get("world");
-        String     holding   = (String)     jsinput.get("holding");
-        JSONObject objects   = (JSONObject) jsinput.get("objects");
+		JSONObject jsinput = (JSONObject) JSONValue.parse(readFromStdin());
+		JSONArray utterance = (JSONArray) jsinput.get("utterance");
+		JSONArray world = (JSONArray) jsinput.get("world");
+		String holding = (String) jsinput.get("holding");
+		JSONObject objects = (JSONObject) jsinput.get("objects");
 
-        JSONObject result = new JSONObject();
-        result.put("utterance", utterance);
+		JSONObject result = new JSONObject();
+		result.put("utterance", utterance);
 
-        // // This is how to get information about the top object in column 1:
-        // JSONArray column = (JSONArray) world.get(1);
-        // String topobject = (String) column.get(column.size() - 1);
-        // JSONObject objectinfo = (JSONObject) objects.get(topobject);
-        // String form = (String) objectinfo.get("form");
+		DCGParser parser = new DCGParser("shrdlite_grammar.pl");
+		List<Term> trees = parser.parseSentence("command", utterance);
+		List tstrs = new ArrayList();
+		result.put("trees", tstrs);
+//		System.out.println();
+		for (Term t : trees) {
+			tstrs.add(t.toString());
+			// DEBUG OUTPUT
+//			System.out.println("Tree " + (trees.indexOf(t) + 1));
+//			System.out.println(t.toString());
+//			System.out.println();
+		}
 
-        DCGParser parser = new DCGParser("shrdlite_grammar.pl");
-        List<Term> trees = parser.parseSentence("command", utterance);
-        List tstrs = new ArrayList();
-        result.put("trees", tstrs);
-        System.out.println();
-        for (Term t : trees) {
-            tstrs.add(t.toString());
-            // DEBUG OUTPUT
-            System.out.println("Tree " + (trees.indexOf(t) + 1));
-            System.out.println(t.toString());
-            System.out.println();
-        }
+		if (trees.isEmpty()) {
+			result.put("output", "Parse error!");
 
-        if (trees.isEmpty()) {
-            result.put("output", "Parse error!");
+		} else {
+			List<Goal> goals = new ArrayList<>();
+			Interpreter interpreter = new Interpreter(world, holding, objects);
+			for (Term tree : trees) {
+				for (Goal goal : interpreter.interpret(tree)) {
+					goals.add(goal);
+				}
+			}
+			result.put("goals", "");
 
-        } else {
-            List<Goal> goals = new ArrayList<>();
-            Interpreter interpreter = new Interpreter(world, holding, objects);
-            for (Term tree : trees) {
-                for (Goal goal : interpreter.interpret(tree)) {
-                	goals.add(goal);
-                }
-            }
-            result.put("goals", goals);
+			if (goals.isEmpty()) {
+				result.put("output", "Interpretation error!");
 
-            if (goals.isEmpty()) {
-                result.put("output", "Interpretation error!");
+			} else if (goals.size() > 100) {
+				result.put("output", "Ambiguity error!");
+			} else {
+				Planner planner = new Planner(interpreter.world);
+				List<Plan> plans = new ArrayList<Plan>();
+				for (Goal g : goals) {
+					plans.add(planner.solve(g));
+				}
+				for (Plan p : plans) {
+					List<String> actionStrings = new ArrayList<>();
+					for (Action action : p.actions) {
+						actionStrings.add(action.toString());
+					}
+					result.put("plan", actionStrings);
+				}
+				if (plans.isEmpty()) {
+					result.put("output", "Planning error!");
+				} else {
+					result.put("output", "Success!");
+				}
+			}
+		}
 
-            } else if (goals.size() > 100) {
-                result.put("output", "Ambiguity error!");
-            } else {
-                Planner planner = new Planner(interpreter.world);
-                List<Plan> plans = new ArrayList<Plan>();
-                for(Goal g : goals) {
-                	plans.add(planner.solve(g));
-                }
-                for(Plan p : plans) {
-            		result.put("plan", p.actions);
-                }
-//                result.put("plan", plan);
-                if (plans.isEmpty()) {
-                    result.put("output", "Planning error!");
-                } else {
-                    result.put("output", "Success!");
-                }
-            }
-        }
+		System.out.print(result);
+	}
 
-        System.out.print(result);
-    }
-
-    public static String readFromStdin() throws IOException {
-        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-        StringBuilder data = new StringBuilder();
-        String line;
-        while ((line = in.readLine()) != null) {
-            data.append(line).append('\n');
-        }
-        return data.toString();
-    }
+	public static String readFromStdin() throws IOException {
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		StringBuilder data = new StringBuilder();
+		String line;
+		while ((line = in.readLine()) != null) {
+			data.append(line).append('\n');
+		}
+		return data.toString();
+	}
 
 }
-
