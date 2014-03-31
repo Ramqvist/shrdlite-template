@@ -37,4 +37,9 @@ public class Plan implements Comparable<Plan>{
 		return 1;
 	}
 	
+	@Override
+	public String toString() {
+		return "(Plan " + actions + " : " + currentState + ")";
+	}
+	
 }

@@ -111,10 +111,23 @@ public class Interpreter {
 	public Object walkTree(Term term) throws InterpretationException {
 		Relation relation, finalRelation;
 		Entity entity;
-		
+
 		if (term instanceof CompoundTerm) {
 			CompoundTerm cterm = (CompoundTerm) term;
 			switch (cterm.tag.functor.toString()) {
+			case "take":
+				/*
+				 * Take has one child, which is always either floor,
+				 * basic_entity or relative_entity.
+				 */
+				System.out.println("saw take");
+				entity = (Entity) walkTree(cterm.args[0]);
+				// TODO: HOW DO WE EXPLAIN THIS AS A RELATION?
+				// Same goes for the "put" command.
+
+				// Quote webpage:
+				// "For the take and put commands, the procedure is similar but different…"
+				break;
 			case "move":
 				/*
 				 * Move has two children. The left child is always either floor,
@@ -127,6 +140,9 @@ public class Interpreter {
 				System.out.println("saw move");
 				entity = (Entity) walkTree(cterm.args[0]);
 				relation = (Relation) walkTree(cterm.args[1]);
+				if (!Relation.matchEntityAndRelation(entity, relation, world).isEmpty())
+					throw new InterpretationException("No need to do more, world is already matching relation.");
+				
 				finalRelation = new Relation(entity, relation.getEntityB(), relation.getType());
 				relations.add(finalRelation);
 
@@ -213,7 +229,7 @@ public class Interpreter {
 				System.out.println("saw object");
 				entity = new Entity(cterm.args[0].toString(), cterm.args[1].toString(), cterm.args[2].toString());
 
-				List<Entity> matchedEntities = matchEntityAndRelation(entity, givenRelation);
+				List<Entity> matchedEntities = Relation.matchEntityAndRelation(entity, givenRelation, world);
 
 				if (matchedEntities.isEmpty()) {
 					if (givenRelation == null)
@@ -226,7 +242,9 @@ public class Interpreter {
 
 				System.out.println("Success: [" + entity + "] exists in the world as [" + matchedEntities.get(0) + "].");
 				givenRelation = null; // Reset the givenRelation value.
-				return matchedEntities.get(0); // Since we don't handle Ambiguity Errors, just take the first match. 
+				return matchedEntities.get(0); // Since we don't handle
+												// Ambiguity Errors, just take
+												// the first match.
 			}
 		} else if (term instanceof AtomTerm) {
 			AtomTerm aterm = (AtomTerm) term;
@@ -257,106 +275,6 @@ public class Interpreter {
 		return null;
 	}
 
-	public boolean goalReached(Goal goal, List<List<Entity>> world) {
-		int count = 0;
-		for (List<Entity> column : world) {
-			for (Entity entity : column) {
-				for (Relation relation : goal.getRelations()) {
-					if (!matchEntityAndRelation(entity, relation).isEmpty())
-						count++;
-				}
-			}
-		}
-		return count == goal.getRelations().size();
-	}
-	
-	private List<Entity> matchEntityAndRelation(Entity entity, Relation relation) {
-		List<Entity> matchedEntities = new ArrayList<>();
-
-		if (relation != null) {
-			System.out.println("GivenRelation: " + relation);
-			// If a relation is given, we need to make sure that we only
-			// match against objects that also match the given relation.
-			for (List<Entity> column : world) {
-				if (column.contains(entity)) {
-					if (relation.getType().equals(Relation.TYPE.ON_TOP_OF)) {
-						if (relation.getEntityB().getForm().equals(Entity.FORM.FLOOR)) {
-							// The floor is a special case, since it is
-							// not represented in our world.
-							if (column.indexOf(entity) == 0)
-								matchedEntities.add(column.get(column.indexOf(entity)));
-						} else if (!relation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
-							// An entity is never on top of a box.
-							if (column.indexOf(entity) > 0
-									&& column.get(column.indexOf(entity) - 1).getForm()
-											.equals(relation.getEntityB().getForm()))
-								// Check for entities below this entity.
-								matchedEntities.add(column.get(column.indexOf(entity)));
-						}
-					} else if (relation.getType().equals(Relation.TYPE.INSIDE)) {
-						// Entities are always inside boxes, nothing
-						// else. Only boxes.
-						if (relation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
-							if (column.indexOf(entity) > 0
-									&& column.get(column.indexOf(entity) - 1).getForm().equals(Entity.FORM.BOX))
-								matchedEntities.add(column.get(column.indexOf(entity)));
-						}
-					} else if (relation.getType().equals(Relation.TYPE.ABOVE)) {
-						// Check for entities below this entity.
-						for (int i = column.indexOf(entity); i >= 0; i--) {
-							if (column.get(i).getForm().equals(relation.getEntityB().getForm()))
-								matchedEntities.add(column.get(column.indexOf(entity)));
-						}
-					} else if (relation.getType().equals(Relation.TYPE.UNDER)) {
-						// Check for entities above this entity.
-						for (int i = column.indexOf(entity); i < column.size(); i++) {
-							if (column.get(i).getForm().equals(relation.getEntityB().getForm()))
-								matchedEntities.add(column.get(column.indexOf(entity)));
-						}
-					} else if (relation.getType().equals(Relation.TYPE.BESIDE)) {
-						// Relation says the entity should be beside
-						// another entity, is it?
-						if (world.indexOf(column) + 1 < world.size()) {
-							// Is it to the right of this entity?
-							if (world.get(world.indexOf(column) + 1).contains(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
-							}
-						} else if (world.indexOf(column) - 1 >= 0) {
-							// Is is to the left of this entity?
-							if (world.get(world.indexOf(column) - 1).contains(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
-							}
-						}
-					} else if (relation.getType().equals(Relation.TYPE.LEFT_OF)) {
-						// Relation says the entity should be left of
-						// another entity, is it?
-						for (int i = world.indexOf(column) + 1; i < world.size(); i++) {
-							if (world.get(i).contains(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
-							}
-						}
-					} else if (relation.getType().equals(Relation.TYPE.RIGHT_OF)) {
-						// Relation says the entity should be right of
-						// another entity, is it
-						for (int i = world.indexOf(column) - 1; i >= 0; i--) {
-							if (world.get(i).contains(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
-							}
-						}
-					}
-				}
-			}
-		} else {
-			// If no relation is given, we can match against any object.
-			System.out.println("No relation given, matching " + entity + " against all objects in the world.");
-			for (List<Entity> column : world) {
-				if (column.contains(entity))
-					matchedEntities.add(column.get(column.indexOf(entity)));
-			}
-		}
-		return matchedEntities;
-	}
-	
 	public class InterpretationException extends Exception {
 
 		private static final long serialVersionUID = 2280978916235342656L;

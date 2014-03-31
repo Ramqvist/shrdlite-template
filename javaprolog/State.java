@@ -8,6 +8,7 @@ import java.util.List;
  */
 
 public class State {
+	
 	List<List<Entity>> world;
 	List<Relation> relations;
 	Entity holding = null;
@@ -39,22 +40,22 @@ public class State {
 		return relations.contains(r);
 	}
 	
-	public State takeAction(Action a) {
+	public State takeAction(Action a) throws NullPointerException, IllegalStateException {
 		State s = new State(this);
 		if(a.command == Action.COMMAND.DROP) {
-			if(holding != null) {
-				throw new NullPointerException("Not holding anything");
+			if(s.holding == null) {
+				throw new NullPointerException("Not holding anything.");
 			}
-			world.get(a.column).add(holding);
-			holding = null;
+			s.world.get(a.column).add(s.holding);
+			s.holding = null;
 		} else {
-			if(holding != null) {
-				throw new IllegalStateException("Already holding a object!");
+			if(s.holding != null) {
+				throw new IllegalStateException("Already holding a object.");
 			}
-			if(world.get(a.column).isEmpty()) {
-				throw new IllegalStateException("No object to pick up");
+			if(s.world.get(a.column).isEmpty()) {
+				throw new IllegalStateException("No object to pick up.");
 			}
-			holding = world.get(a.column).remove(world.get(a.column).size() - 1 );
+			s.holding = s.world.get(a.column).remove(s.world.get(a.column).size() - 1);
 		}
 		return s;
 	}
@@ -62,4 +63,10 @@ public class State {
 	public boolean isHolding() {
 		return holding != null;
 	}
+	
+	@Override
+	public String toString() {
+		return "(State " + world + " : " + relations + ")";
+	}
+	
 }

@@ -181,5 +181,25 @@ public class Entity {
 		}
 		return true;
 	}
+	
+	public boolean equalsExact(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		Entity other = (Entity) obj;
+		if (color != other.color) {
+			return false;
+		}
+		if (form != other.form) {
+			return false;
+		}
+		if (size != other.size) {
+			return false;
+		}
+		return true;
+	}
 
 }
