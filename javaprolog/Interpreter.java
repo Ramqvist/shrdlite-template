@@ -94,6 +94,21 @@ public class Interpreter {
 	}
 
 	private Relation givenRelation;
+	/*
+	 * These booleans are used to make sure that the correct relations are
+	 * generated in the walkTree method. The logic is as follows:
+	 * 
+	 * As a rule, we only create and save relations if they are created in the
+	 * "take", "put" and "move" methods.
+	 * 
+	 * However, sometimes we need to generate more than one relation, e.g. for
+	 * the utterance "put the white ball in a red box on the floor" there is no
+	 * red box on the floor. However, there is a red box that could be put on
+	 * the floor. These booleans are then used to make sure that a relation that
+	 * says that in addition to having the white ball be inside a red box, that
+	 * red box should be on top of the floor.
+	 */
+	private boolean relativeChild = false, moveRelation = false;
 
 	/**
 	 * Recursively walks the given tree, generating a list of relations that
@@ -122,11 +137,11 @@ public class Interpreter {
 				 */
 				System.out.println("saw take");
 				entity = (Entity) walkTree(cterm.args[0]);
-				// TODO: HOW DO WE EXPLAIN THIS AS A RELATION?
-				// Same goes for the "put" command.
-
-				// Quote webpage:
-				// "For the take and put commands, the procedure is similar but different…"
+				/*
+				 * TODO: HOW DO WE EXPLAIN THIS AS A RELATION? Same goes for the
+				 * "put" command. Quote webpage:
+				 * "For the take and put commands, the procedure is similar but different…"
+				 */
 				break;
 			case "move":
 				/*
@@ -139,10 +154,12 @@ public class Interpreter {
 				 */
 				System.out.println("saw move");
 				entity = (Entity) walkTree(cterm.args[0]);
+				moveRelation = true;
 				relation = (Relation) walkTree(cterm.args[1]);
+				moveRelation = false;
 				if (!Relation.matchEntityAndRelation(entity, relation, world).isEmpty())
 					throw new InterpretationException("No need to do more, world is already matching relation.");
-				
+
 				finalRelation = new Relation(entity, relation.getEntityB(), relation.getType());
 				relations.add(finalRelation);
 
@@ -152,7 +169,7 @@ public class Interpreter {
 				 * clutter up our code with checking logic here.
 				 */
 				if (!ConstraintCheck.isValidRelations(relations))
-					throw new InterpretationException("error in move lol"); // TODO
+					throw new InterpretationException("The created relation " + relations + " don't match the rules of the world.");
 
 				System.out.println("MOVE: Added new relation to relations: " + finalRelation);
 				return finalRelation;
@@ -166,6 +183,7 @@ public class Interpreter {
 				 */
 				System.out.println("saw relative");
 				Relation.TYPE relationType = (Relation.TYPE) walkTree(cterm.args[0]);
+				relativeChild = true;
 				entity = (Entity) walkTree(cterm.args[1]);
 				return new Relation(new Entity(), entity, relationType);
 			case "basic_entity":
@@ -196,19 +214,20 @@ public class Interpreter {
 				givenRelation = relation = (Relation) walkTree(cterm.args[2]);
 				entity = (Entity) walkTree(cterm.args[1]);
 				finalRelation = new Relation(entity, relation.getEntityB(), relation.getType());
-
+				// If relative_entity is a child of relative, add relation
+				// otherwise don't
+				System.out.println(relativeChild);
+				if (relativeChild && moveRelation)
+					relations.add(finalRelation);
 				/*
 				 * Here we check if this relation makes sense in the world. This
 				 * check is done by another class, ConstraintCheck. No need to
 				 * clutter up our code with checking logic here.
 				 */
 				if (!ConstraintCheck.isValidRelations(relations))
-					throw new InterpretationException("error lol"); // TODO:
-																	// Write a
-																	// normal
-																	// error
-																	// message.
+					throw new InterpretationException("The created relation " + relations + " don't match the rules of the world.");
 
+				relativeChild = false;
 				return finalRelation.getEntityA();
 			case "object":
 				/*
@@ -231,20 +250,25 @@ public class Interpreter {
 
 				List<Entity> matchedEntities = Relation.matchEntityAndRelation(entity, givenRelation, world);
 
+				Entity returnEntity = entity;
 				if (matchedEntities.isEmpty()) {
+					givenRelation.setEntityA(entity);
 					if (givenRelation == null)
 						throw new InterpretationException("[" + entity + "] does not match anything in the world.");
-					else
-						throw new InterpretationException("The " + givenRelation + " relation does not match anything in the world.");
-				} else if (matchedEntities.size() > 1) {
-					// TODO: Handle Ambiguity Error in some fancy way.
+					else {
+						returnEntity = matchEntity(world, givenRelation);
+						if (returnEntity == null)
+							throw new InterpretationException("[" + entity + "] does not match anything in the world.");
+					}
+					// } else if (matchedEntities.size() > 1) {
+					// // TODO: Handle Ambiguity Error in some fancy way.
+				} else {
+					returnEntity = matchedEntities.get(0);
 				}
 
-				System.out.println("Success: [" + entity + "] exists in the world as [" + matchedEntities.get(0) + "].");
+				System.out.println("Success: [" + entity + "] exists in the world as [" + returnEntity + "].");
 				givenRelation = null; // Reset the givenRelation value.
-				return matchedEntities.get(0); // Since we don't handle
-												// Ambiguity Errors, just take
-												// the first match.
+				return returnEntity;
 			}
 		} else if (term instanceof AtomTerm) {
 			AtomTerm aterm = (AtomTerm) term;
@@ -272,6 +296,17 @@ public class Interpreter {
 			return Relation.parseType(aterm.value);
 		}
 		System.out.println();
+		return null;
+	}
+
+	private Entity matchEntity(List<List<Entity>> world, Relation givenRelation) {
+		for (List<Entity> column : world) {
+			for (Entity cEntity : column) {
+				if (cEntity.equals(givenRelation.getEntityA())) {
+					return cEntity;
+				}
+			}
+		}
 		return null;
 	}
 

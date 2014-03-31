@@ -22,10 +22,12 @@ public class Planner {
 
 		boolean reachedGoal = false;
 		Plan goalPlan = null;
-//		int count = 0; // Used to count iterations.
+		int count = 0; // Used to count iterations.
+		// Hey I didn't even know Java HAD labels!
+		outerloop:
 		while (true) {
 			Plan plan = queue.poll();
-//			count++;
+			count++;
 			reachedGoal = hasReachedGoal(goal, plan.currentState);
 			if (reachedGoal) {
 				System.out.println(plan + " reached the goal state " + goal);
@@ -46,17 +48,25 @@ public class Planner {
 			}
 
 			for (Action newAction : possibleActions) {
-//				count++;
+				count++;
 				List<Action> actionList = new ArrayList<Action>();
 				for (Action c : plan.actions) {
 					actionList.add(c);
 				}
 				actionList.add(newAction);
-//				System.out.println(actionList);
+				
 				try {
 					Plan p = new Plan(plan.currentState.takeAction(newAction), actionList);
+					
 					if (ConstraintCheck.isValidWorld(p.currentState.world)) {
 						queue.add(p);
+					}
+					
+					if (hasReachedGoal(goal, p.currentState)) {
+						goalPlan = p;
+						// This is ugly. Really ugly. But it optimizes heavily, reducing iterationcount by like 80%... Also it makes sense.
+						// TODO: Refactor Planner break stuff.
+						break outerloop; 
 					}
 				} catch (Exception e) {
 					System.out.println(e);
@@ -64,30 +74,22 @@ public class Planner {
 				}
 			}
 		}
-//		System.out.println(count);
+		System.out.println(count);
 		return goalPlan;
 	}
-
+	
 	private static boolean hasReachedGoal(Goal goal, State state) {
 		int count = 0;
 		for (List<Entity> column : state.world) {
 			for (Entity entity : column) {
 				for (Relation relation : goal.getRelations()) {
-					if (!Relation.matchEntityAndRelationExact(entity, relation, state.world).isEmpty())
+					if (!Relation.matchEntityAndRelationExact(entity, relation, state.world).isEmpty()) {
 						count++;
+					}
 				}
 			}
 		}
 		return count == goal.getRelations().size();
 	}
-
-	// private static boolean hasReachedGoal(Goal g, State s) {
-	// for(Relation r : g.getRelations()) {
-	// if(!s.exist(r)) {
-	// return false;
-	// }
-	// }
-	// return true;
-	// }
 
 }

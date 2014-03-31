@@ -262,7 +262,7 @@ public class Relation {
 						// else. Only boxes.
 						if (relation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
 							if (column.indexOf(entity) > 0 && column.get(column.indexOf(entity) - 1).equalsExact(relation.getEntityB())) {
-								System.out.println(column.get(column.indexOf(entity) - 1) + " matched " + relation.getEntityB());
+//								System.out.println(column.get(column.indexOf(entity) - 1) + " matched " + relation.getEntityB());
 								matchedEntities.add(column.get(column.indexOf(entity)));
 							}
 						}
