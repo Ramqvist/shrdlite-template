@@ -10,7 +10,9 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /**
- * The interpreter class
+ * Allows you to tnterpret any tree parsed by the DCGParser, generating a list
+ * of relations that describe the goal that the planner should try to reach.
+ * 
  */
 public class Interpreter {
 
@@ -93,7 +95,12 @@ public class Interpreter {
 		return goalList;
 	}
 
+	/*
+	 * This is simply to avoid having to let walkTree have a second parameter
+	 * that is null most of the time. Could perhaps be done better.
+	 */
 	private Relation givenRelation;
+
 	/*
 	 * These booleans are used to make sure that the correct relations are
 	 * generated in the walkTree method. The logic is as follows:
@@ -139,7 +146,9 @@ public class Interpreter {
 				entity = (Entity) walkTree(cterm.args[0]);
 				/*
 				 * TODO: HOW DO WE EXPLAIN THIS AS A RELATION? Same goes for the
-				 * "put" command. Quote webpage:
+				 * "put" command.
+				 * 
+				 * Quote from the course page:
 				 * "For the take and put commands, the procedure is similar but different…"
 				 */
 				break;
@@ -214,11 +223,15 @@ public class Interpreter {
 				givenRelation = relation = (Relation) walkTree(cterm.args[2]);
 				entity = (Entity) walkTree(cterm.args[1]);
 				finalRelation = new Relation(entity, relation.getEntityB(), relation.getType());
-				// If relative_entity is a child of relative, add relation
-				// otherwise don't
-				System.out.println(relativeChild);
+
+				/*
+				 * If this relative_entity has been reached from the right child
+				 * of "move" and is a child of relative, we should save this
+				 * relation.
+				 */
 				if (relativeChild && moveRelation)
 					relations.add(finalRelation);
+
 				/*
 				 * Here we check if this relation makes sense in the world. This
 				 * check is done by another class, ConstraintCheck. No need to
@@ -299,6 +312,18 @@ public class Interpreter {
 		return null;
 	}
 
+	/**
+	 * Returns the first entity that matches the given relation in the given
+	 * world.
+	 * 
+	 * @param world
+	 *            a 2D list of entities.
+	 * @param givenRelation
+	 *            a Relation that describes the relation that the returned
+	 *            entity should match.
+	 * @return the matching entity or null if no entity matches the given
+	 *         relation.
+	 */
 	private Entity matchEntity(List<List<Entity>> world, Relation givenRelation) {
 		for (List<Entity> column : world) {
 			for (Entity cEntity : column) {
