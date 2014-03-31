@@ -124,7 +124,7 @@ public class Entity {
 			this.color = Entity.COLOR.UNDEFINED;
 		}
 	}
-
+	
 	public COLOR getColor() {
 		return color == null ? COLOR.UNDEFINED : color;
 	}

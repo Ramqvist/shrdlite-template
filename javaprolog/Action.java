@@ -12,14 +12,12 @@ public class Action {
 		column = col;
 	}
 	
-	public String toString(){
-		if(command == COMMAND.PICK){
+	public String toString() {
+		if (command == COMMAND.PICK) {
 			return "pick " + column;
-		}else{
+		} else {
 			return "drop " + column;
 		}
-		
-		
-		
+
 	}
 }

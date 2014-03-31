@@ -115,4 +115,13 @@ public class ConstraintCheck {
 		}
 		return true;
 	}
+
+	public static boolean isValidWorld(List<List<Entity>> world) {
+		for(List<Entity> column : world) {
+			if(!isValidColumn(column)) {
+				return false;
+			}
+		}
+		return true;
+	}
 }

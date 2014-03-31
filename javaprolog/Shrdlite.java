@@ -70,12 +70,19 @@ public class Shrdlite {
                 result.put("output", "Ambiguity error!");
 
             } else {
-                Planner planner = new Planner(world, holding, objects);
+                Planner planner = new Planner(interpreter.world);
                 List<Relation> exampleGoals = new ArrayList<>();
                 exampleGoals.add(new Relation(new Entity("ball", "white", "large"), new Entity("box", "large", "yellow"), Relation.TYPE.INSIDE));
+                List<Plan> plans = new ArrayList<Plan>();
+                for(Goal g : goals) {
+                	plans.add(planner.solve(g));
+                }
                 Plan plan = planner.solve(new Goal(exampleGoals));
-                int column = 0;
-                while (((JSONArray)world.get(column)).isEmpty()) column++;
+//                int column = 0;
+//                while (((JSONArray)world.get(column)).isEmpty()) column++; Remove?
+                for(Plan p : plans) {
+            		result.put("plan", p.actions);
+                }
                 result.put("plan", plan);
                 if (plan.isEmpty()) {
                     result.put("output", "Planning error!");

@@ -66,6 +66,10 @@ public class Relation {
 	public void setEntityB(Entity b) {
 		this.b = b;
 	}
+	
+	public Relation copy() {
+		return new Relation(a.copy(), b.copy(), type);
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -115,5 +119,6 @@ public class Relation {
 	public String toString() {
 		return "(" + type + " " + a + " " + b + ")";
 	}
+	
 
 }
