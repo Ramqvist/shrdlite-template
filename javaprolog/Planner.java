@@ -22,8 +22,10 @@ public class Planner {
 
 		boolean reachedGoal = false;
 		Plan goalPlan = null;
+//		int count = 0; // Used to count iterations.
 		while (true) {
 			Plan plan = queue.poll();
+//			count++;
 			reachedGoal = hasReachedGoal(goal, plan.currentState);
 			if (reachedGoal) {
 				System.out.println(plan + " reached the goal state " + goal);
@@ -36,17 +38,21 @@ public class Planner {
 				if (plan.currentState.isHolding()) {
 					possibleActions.add(new Action(Action.COMMAND.DROP, i));
 				} else {
-					possibleActions.add(new Action(Action.COMMAND.PICK, i));
+					// Small optimization. No need to try to pick something from
+					// an empty column.
+					if (!plan.currentState.world.get(i).isEmpty())
+						possibleActions.add(new Action(Action.COMMAND.PICK, i));
 				}
 			}
 
 			for (Action newAction : possibleActions) {
+//				count++;
 				List<Action> actionList = new ArrayList<Action>();
 				for (Action c : plan.actions) {
 					actionList.add(c);
 				}
 				actionList.add(newAction);
-				System.out.println(actionList);
+//				System.out.println(actionList);
 				try {
 					Plan p = new Plan(plan.currentState.takeAction(newAction), actionList);
 					if (ConstraintCheck.isValidWorld(p.currentState.world)) {
@@ -58,6 +64,7 @@ public class Planner {
 				}
 			}
 		}
+//		System.out.println(count);
 		return goalPlan;
 	}
 
