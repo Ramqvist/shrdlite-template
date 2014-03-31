@@ -111,7 +111,7 @@ public class Interpreter {
 	public Object walkTree(Term term) throws InterpretationException {
 		Relation relation, finalRelation;
 		Entity entity;
-
+		
 		if (term instanceof CompoundTerm) {
 			CompoundTerm cterm = (CompoundTerm) term;
 			switch (cterm.tag.functor.toString()) {
@@ -257,6 +257,19 @@ public class Interpreter {
 		return null;
 	}
 
+	public boolean goalReached(Goal goal, List<List<Entity>> world) {
+		int count = 0;
+		for (List<Entity> column : world) {
+			for (Entity entity : column) {
+				for (Relation relation : goal.getRelations()) {
+					if (!matchEntityAndRelation(entity, relation).isEmpty())
+						count++;
+				}
+			}
+		}
+		return count == goal.getRelations().size();
+	}
+	
 	private List<Entity> matchEntityAndRelation(Entity entity, Relation relation) {
 		List<Entity> matchedEntities = new ArrayList<>();
 
