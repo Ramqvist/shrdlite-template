@@ -11,11 +11,7 @@ public class Action {
 		command = com;
 		column = col;
 	}
-<<<<<<< HEAD
 	
-=======
-
->>>>>>> 77edfe7da964b5d5db6a135f45fad4115f498034
 	public String toString() {
 		if (command == COMMAND.PICK) {
 			return "pick " + column;
