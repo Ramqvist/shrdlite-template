@@ -1,25 +1,23 @@
-
 public class Action {
-	public enum COMMAND{
-		PICK,
-		DROP
+
+	public enum COMMAND {
+		PICK, DROP
 	}
+
 	public final COMMAND command;
 	public final int column;
-	
-	public Action(COMMAND com, int col){
+
+	public Action(COMMAND com, int col) {
 		command = com;
 		column = col;
 	}
-	
-	public String toString(){
-		if(command == COMMAND.PICK){
+
+	public String toString() {
+		if (command == COMMAND.PICK) {
 			return "pick " + column;
-		}else{
+		} else {
 			return "drop " + column;
 		}
-		
-		
-		
+
 	}
 }
