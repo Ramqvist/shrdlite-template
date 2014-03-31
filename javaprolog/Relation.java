@@ -68,7 +68,7 @@ public class Relation {
 	}
 	
 	public Relation copy() {
-		return new Relation(a.copy(), b.copy(), type);
+		return new Relation(a, b, type);
 	}
 
 	/*
