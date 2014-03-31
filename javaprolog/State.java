@@ -56,7 +56,6 @@ public class State {
 			}
 			holding = world.get(a.column).remove(world.get(a.column).size() - 1 );
 		}
-		this.relations = Relation.parse(world);
 		return s;
 	}
 
