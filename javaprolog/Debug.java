@@ -1,6 +1,6 @@
 /**
  * This is simply so that we can easily turn on / off console println's, since
- * all stdout data is fed to the JavaScript client.
+ * all standard output is fed to the JavaScript client.
  * 
  */
 public class Debug {
