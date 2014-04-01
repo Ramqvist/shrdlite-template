@@ -34,12 +34,12 @@ public class Shrdlite {
 		List<Term> trees = parser.parseSentence("command", utterance);
 		List tstrs = new ArrayList();
 		result.put("trees", tstrs);
-		Debug.printDebug();
+		Debug.print();
 		for (Term t : trees) {
 			tstrs.add(t.toString());
-			Debug.printDebug("Tree " + (trees.indexOf(t) + 1));
-			Debug.printDebug(t.toString());
-			Debug.printDebug();
+			Debug.print("Tree " + (trees.indexOf(t) + 1));
+			Debug.print(t.toString());
+			Debug.print();
 		}
 
 		if (trees.isEmpty()) {
@@ -57,7 +57,6 @@ public class Shrdlite {
 
 			if (goals.isEmpty()) {
 				result.put("output", "Interpretation error!");
-
 			} else if (goals.size() > 100) { // TODO: Temporarily changed so we can ignore ambiguity errors for now.
 				result.put("output", "Ambiguity error!");
 			} else {

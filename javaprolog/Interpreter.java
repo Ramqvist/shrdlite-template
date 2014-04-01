@@ -1,7 +1,6 @@
 import gnu.prolog.term.AtomTerm;
 import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.Term;
-import gnu.prolog.term.VariableTerm;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +9,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 /**
- * Allows you to tnterpret any tree parsed by the DCGParser, generating a list
+ * Allows you to interpret any tree parsed by the DCGParser, generating a list
  * of relations that describe the goal that the planner should try to reach.
  * 
  */
@@ -48,9 +47,9 @@ public class Interpreter {
 
 			this.world.add(column);
 		}
-		Debug.printDebug("World Representation");
-		Debug.printDebug(this.world);
-		Debug.printDebug();
+		Debug.print("World Representation");
+		Debug.print(this.world);
+		Debug.print();
 	}
 
 	List<Relation> relations;
@@ -69,28 +68,28 @@ public class Interpreter {
 		List<Goal> goalList = new ArrayList<Goal>();
 		relations = new ArrayList<>();
 
-		Debug.printDebug("=================");
-		Debug.printDebug("START OF INTERPRET");
-		Debug.printDebug();
+		Debug.print("=================");
+		Debug.print("START OF INTERPRET");
+		Debug.print();
 
 		try {
 			walkTree(tree);
 			goalList.add(new Goal(relations));
 		} catch (InterpretationException e) {
-			Debug.printDebug(e);
+			Debug.print(e);
 		}
 
-		Debug.printDebug();
-		Debug.printDebug("END OF INTERPRET");
-		Debug.printDebug("================");
-		Debug.printDebug();
+		Debug.print();
+		Debug.print("END OF INTERPRET");
+		Debug.print("================");
+		Debug.print();
 
 		if (goalList.size() > 0)
-			Debug.printDebug(goalList.get(0));
+			Debug.print(goalList.get(0));
 		else
-			Debug.printDebug("No goal could be produced.");
+			Debug.print("No goal could be produced.");
 
-		Debug.printDebug();
+		Debug.print();
 
 		return goalList;
 	}
@@ -142,7 +141,7 @@ public class Interpreter {
 				 * Take has one child, which is always either floor,
 				 * basic_entity or relative_entity.
 				 */
-				Debug.printDebug("saw take");
+				Debug.print("saw take");
 				entity = (Entity) walkTree(cterm.args[0]);
 				/*
 				 * TODO: HOW DO WE EXPLAIN THIS AS A RELATION? Same goes for the
@@ -161,7 +160,7 @@ public class Interpreter {
 				 * The right child is always relative. For us, this means it is
 				 * always a Relation.
 				 */
-				Debug.printDebug("saw move");
+				Debug.print("saw move");
 				entity = (Entity) walkTree(cterm.args[0]);
 				moveRelation = true;
 				relation = (Relation) walkTree(cterm.args[1]);
@@ -184,7 +183,7 @@ public class Interpreter {
 					throw new InterpretationException("The created relation " + relations + " don't match the rules of the world.");
 				}
 
-				Debug.printDebug("MOVE: Added new relation to relations: " + finalRelation);
+				Debug.print("MOVE: Added new relation to relations: " + finalRelation);
 				return finalRelation;
 			case "relative":
 				/*
@@ -194,7 +193,7 @@ public class Interpreter {
 				 * The right child is always either floor, basic_entity or
 				 * relative_entity. For us, this means it is always an Entity.
 				 */
-				Debug.printDebug("saw relative");
+				Debug.print("saw relative");
 				Relation.TYPE relationType = (Relation.TYPE) walkTree(cterm.args[0]);
 				relativeChild = true;
 				entity = (Entity) walkTree(cterm.args[1]);
@@ -207,7 +206,7 @@ public class Interpreter {
 				 * The right child is always an object. For us, this means it is
 				 * an Entity.
 				 */
-				Debug.printDebug("saw basic_entity");
+				Debug.print("saw basic_entity");
 				walkTree(cterm.args[0]);
 				entity = (Entity) walkTree(cterm.args[1]);
 				return entity;
@@ -222,7 +221,7 @@ public class Interpreter {
 				 * The right child is always an object. For us, this means it is
 				 * an Entity.
 				 */
-				Debug.printDebug("saw relative_entity");
+				Debug.print("saw relative_entity");
 				walkTree(cterm.args[0]);
 				givenRelation = relation = (Relation) walkTree(cterm.args[2]);
 				entity = (Entity) walkTree(cterm.args[1]);
@@ -262,28 +261,34 @@ public class Interpreter {
 				 * This is done by setting the givenRelation object to the given
 				 * relation.
 				 */
-				Debug.printDebug("saw object");
+				Debug.print("saw object");
 				entity = new Entity(cterm.args[0].toString(), cterm.args[1].toString(), cterm.args[2].toString());
 
+				/*
+				 * Check if any entity matched the given relation, and act
+				 * accordingly.
+				 */
 				List<Entity> matchedEntities = Relation.matchEntityAndRelation(entity, givenRelation, world);
-
 				Entity returnEntity = entity;
+				Debug.print(returnEntity);
 				if (matchedEntities.isEmpty()) {
-					givenRelation.setEntityA(entity);
-					if (givenRelation == null)
+					if (givenRelation == null) {
 						throw new InterpretationException("[" + entity + "] does not match anything in the world.");
-					else {
+					} else {
 						returnEntity = matchEntity(world, givenRelation);
-						if (returnEntity == null)
+						if (returnEntity == null) {
 							throw new InterpretationException("[" + entity + "] does not match anything in the world.");
+						}
 					}
+					givenRelation.setEntityA(entity);
 					// } else if (matchedEntities.size() > 1) {
 					// // TODO: Handle Ambiguity Error in some fancy way.
 				} else {
 					returnEntity = matchedEntities.get(0);
 				}
+				Debug.print(returnEntity);
 
-				Debug.printDebug("Success: [" + entity + "] exists in the world as [" + returnEntity + "].");
+				Debug.print("Success: [" + entity + "] exists in the world as [" + returnEntity + "].");
 				givenRelation = null; // Reset the givenRelation value.
 				return returnEntity;
 			}
@@ -291,20 +296,20 @@ public class Interpreter {
 			AtomTerm aterm = (AtomTerm) term;
 			switch (aterm.value) {
 			case "floor":
-				Debug.printDebug("saw floor");
+				Debug.print("saw floor");
 				return new Entity(Entity.FORM.FLOOR, Entity.SIZE.UNDEFINED, Entity.COLOR.UNDEFINED);
 			case "the":
-				Debug.printDebug("saw the");
+				Debug.print("saw the");
 				// "The" means that there should only be one item that matches
 				// the description. If more than one item matches the
 				// description, we should ask clarification question(s):
 				break;
 			case "any":
-				Debug.printDebug("saw any");
+				Debug.print("saw any");
 				// "Any" should work as this currently does.
 				break;
 			case "all":
-				Debug.printDebug("saw all");
+				Debug.print("saw all");
 				// "All" should create one relation for each item that matches
 				// the description.
 				break;
@@ -312,7 +317,7 @@ public class Interpreter {
 			// This static method handles the parsing of type values.
 			return Relation.parseType(aterm.value);
 		}
-		Debug.printDebug();
+		Debug.print();
 		return null;
 	}
 

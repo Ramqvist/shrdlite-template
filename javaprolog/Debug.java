@@ -1,6 +1,6 @@
 /**
  * This is simply so that we can easily turn on / off console println's, since
- * all stdout data is fed to the Javascript client.
+ * all stdout data is fed to the JavaScript client.
  * 
  */
 public class Debug {
@@ -14,7 +14,7 @@ public class Debug {
 	 * @param message
 	 *            The String message to be printed.
 	 */
-	public static void printDebug(String message) {
+	public static void print(String message) {
 		if (debug) {
 			System.out.println(message);
 		}
@@ -27,7 +27,7 @@ public class Debug {
 	 * @param object
 	 *            The object to be printed.
 	 */
-	public static void printDebug(Object object) {
+	public static void print(Object object) {
 		if (debug) {
 			System.out.println(object.toString());
 		}
@@ -37,7 +37,7 @@ public class Debug {
 	 * Prints a new line to standard output if the Debug.debug variable is set
 	 * to true.
 	 */
-	public static void printDebug() {
+	public static void print() {
 		if (debug) {
 			System.out.println();
 		}
