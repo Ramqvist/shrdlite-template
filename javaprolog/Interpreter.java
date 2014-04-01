@@ -144,8 +144,7 @@ public class Interpreter {
 				Debug.print("saw take");
 				entity = (Entity) walkTree(cterm.args[0]);
 				/*
-				 * TODO: HOW DO WE EXPLAIN THIS AS A RELATION? Same goes for the
-				 * "put" command.
+				 * TODO: HOW DO WE EXPLAIN THIS AS A RELATION?
 				 * 
 				 * Quote from the course page:
 				 * "For the take and put commands, the procedure is similar but different…"
