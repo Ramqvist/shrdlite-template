@@ -30,7 +30,7 @@ public class Planner {
 			count++;
 			reachedGoal = hasReachedGoal(goal, plan.currentState);
 			if (reachedGoal) {
-//				System.out.println(plan + " reached the goal state " + goal);
+				Debug.printDebug(plan + " reached the goal state " + goal);
 				goalPlan = plan;
 				break;
 			}
@@ -69,12 +69,12 @@ public class Planner {
 						break outerloop; 
 					}
 				} catch (Exception e) {
-//					System.out.println(e);
+					Debug.printDebug(e);
 					// The action was rejected, so we do nothing.
 				}
 			}
 		}
-//		System.out.println(count);
+		Debug.printDebug(count);
 		return goalPlan;
 	}
 	

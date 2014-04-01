@@ -149,14 +149,16 @@ public class Relation {
 						if (relation.getEntityB().getForm().equals(Entity.FORM.FLOOR)) {
 							// The floor is a special case, since it is
 							// not represented in our world.
-							if (column.indexOf(entity) == 0)
+							if (column.indexOf(entity) == 0) {
 								matchedEntities.add(column.get(column.indexOf(entity)));
+							}
 						} else if (!relation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
 							// An entity is never on top of a box.
 							if (column.indexOf(entity) > 0
-									&& column.get(column.indexOf(entity) - 1).getForm().equals(relation.getEntityB().getForm()))
+									&& column.get(column.indexOf(entity) - 1).getForm().equals(relation.getEntityB().getForm())) {
 								// Check for entities below this entity.
 								matchedEntities.add(column.get(column.indexOf(entity)));
+							}
 						}
 					} else if (relation.getType().equals(Relation.TYPE.INSIDE)) {
 						// Entities are always inside boxes, nothing
@@ -169,14 +171,16 @@ public class Relation {
 					} else if (relation.getType().equals(Relation.TYPE.ABOVE)) {
 						// Check for entities below this entity.
 						for (int i = column.indexOf(entity); i >= 0; i--) {
-							if (column.get(i).getForm().equals(relation.getEntityB().getForm()))
+							if (column.get(i).getForm().equals(relation.getEntityB().getForm())) {
 								matchedEntities.add(column.get(column.indexOf(entity)));
+							}
 						}
 					} else if (relation.getType().equals(Relation.TYPE.UNDER)) {
 						// Check for entities above this entity.
 						for (int i = column.indexOf(entity); i < column.size(); i++) {
-							if (column.get(i).getForm().equals(relation.getEntityB().getForm()))
+							if (column.get(i).getForm().equals(relation.getEntityB().getForm())) {
 								matchedEntities.add(column.get(column.indexOf(entity)));
+							}
 						}
 					} else if (relation.getType().equals(Relation.TYPE.BESIDE)) {
 						// Relation says the entity should be beside
@@ -211,9 +215,33 @@ public class Relation {
 					}
 				}
 			}
+			
+			/*
+			 * Tries to perform exact matching.
+			 */
+			Debug.printDebug("Entity: " + entity);
+			Debug.printDebug("Relation: " + relation);
+			Debug.printDebug("Matched Entities: " + matchedEntities);
+			if (matchedEntities.size() > 0) {
+				if (relation.getEntityB().getSize() != Entity.SIZE.UNDEFINED) {
+					for (int i = 0; i < matchedEntities.size(); i++) {
+						if (matchedEntities.get(i).getSize() != relation.getEntityB().getSize()) {
+							matchedEntities.remove(i);
+						}
+					}
+				}
+				
+				if (relation.getEntityB().getColor() != Entity.COLOR.UNDEFINED) {
+					for (int i = 0; i < matchedEntities.size(); i++) {
+						if (matchedEntities.get(i).getColor() != relation.getEntityB().getColor()) {
+							matchedEntities.remove(i);
+						}
+					}
+				}
+			}
 		} else {
 			// If no relation is given, we can match against any object.
-//			System.out.println("No relation given, matching " + entity + " against all objects in the world.");
+//			Debug.printDebug("No relation given, matching " + entity + " against all objects in the world.");
 			for (List<Entity> column : world) {
 				if (column.contains(entity))
 					matchedEntities.add(column.get(column.indexOf(entity)));
@@ -262,7 +290,7 @@ public class Relation {
 						// else. Only boxes.
 						if (relation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
 							if (column.indexOf(entity) > 0 && column.get(column.indexOf(entity) - 1).equalsExact(relation.getEntityB())) {
-//								System.out.println(column.get(column.indexOf(entity) - 1) + " matched " + relation.getEntityB());
+//								Debug.printDebug(column.get(column.indexOf(entity) - 1) + " matched " + relation.getEntityB());
 								matchedEntities.add(column.get(column.indexOf(entity)));
 							}
 						}

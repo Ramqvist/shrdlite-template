@@ -34,13 +34,12 @@ public class Shrdlite {
 		List<Term> trees = parser.parseSentence("command", utterance);
 		List tstrs = new ArrayList();
 		result.put("trees", tstrs);
-//		System.out.println();
+		Debug.printDebug();
 		for (Term t : trees) {
 			tstrs.add(t.toString());
-			// DEBUG OUTPUT
-//			System.out.println("Tree " + (trees.indexOf(t) + 1));
-//			System.out.println(t.toString());
-//			System.out.println();
+			Debug.printDebug("Tree " + (trees.indexOf(t) + 1));
+			Debug.printDebug(t.toString());
+			Debug.printDebug();
 		}
 
 		if (trees.isEmpty()) {
@@ -59,7 +58,7 @@ public class Shrdlite {
 			if (goals.isEmpty()) {
 				result.put("output", "Interpretation error!");
 
-			} else if (goals.size() > 100) {
+			} else if (goals.size() > 100) { // TODO: Temporarily changed so we can ignore ambiguity errors for now.
 				result.put("output", "Ambiguity error!");
 			} else {
 				Planner planner = new Planner(interpreter.world);
@@ -67,13 +66,13 @@ public class Shrdlite {
 				for (Goal g : goals) {
 					plans.add(planner.solve(g));
 				}
-				for (Plan p : plans) {
-					List<String> actionStrings = new ArrayList<>();
-					for (Action action : p.actions) {
-						actionStrings.add(action.toString());
-					}
-					result.put("plan", actionStrings);
+//				for (Plan p : plans) {
+				List<String> actionStrings = new ArrayList<>();
+				for (Action action : plans.get(0).actions) {
+					actionStrings.add(action.toString());
 				}
+				result.put("plan", actionStrings);
+//				}
 				if (plans.isEmpty()) {
 					result.put("output", "Planning error!");
 				} else {
