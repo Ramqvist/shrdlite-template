@@ -110,6 +110,11 @@ public class ConstraintCheck {
 				 * Check the INSIDE relation type.
 				 */
 				
+				// Balls must be inside boxes. (On the floor handled below.)
+				if (relation.getEntityA().getForm() == Entity.FORM.BALL && relation.getEntityB().getForm() != Entity.FORM.BOX) {
+					return false;
+				}
+				
 				// Objects are only inside boxes.
 				if (relation.getEntityB().getForm() != Entity.FORM.BOX) {
 					return false;
@@ -177,6 +182,13 @@ public class ConstraintCheck {
 								return false;
 							}
 						}
+						return false;
+					}
+				}
+				
+				// Balls can only be on top of the floor or inside a box
+				if (relation.getEntityA().getForm() == Entity.FORM.BALL && relation.getType() == Relation.TYPE.ON_TOP_OF) {
+					if (relation.getEntityB().getForm() != Entity.FORM.FLOOR) {
 						return false;
 					}
 				}
