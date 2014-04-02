@@ -231,8 +231,10 @@ public class Interpreter {
 				 * of "move" and is a child of relative, we should save this
 				 * relation.
 				 */
-				if (relativeChild && moveRelation)
+				if (relativeChild && moveRelation) {
+					Debug.print("relativeChild && moveRelation: Success! Added " + finalRelation + " to relations.");
 					relations.add(finalRelation);
+				}
 
 				/*
 				 * Here we check if this relation makes sense in the world. This
