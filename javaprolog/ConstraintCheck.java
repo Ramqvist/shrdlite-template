@@ -85,7 +85,11 @@ public class ConstraintCheck {
 				Entity previous = entityList.get(i-1);
 				if (previous.getForm() == Entity.FORM.TABLE || previous.getForm() == Entity.FORM.PLANK) {
 					//..of the same size
-					if(e.getSize() != previous.getSize()) {
+					if(e.getSize() == Entity.SIZE.LARGE && previous.getSize() == Entity.SIZE.SMALL) {
+						return false;
+					}
+				} else if (previous.getForm() == Entity.FORM.BRICK) {
+					if(previous.getSize() == Entity.SIZE.SMALL) {
 						return false;
 					}
 				} else {
