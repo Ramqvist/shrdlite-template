@@ -52,8 +52,9 @@ public class Interpreter {
 		Debug.print();
 	}
 
-	List<Relation> relations;
-
+	private List<Relation> relations;
+	private List<Goal> goalList;
+	
 	/**
 	 * Interprets the given tree, returning a (possibly empty) list of goals
 	 * that satisfy the "meaning" of the given tree.
@@ -65,7 +66,7 @@ public class Interpreter {
 	 *         tree.
 	 */
 	public List<Goal> interpret(Term tree) {
-		List<Goal> goalList = new ArrayList<Goal>();
+		goalList = new ArrayList<Goal>();
 		relations = new ArrayList<>();
 
 		Debug.print("=================");
@@ -74,7 +75,7 @@ public class Interpreter {
 
 		try {
 			walkTree(tree);
-			goalList.add(new Goal(relations));
+//			goalList.add(new Goal(relations));
 		} catch (InterpretationException e) {
 			Debug.print(e);
 		}
@@ -85,7 +86,7 @@ public class Interpreter {
 		Debug.print();
 
 		if (goalList.size() > 0)
-			Debug.print(goalList.get(0));
+			Debug.print(goalList);
 		else
 			Debug.print("No goal could be produced.");
 
@@ -115,6 +116,10 @@ public class Interpreter {
 	 * red box should be on top of the floor.
 	 */
 	private boolean relativeChild = false, moveRelation = false;
+	
+	private String quantifier;
+	
+	private List<Relation> secondRelations = new ArrayList<>();
 
 	/**
 	 * Recursively walks the given tree, generating a list of relations that
@@ -132,6 +137,8 @@ public class Interpreter {
 	public Object walkTree(Term term) throws InterpretationException {
 		Relation relation, finalRelation;
 		Entity entity;
+		List<Entity> possibleEntities;
+		List<Relation> relationList;
 
 		if (term instanceof CompoundTerm) {
 			CompoundTerm cterm = (CompoundTerm) term;
@@ -160,30 +167,48 @@ public class Interpreter {
 				 * always a Relation.
 				 */
 				Debug.print("saw move");
-				entity = (Entity) walkTree(cterm.args[0]);
+				possibleEntities = (List<Entity>) walkTree(cterm.args[0]);
 				moveRelation = true;
-				relation = (Relation) walkTree(cterm.args[1]);
+				relationList = (List<Relation>) walkTree(cterm.args[1]);
 				moveRelation = false;
-				if (Relation.matchEntityAndRelationExact(entity, relation, world).isEmpty()) {
-					if (!Relation.matchEntityAndRelation(entity, relation, world).isEmpty()) {
-						throw new InterpretationException("No need to do more, world is already matching relation.");
+				Debug.print(relations);
+				for (Entity pentity : possibleEntities) {
+					for (Relation arelation : relationList) {
+						if (Relation.matchEntityAndRelationExact(pentity, arelation, world).isEmpty()) {
+							if (!Relation.matchEntityAndRelation(pentity, arelation, world).isEmpty()) {
+								throw new InterpretationException("No need to do more, world is already matching relation.");
+							}
+						}
+
+						if (quantifier.equals("any")) {
+							relations = new ArrayList<Relation>();
+						}
+						
+						finalRelation = new Relation(pentity, arelation.getEntityB(), arelation.getType());
+						relations.add(finalRelation);
+						
+						for (Relation srelation : secondRelations) {
+							if (srelation.getEntityA().equalsExact(finalRelation.getEntityB())) {
+								relations.add(srelation);
+							}
+						}
+						
+						/*
+						 * Here we check if this relation makes sense in the world. This
+						 * check is done by another class, ConstraintCheck. No need to
+						 * clutter up our code with checking logic here.
+						 */
+						if (!ConstraintCheck.isValidRelations(relations)) {
+							throw new InterpretationException("The created relation " + relations + " don't match the rules of the world.");
+						}
+						
+						goalList.add(new Goal(relations));
 					}
 				}
 
-				finalRelation = new Relation(entity, relation.getEntityB(), relation.getType());
-				relations.add(finalRelation);
-
-				/*
-				 * Here we check if this relation makes sense in the world. This
-				 * check is done by another class, ConstraintCheck. No need to
-				 * clutter up our code with checking logic here.
-				 */
-				if (!ConstraintCheck.isValidRelations(relations)) {
-					throw new InterpretationException("The created relation " + relations + " don't match the rules of the world.");
-				}
-
-				Debug.print("MOVE: Added new relation to relations: " + finalRelation);
-				return finalRelation;
+//				Debug.print("MOVE: Added new relation to relations: " + finalRelation);
+				Debug.print("Returning from move");
+				return null;
 			case "relative":
 				/*
 				 * Relative has two children. The left child is always a
@@ -195,8 +220,20 @@ public class Interpreter {
 				Debug.print("saw relative");
 				Relation.TYPE relationType = (Relation.TYPE) walkTree(cterm.args[0]);
 				relativeChild = true;
-				entity = (Entity) walkTree(cterm.args[1]);
-				return new Relation(new Entity(), entity, relationType);
+				
+				possibleEntities = (List<Entity>) walkTree(cterm.args[1]);
+				
+				relationList = new ArrayList<Relation>();
+				if (quantifier.equals("the")) {
+					relationList.add(new Relation(new Entity(), possibleEntities.get(0), relationType));
+				} else if (quantifier.equals("any")) {
+					for (Entity someEntity : possibleEntities) {
+						relationList.add(new Relation(new Entity(), someEntity, relationType));
+					}
+				}
+				Debug.print(relationList);
+				Debug.print("Returning from relative");
+				return relationList;
 			case "basic_entity":
 				/*
 				 * Basic_entity has two children. The left child is always a
@@ -206,46 +243,79 @@ public class Interpreter {
 				 * an Entity.
 				 */
 				Debug.print("saw basic_entity");
-				walkTree(cterm.args[0]);
-				entity = (Entity) walkTree(cterm.args[1]);
-				return entity;
+				quantifier = (String) walkTree(cterm.args[0]);
+				Object anObject = walkTree(cterm.args[1]);
+				Debug.print("Returning from basic_entity");
+				return anObject;
 			case "relative_entity":
 				/*
 				 * Relative_entity has three children. The left child is always
 				 * a quantifier.
 				 * 
-				 * The middle child is always relative. For us, this means it is
-				 * a Relation.
-				 * 
-				 * The right child is always an object. For us, this means it is
+				 * The middle child is always an object. For us, this means it is
 				 * an Entity.
+				 * 
+				 * The right child is always relative. For us, this means it is
+				 * a Relation.
 				 */
 				Debug.print("saw relative_entity");
-				walkTree(cterm.args[0]);
-				givenRelation = relation = (Relation) walkTree(cterm.args[2]);
-				entity = (Entity) walkTree(cterm.args[1]);
-				finalRelation = new Relation(entity, relation.getEntityB(), relation.getType());
-
-				/*
-				 * If this relative_entity has been reached from the right child
-				 * of "move" and is a child of relative, we should save this
-				 * relation.
-				 */
-				if (relativeChild && moveRelation) {
-					Debug.print("relativeChild && moveRelation: Success! Added " + finalRelation + " to relations.");
-					relations.add(finalRelation);
+				quantifier = (String) walkTree(cterm.args[0]);
+				relationList = (List<Relation>) walkTree(cterm.args[2]);
+				givenRelation = relation = (Relation) relationList.get(0);
+				
+				Debug.print("Relations " + relationList);
+				possibleEntities = (List<Entity>) walkTree(cterm.args[1]);
+				entity = possibleEntities.get(0); // TODO?????
+				if (quantifier.equals("the")) {
+					finalRelation = new Relation(entity, relation.getEntityB(), relation.getType());
+					
+					/*
+					 * If this relative_entity has been reached from the right child
+					 * of "move" and is a child of relative, we should save this
+					 * relation.
+					 */
+					if (relativeChild && moveRelation) {
+						Debug.print("relativeChild && moveRelation: Success! Added " + finalRelation + " to relations.");
+						relations.add(finalRelation);
+					}
+					
+					/*
+					 * Here we check if this relation makes sense in the world. This
+					 * check is done by another class, ConstraintCheck. No need to
+					 * clutter up our code with checking logic here.
+					 */
+					if (!ConstraintCheck.isValidRelations(relations)) {
+						throw new InterpretationException("The created relation " + relations + " don't match the rules of the world.");
+					}
+				} else if (quantifier.equals("any")) {
+					for (Entity pentity : possibleEntities) {
+						for (Relation arelation : relationList) {
+							finalRelation = new Relation(pentity, arelation.getEntityB(), arelation.getType());
+							
+							/*
+							 * If this relative_entity has been reached from the right child
+							 * of "move" and is a child of relative, we should save this
+							 * relation.
+							 */
+							if (relativeChild && moveRelation) {
+								Debug.print("relativeChild && moveRelation: Success! Added " + finalRelation + " to relations.");
+								secondRelations.add(finalRelation);
+							}
+							
+							/*
+							 * Here we check if this relation makes sense in the world. This
+							 * check is done by another class, ConstraintCheck. No need to
+							 * clutter up our code with checking logic here.
+							 */
+							if (!ConstraintCheck.isValidRelations(secondRelations)) {
+								throw new InterpretationException("The created relation " + secondRelations + " don't match the rules of the world.");
+							}
+						}
+					}
 				}
-
-				/*
-				 * Here we check if this relation makes sense in the world. This
-				 * check is done by another class, ConstraintCheck. No need to
-				 * clutter up our code with checking logic here.
-				 */
-				if (!ConstraintCheck.isValidRelations(relations))
-					throw new InterpretationException("The created relation " + relations + " don't match the rules of the world.");
-
 				relativeChild = false;
-				return finalRelation.getEntityA();
+				Debug.print("Returning from relative_entity");
+				return possibleEntities;
 			case "object":
 				/*
 				 * Object always has three children. The left child is the size
@@ -269,9 +339,9 @@ public class Interpreter {
 				 * Check if any entity matched the given relation, and act
 				 * accordingly.
 				 */
+//				Debug.print(givenRelation);
 				List<Entity> matchedEntities = Relation.matchEntityAndRelation(entity, givenRelation, world);
-				Entity returnEntity = entity;
-				Debug.print(returnEntity);
+				Object returnEntity;
 				if (matchedEntities.isEmpty()) {
 					if (givenRelation == null) {
 						throw new InterpretationException("[" + entity + "] does not match anything in the world.");
@@ -281,16 +351,14 @@ public class Interpreter {
 							throw new InterpretationException("[" + entity + "] does not match anything in the world.");
 						}
 					}
-					givenRelation.setEntityA(entity);
-					// } else if (matchedEntities.size() > 1) {
-					// // TODO: Handle Ambiguity Error in some fancy way.
 				} else {
-					returnEntity = matchedEntities.get(0);
+					returnEntity = matchedEntities;
 				}
-				Debug.print(returnEntity);
+				Debug.print(matchedEntities);
 
 				Debug.print("Success: [" + entity + "] exists in the world as [" + returnEntity + "].");
 				givenRelation = null; // Reset the givenRelation value.
+				Debug.print("Returning from object");
 				return returnEntity;
 			}
 		} else if (term instanceof AtomTerm) {
@@ -298,22 +366,24 @@ public class Interpreter {
 			switch (aterm.value) {
 			case "floor":
 				Debug.print("saw floor");
-				return new Entity(Entity.FORM.FLOOR, Entity.SIZE.UNDEFINED, Entity.COLOR.UNDEFINED);
+				List<Entity> tempList = new ArrayList<Entity>();
+				tempList.add(new Entity(Entity.FORM.FLOOR, Entity.SIZE.UNDEFINED, Entity.COLOR.UNDEFINED));
+				return tempList;
 			case "the":
 				Debug.print("saw the");
 				// "The" means that there should only be one item that matches
 				// the description. If more than one item matches the
 				// description, we should ask clarification question(s):
-				break;
+				return "the";
 			case "any":
 				Debug.print("saw any");
 				// "Any" should work as this currently does.
-				break;
+				return "any";
 			case "all":
 				Debug.print("saw all");
 				// "All" should create one relation for each item that matches
 				// the description.
-				break;
+				return "all";
 			}
 			// This static method handles the parsing of type values.
 			return Relation.parseType(aterm.value);

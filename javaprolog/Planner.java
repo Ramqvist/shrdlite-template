@@ -20,14 +20,16 @@ public class Planner {
 		State startState = new State(world, relations);
 		queue.add(new Plan(startState, new ArrayList<Action>()));
 
+		if (!ConstraintCheck.isValidWorld(world)) {
+			Debug.print("World is not valid!");
+			return null;
+		}
+		
 		boolean reachedGoal = false;
 		Plan goalPlan = null;
-		int count = 0; // Used to count iterations.
 		// Hey I didn't even know Java HAD labels!
-		outerloop:
 		while (true) {
 			Plan plan = queue.poll();
-			count++;
 			reachedGoal = hasReachedGoal(goal, plan.currentState);
 			if (reachedGoal) {
 				Debug.print(plan + " reached the goal state " + goal);
@@ -48,7 +50,6 @@ public class Planner {
 			}
 
 			for (Action newAction : possibleActions) {
-				count++;
 				List<Action> actionList = new ArrayList<Action>();
 				for (Action c : plan.actions) {
 					actionList.add(c);
@@ -67,10 +68,8 @@ public class Planner {
 					}
 					
 					if (hasReachedGoal(goal, p.currentState)) {
-						goalPlan = p;
-						// This is ugly. Really ugly. But it optimizes heavily, reducing iteration count by like 80%... Also it makes sense.
-						// TODO: Refactor Planner break stuff.
-						break outerloop;
+						Debug.print(p.actions);
+						return p;
 					}
 				} catch (Exception e) {
 					Debug.print(e);
@@ -78,7 +77,7 @@ public class Planner {
 				}
 			}
 		}
-		Debug.print(count);
+//		Debug.print(queue);
 		return goalPlan;
 	}
 	

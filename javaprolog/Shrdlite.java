@@ -69,11 +69,13 @@ public class Shrdlite {
 					Debug.print("Plan solved in: " + elapsed + " ms.");
 				}
 //				for (Plan p : plans) {
-				List<String> actionStrings = new ArrayList<>();
-				for (Action action : plans.get(0).actions) {
-					actionStrings.add(action.toString());
-				}
-				result.put("plan", actionStrings);
+					List<String> actionStrings = new ArrayList<>();
+					for (Action action : plans.get(0).actions) {
+						actionStrings.add(action.toString());
+					}
+//					Debug.print(p);
+					// TODO: We need to make sure to pick the best plan somehow.
+					result.put("plan", actionStrings);
 //				}
 				if (plans.isEmpty()) {
 					result.put("output", "Planning error!");
