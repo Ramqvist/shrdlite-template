@@ -40,16 +40,18 @@ public class Planner {
 				if (plan.currentState.isHolding()) {
 					possibleActions.add(new Action(Action.COMMAND.DROP, i));
 				} else {
-					// Small optimization. No need to try to pick something from
+					// Big optimization. No need to try to pick something from
 					// an empty column.
-					if (!plan.currentState.world.get(i).isEmpty())
+					if (!plan.currentState.world.get(i).isEmpty()) {
 						possibleActions.add(new Action(Action.COMMAND.PICK, i));
+					}
 				}
 			}
-
+			
+			// Take all possible actions.
 			for (Action newAction : possibleActions) {
 				count++;
-				List<Action> actionList = new ArrayList<Action>();
+				List<Action> actionList = new ArrayList<Action>(plan.actions.size() + 1);
 				for (Action c : plan.actions) {
 					actionList.add(c);
 				}
@@ -69,7 +71,7 @@ public class Planner {
 					if (hasReachedGoal(goal, p.currentState)) {
 						goalPlan = p;
 						// This is ugly. Really ugly. But it optimizes heavily, reducing iteration count by like 80%... Also it makes sense.
-						// TODO: Refactor Planner break stuff.
+						// TODO: Refactor Planner break stuff or return goalPlan
 						break outerloop;
 					}
 				} catch (Exception e) {

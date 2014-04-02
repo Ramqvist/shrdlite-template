@@ -15,10 +15,10 @@ public class ConstraintCheckTest {
 	public static void main(String[] args) {
 
 		testBallInBox();
-//		testBallCannotSupport();
-//		testSmallCannotSupportLarge();
-//		testBoxCannotContainPyrPlank();
-//		testBoxOnlySupportedbyTablesPlanks();
+		testBallCannotSupport();
+		testSmallCannotSupportLarge();
+		testBoxCannotContainPyrPlank();
+		testBoxOnlySupportedbyTablesPlanks();
 	}
 	
 	/**
