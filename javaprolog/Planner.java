@@ -58,15 +58,19 @@ public class Planner {
 				try {
 					Plan p = new Plan(plan.currentState.takeAction(newAction), actionList);
 					
-					if (ConstraintCheck.isValidWorld(p.currentState.world)) {
+					if (newAction.command == Action.COMMAND.DROP) {
+						if (ConstraintCheck.isValidColumn(p.currentState.world.get(newAction.column))) { 
+							queue.add(p);
+						}
+					} else {
 						queue.add(p);
 					}
 					
 					if (hasReachedGoal(goal, p.currentState)) {
 						goalPlan = p;
-						// This is ugly. Really ugly. But it optimizes heavily, reducing iterationcount by like 80%... Also it makes sense.
+						// This is ugly. Really ugly. But it optimizes heavily, reducing iteration count by like 80%... Also it makes sense.
 						// TODO: Refactor Planner break stuff.
-						break outerloop; 
+						break outerloop;
 					}
 				} catch (Exception e) {
 					Debug.print(e);
