@@ -13,7 +13,7 @@ import java.util.List;
     All objects must be supported by something. 	(SKIP)
     The arm can only hold one object at the time. 	(SKIP)
     The arm can only pick up free objects. 			(SKIP)
-    Objects are “in” boxes, but “on” other objects.
+    Objects are “in” boxes, but “on” other objects. (SKIP)
     Balls must be in boxes or on the floor, otherwise they roll away.
     Balls cannot support anything.
     Small objects cannot support large objects.
@@ -28,7 +28,8 @@ public class ConstraintCheck {
 	public static void main(String[] args) {
 
 		// TEST BALL CANNOT SUPPORT
-		testBallCannotSupport();
+//		testBallCannotSupport();
+		testSmallCannotSupportLarge();
 	}
 
 	private static void testBallCannotSupport() {
@@ -39,20 +40,38 @@ public class ConstraintCheck {
 		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
 
 		if (!isValidColumn(entityList)) {
-			System.out.println("Yakshemaish! GREAT SUCCESS!!!");
+			entityList = new ArrayList<Entity>();
+			entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+			entityList.add(new Entity(Entity.FORM.BALL, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+			if (isValidColumn(entityList)) {
+				System.out.println("Test testBallCannotSupport() Passed");
+			} else {
+				System.err.println("Test testBallCannotSupport() Failed");
+			}
 		} else {
-			System.err.println("TEST BALL CANNOT SUPPORT FAILED");
+			System.err.println("Test testBallCannotSupport() Failed");
 		}
-
-		entityList = new ArrayList<Entity>();
+	}
+	
+	// Small objects cannot support large objects.
+	private static void testSmallCannotSupportLarge() {
+		List<Entity> entityList = new ArrayList<Entity>();
 		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
-		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
-		entityList.add(new Entity(Entity.FORM.BALL, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+		entityList.add(new Entity(Entity.FORM.PYRAMID, Entity.SIZE.SMALL, Entity.COLOR.BLACK));
 
 		if (isValidColumn(entityList)) {
-			System.out.println("Yakshemaish! GREAT SUCCESS!!!");
+			
+			entityList = new ArrayList<Entity>();
+			entityList.add(new Entity(Entity.FORM.PLANK, Entity.SIZE.SMALL, Entity.COLOR.BLACK));
+			entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+			
+			if (!isValidColumn(entityList)) {
+				System.out.println("Test testSmallCannotSupportLarge() Passed");
+			} else {
+				System.err.println("Test testSmallCannotSupportLarge() Failed");
+			}
 		} else {
-			System.err.println("TEST BALL CANNOT SUPPORT FAILED");
+			System.err.println("Test testSmallCannotSupportLarge() Failed");
 		}
 	}
 
@@ -68,13 +87,25 @@ public class ConstraintCheck {
 		if (entityList.isEmpty()) {
 			return true;
 		}
+		//TODO: Merge for loops.
+		
+		//Balls must be in boxes or on the floor, otherwise they roll away.
+		for (int i = 0; i < entityList.size(); i++) {
+			Entity e = entityList.get(i);
+			if (e.getForm() == Entity.FORM.BALL && i != 0 && entityList.get(i-1).getForm() != Entity.FORM.BOX) {
+				return false;
+			}
+		}
+		
 		// If Any ball is NOT the last Entity, then the Column is not Valid!
+		// (Balls cannot support anything)
 		for (int i = 0; i < entityList.size(); i++) {
 			Entity e = entityList.get(i);
 			if (e.getForm() == Entity.FORM.BALL && i + 1 != entityList.size()) {
 				return false;
 			}
 		}
+		
 		// Small objects cannot support large objects.
 		boolean previousIsSmall = false;
 		for (int i = 0; i < entityList.size(); i++) {
@@ -84,7 +115,34 @@ public class ConstraintCheck {
 			}
 			previousIsSmall = e.getSize() == Entity.SIZE.SMALL;
 		}
-
+		
+		//Boxes cannot contain pyramids or planks of the same size. 
+		for (int i = 0; i < entityList.size(); i++) {
+			Entity e = entityList.get(i);
+			if(e.getForm() == Entity.FORM.BOX && e.getSize() == Entity.SIZE.LARGE && i != entityList.size() - 1) {
+				Entity next = entityList.get(i+1);
+				if(next.getSize() != Entity.SIZE.SMALL) {
+					return false;
+				}
+			}
+		}
+		
+		//Boxes can only be supported by tables or planks of the same size, but large boxes can also be supported by large bricks.
+		for (int i = 0; i < entityList.size(); i++) {
+			Entity e = entityList.get(i);
+			if(i != 0 && e.getForm() == Entity.FORM.BOX) {
+				Entity previous = entityList.get(i);
+				if (previous.getForm() == Entity.FORM.TABLE && previous.getForm() == Entity.FORM.PLANK) {
+					//..of the same size
+					if(e.getSize() != previous.getSize()) {
+						return false;
+					}
+				} else {
+					//Boxes can only be supported by tables or planks.
+					return false;
+				}
+			}
+		}
 		return true;
 	}
 
