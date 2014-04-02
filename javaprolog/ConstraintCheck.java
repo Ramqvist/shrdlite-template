@@ -1,8 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
 
-import Entity.SIZE;
-
 /**
  * Class for checking constraints.
  * <p>
@@ -30,7 +28,8 @@ public class ConstraintCheck {
 	public static void main(String[] args) {
 
 		// TEST BALL CANNOT SUPPORT
-		testBallCannotSupport();
+//		testBallCannotSupport();
+		testSmallCannotSupportLarge();
 	}
 
 	private static void testBallCannotSupport() {
@@ -41,20 +40,38 @@ public class ConstraintCheck {
 		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
 
 		if (!isValidColumn(entityList)) {
-			System.out.println("Yakshemaish! GREAT SUCCESS!!!");
+			entityList = new ArrayList<Entity>();
+			entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+			entityList.add(new Entity(Entity.FORM.BALL, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+			if (isValidColumn(entityList)) {
+				System.out.println("Test testBallCannotSupport() Passed");
+			} else {
+				System.err.println("Test testBallCannotSupport() Failed");
+			}
 		} else {
-			System.err.println("TEST BALL CANNOT SUPPORT FAILED");
+			System.err.println("Test testBallCannotSupport() Failed");
 		}
-
-		entityList = new ArrayList<Entity>();
+	}
+	
+	// Small objects cannot support large objects.
+	private static void testSmallCannotSupportLarge() {
+		List<Entity> entityList = new ArrayList<Entity>();
 		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
-		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
-		entityList.add(new Entity(Entity.FORM.BALL, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+		entityList.add(new Entity(Entity.FORM.PYRAMID, Entity.SIZE.SMALL, Entity.COLOR.BLACK));
 
 		if (isValidColumn(entityList)) {
-			System.out.println("Yakshemaish! GREAT SUCCESS!!!");
+			
+			entityList = new ArrayList<Entity>();
+			entityList.add(new Entity(Entity.FORM.PLANK, Entity.SIZE.SMALL, Entity.COLOR.BLACK));
+			entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+			
+			if (!isValidColumn(entityList)) {
+				System.out.println("Test testSmallCannotSupportLarge() Passed");
+			} else {
+				System.err.println("Test testSmallCannotSupportLarge() Failed");
+			}
 		} else {
-			System.err.println("TEST BALL CANNOT SUPPORT FAILED");
+			System.err.println("Test testSmallCannotSupportLarge() Failed");
 		}
 	}
 
@@ -104,7 +121,7 @@ public class ConstraintCheck {
 			Entity e = entityList.get(i);
 			if(e.getForm() == Entity.FORM.BOX && e.getSize() == Entity.SIZE.LARGE && i != entityList.size() - 1) {
 				Entity next = entityList.get(i+1);
-				if(next.getSize() == Entity.SIZE.SMALL) {
+				if(next.getSize() != Entity.SIZE.SMALL) {
 					return false;
 				}
 			}
