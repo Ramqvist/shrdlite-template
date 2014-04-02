@@ -78,7 +78,7 @@ public class ConstraintCheck {
 		for (int i = 0; i < entityList.size(); i++) {
 			Entity e = entityList.get(i);
 			if(i != 0 && e.getForm() == Entity.FORM.BOX) {
-				Entity previous = entityList.get(i);
+				Entity previous = entityList.get(i-1);
 				if (previous.getForm() == Entity.FORM.TABLE && previous.getForm() == Entity.FORM.PLANK) {
 					//..of the same size
 					if(e.getSize() != previous.getSize()) {

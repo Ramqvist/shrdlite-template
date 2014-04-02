@@ -58,5 +58,4 @@ public class ConstraintCheckTest {
 		}
 	}
 	
-	private static void test
 }
