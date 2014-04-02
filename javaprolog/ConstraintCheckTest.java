@@ -10,15 +10,38 @@ import java.util.List;
 public class ConstraintCheckTest {
 	
 	/**
-	 * Method to test ConstraintCheck. TODO: Make JUNIT Test instead!
+	 * Method to run all tests for ConstraintCheck. TODO: Make JUNIT Test instead!
 	 */
 	public static void main(String[] args) {
 
-		// TEST BALL CANNOT SUPPORT
+		testBallInBox();
 //		testBallCannotSupport();
 //		testSmallCannotSupportLarge();
 //		testBoxCannotContainPyrPlank();
-		testBoxOnlySupportedbyTablesPlanks();
+//		testBoxOnlySupportedbyTablesPlanks();
+	}
+	
+	/**
+	 * Balls must be in boxes or on the floor, otherwise they roll away.
+	 */
+	private static void testBallInBox() {
+		List<Entity> entityList = new ArrayList<Entity>();
+		entityList.add(new Entity(Entity.FORM.PLANK, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+		entityList.add(new Entity(Entity.FORM.BALL, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+
+		if (ConstraintCheck.isValidColumn(entityList)) {
+			entityList = new ArrayList<Entity>();
+			entityList.add(new Entity(Entity.FORM.BALL, Entity.SIZE.SMALL, Entity.COLOR.BLACK));
+			entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+			if (!ConstraintCheck.isValidColumn(entityList)) {
+				System.out.println("Test testBoxOnlySupportedbyTablesPlanks() Passed");
+			} else {
+				System.err.println("Test testBoxOnlySupportedbyTablesPlanks() Failed 2");
+			}
+		} else {
+			System.err.println("Test testBoxOnlySupportedbyTablesPlanks() Failed 1");
+		}
 	}
 
 	
