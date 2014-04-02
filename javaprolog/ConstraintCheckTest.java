@@ -1,7 +1,12 @@
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Tests {@link ConstraintCheck#isValidColumn(List)} if it correct.
+ * 
+ * @author Erik
+ *
+ */
 public class ConstraintCheckTest {
 	
 	/**
@@ -12,9 +17,11 @@ public class ConstraintCheckTest {
 		// TEST BALL CANNOT SUPPORT
 //		testBallCannotSupport();
 //		testSmallCannotSupportLarge();
-		testBallCannotSupport();
+		testBoxCannotContainPyrPlank();
 	}
 
+	
+	//Balls cannot support anything
 	private static void testBallCannotSupport() {
 		List<Entity> entityList = new ArrayList<Entity>();
 		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
@@ -56,6 +63,29 @@ public class ConstraintCheckTest {
 		} else {
 			System.err.println("Test testSmallCannotSupportLarge() Failed");
 		}
+	}
+	
+
+	//Boxes cannot contain pyramids or planks of the same size. 
+	private static void testBoxCannotContainPyrPlank() {
+		List<Entity> entityList = new ArrayList<Entity>();
+//		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+//		entityList.add(new Entity(Entity.FORM.PYRAMID, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+//
+//		if (!ConstraintCheck.isValidColumn(entityList)) {
+			entityList = new ArrayList<Entity>();
+			entityList.add(new Entity(Entity.FORM.PLANK, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+			entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+			entityList.add(new Entity(Entity.FORM.PLANK, Entity.SIZE.SMALL, Entity.COLOR.BLACK));
+			
+			if (ConstraintCheck.isValidColumn(entityList)) {
+				System.out.println("Test testBoxCannotContainPyrPlank() Passed");
+			} else {
+				System.err.println("Test testBoxCannotContainPyrPlank() Failed");
+			}
+//		} else {
+//			System.err.println("Test testBoxCannotContainPyrPlank() Failed");
+//		}
 	}
 	
 }

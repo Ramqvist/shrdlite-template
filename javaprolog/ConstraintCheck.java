@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,10 +65,15 @@ public class ConstraintCheck {
 		//Boxes cannot contain pyramids or planks of the same size. 
 		for (int i = 0; i < entityList.size(); i++) {
 			Entity e = entityList.get(i);
-			if(e.getForm() == Entity.FORM.BOX && e.getSize() == Entity.SIZE.LARGE && i != entityList.size() - 1) {
+			if(e.getForm() == Entity.FORM.BOX && i != entityList.size() - 1) {
 				Entity next = entityList.get(i+1);
-				if(next.getSize() != Entity.SIZE.SMALL) {
-					return false;
+				if(next.getForm() == Entity.FORM.PYRAMID || next.getForm() == Entity.FORM.PLANK) {
+					if(e.getSize() == Entity.SIZE.LARGE && next.getSize() == Entity.SIZE.LARGE) {
+						return false;
+					}
+					if(e.getSize() == Entity.SIZE.SMALL) {
+						return false;
+					}
 				}
 			}
 		}
@@ -79,7 +83,7 @@ public class ConstraintCheck {
 			Entity e = entityList.get(i);
 			if(i != 0 && e.getForm() == Entity.FORM.BOX) {
 				Entity previous = entityList.get(i-1);
-				if (previous.getForm() == Entity.FORM.TABLE && previous.getForm() == Entity.FORM.PLANK) {
+				if (previous.getForm() == Entity.FORM.TABLE || previous.getForm() == Entity.FORM.PLANK) {
 					//..of the same size
 					if(e.getSize() != previous.getSize()) {
 						return false;
