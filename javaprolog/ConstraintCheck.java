@@ -138,9 +138,9 @@ public class ConstraintCheck {
 						return false;
 					}
 				}
-			} else if (relation.getType() == Relation.TYPE.ABOVE || relation.getType() == Relation.TYPE.ON_TOP_OF) {
+			} else if (relation.getType() == Relation.TYPE.ON_TOP_OF) {
 				/*
-				 * Checking the ABOVE and ON_TOP_OF relations. 
+				 * Checking the ON_TOP_OF relations. 
 				 */
 				
 				// Balls cannot support anything.
@@ -155,34 +155,24 @@ public class ConstraintCheck {
 				
 				// Boxes can only be supported by tables or planks of the same size, but large boxes can also be supported by large bricks.				
 				if (relation.getEntityA().getForm() == Entity.FORM.BOX) {
-					if (relation.getEntityA().getSize() == Entity.SIZE.LARGE) {
-						if (relation.getEntityB().getSize() == Entity.SIZE.LARGE) {
+					if (relation.getEntityB().getForm() != Entity.FORM.FLOOR) {
+						if (relation.getEntityA().getSize() == Entity.SIZE.LARGE) {
+							if (relation.getEntityB().getSize() == Entity.SIZE.LARGE) {
+								if (relation.getEntityB().getForm() != Entity.FORM.BRICK && relation.getEntityB().getForm() != Entity.FORM.TABLE && relation.getEntityB().getForm() != Entity.FORM.PLANK) {
+									Debug.print("fail fail fail");
+									return false;
+								}
+							}
+						} else {
+							// If the box is small it cannot be supported by a small brick.
+							if (relation.getEntityB().getSize() == Entity.SIZE.SMALL && relation.getEntityB().getForm() == Entity.FORM.BRICK) {
+								return false;
+							}
+							
 							if (relation.getEntityB().getForm() != Entity.FORM.BRICK && relation.getEntityB().getForm() != Entity.FORM.TABLE && relation.getEntityB().getForm() != Entity.FORM.PLANK) {
-								Debug.print("fail fail fail");
-								return false;
-							}
-						} else {
-							// If the ball is not on the floor...
-							if (relation.getType() == Relation.TYPE.ON_TOP_OF && relation.getEntityB().getForm() != Entity.FORM.FLOOR) {
-								Debug.print("ball not on floor!");
 								return false;
 							}
 						}
-					} else {
-						// If the box is small it cannot be supported by a small brick.
-						if (relation.getEntityB().getSize() == Entity.SIZE.SMALL && relation.getEntityB().getForm() == Entity.FORM.BRICK) {
-							return false;
-						}
-						
-						if (relation.getEntityB().getForm() != Entity.FORM.BRICK && relation.getEntityB().getForm() != Entity.FORM.TABLE && relation.getEntityB().getForm() != Entity.FORM.PLANK) {
-							return false;
-						} else {
-							// If the ball is not on the floor...
-							if (relation.getType() == Relation.TYPE.ON_TOP_OF && relation.getEntityB().getForm() != Entity.FORM.FLOOR) {
-								return false;
-							}
-						}
-						return false;
 					}
 				}
 				
