@@ -17,14 +17,17 @@ public class State {
 		this.relations = relations;
 	}
 
+	/**
+	 * Clone constructor.
+	 */
 	public State(State state) {
 		this.relations = new ArrayList<Relation>();
 		for (Relation r : state.relations) {
 			this.relations.add(r.copy());
 		}
-		this.world = new ArrayList<List<Entity>>();
+		this.world = new ArrayList<List<Entity>>(state.world.size());
 		for (List<Entity> entityList : state.world) {
-			List<Entity> l = new ArrayList<Entity>();
+			List<Entity> l = new ArrayList<Entity>(entityList.size());
 			for (Entity ent : entityList) {
 				l.add(ent);
 			}
@@ -35,6 +38,9 @@ public class State {
 		}
 	}
 
+	/**
+	 * Checks if the state has the given relation.
+	 */
 	public boolean exist(Relation r) {
 		return relations.contains(r);
 	}

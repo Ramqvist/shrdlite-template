@@ -10,14 +10,38 @@ import java.util.List;
 public class ConstraintCheckTest {
 	
 	/**
-	 * Method to test ConstraintCheck. TODO: Make JUNIT Test instead!
+	 * Method to run all tests for ConstraintCheck. TODO: Make JUNIT Test instead!
 	 */
 	public static void main(String[] args) {
 
-		// TEST BALL CANNOT SUPPORT
-//		testBallCannotSupport();
-//		testSmallCannotSupportLarge();
+		testBallInBox();
+		testBallCannotSupport();
+		testSmallCannotSupportLarge();
 		testBoxCannotContainPyrPlank();
+		testBoxOnlySupportedbyTablesPlanks();
+	}
+	
+	/**
+	 * Balls must be in boxes or on the floor, otherwise they roll away.
+	 */
+	private static void testBallInBox() {
+		List<Entity> entityList = new ArrayList<Entity>();
+		entityList.add(new Entity(Entity.FORM.PLANK, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+		entityList.add(new Entity(Entity.FORM.BALL, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+
+		if (ConstraintCheck.isValidColumn(entityList)) {
+			entityList = new ArrayList<Entity>();
+			entityList.add(new Entity(Entity.FORM.BALL, Entity.SIZE.SMALL, Entity.COLOR.BLACK));
+			entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+			if (!ConstraintCheck.isValidColumn(entityList)) {
+				System.out.println("Test testBoxOnlySupportedbyTablesPlanks() Passed");
+			} else {
+				System.err.println("Test testBoxOnlySupportedbyTablesPlanks() Failed 2");
+			}
+		} else {
+			System.err.println("Test testBoxOnlySupportedbyTablesPlanks() Failed 1");
+		}
 	}
 
 	
@@ -69,10 +93,10 @@ public class ConstraintCheckTest {
 	//Boxes cannot contain pyramids or planks of the same size. 
 	private static void testBoxCannotContainPyrPlank() {
 		List<Entity> entityList = new ArrayList<Entity>();
-//		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
-//		entityList.add(new Entity(Entity.FORM.PYRAMID, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
-//
-//		if (!ConstraintCheck.isValidColumn(entityList)) {
+		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+		entityList.add(new Entity(Entity.FORM.PYRAMID, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+
+		if (!ConstraintCheck.isValidColumn(entityList)) {
 			entityList = new ArrayList<Entity>();
 			entityList.add(new Entity(Entity.FORM.PLANK, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
 			entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
@@ -83,9 +107,33 @@ public class ConstraintCheckTest {
 			} else {
 				System.err.println("Test testBoxCannotContainPyrPlank() Failed");
 			}
-//		} else {
-//			System.err.println("Test testBoxCannotContainPyrPlank() Failed");
-//		}
+		} else {
+			System.err.println("Test testBoxCannotContainPyrPlank() Failed");
+		}
+	}
+	
+	/**
+	 * Boxes can only be supported by tables or planks of the same size, but large boxes can also be supported by large bricks.
+	 */
+	private static void testBoxOnlySupportedbyTablesPlanks() {
+		List<Entity> entityList = new ArrayList<Entity>();
+		entityList.add(new Entity(Entity.FORM.PLANK, Entity.SIZE.SMALL, Entity.COLOR.BLACK));
+		entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+
+		if (!ConstraintCheck.isValidColumn(entityList)) {
+			entityList = new ArrayList<Entity>();
+			entityList.add(new Entity(Entity.FORM.PLANK, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+			entityList.add(new Entity(Entity.FORM.BRICK, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
+			entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.SMALL, Entity.COLOR.BLACK));
+			entityList.add(new Entity(Entity.FORM.BALL, Entity.SIZE.SMALL, Entity.COLOR.BLACK));
+			if (ConstraintCheck.isValidColumn(entityList)) {
+				System.out.println("Test testBoxOnlySupportedbyTablesPlanks() Passed");
+			} else {
+				System.err.println("Test testBoxOnlySupportedbyTablesPlanks() Failed 2");
+			}
+		} else {
+			System.err.println("Test testBoxOnlySupportedbyTablesPlanks() Failed 1");
+		}
 	}
 	
 }
