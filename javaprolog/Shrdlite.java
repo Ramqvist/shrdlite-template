@@ -63,7 +63,10 @@ public class Shrdlite {
 				Planner planner = new Planner(interpreter.world);
 				List<Plan> plans = new ArrayList<Plan>();
 				for (Goal g : goals) {
+					long start = System.currentTimeMillis();
 					plans.add(planner.solve(g));
+					long elapsed = System.currentTimeMillis() - start;
+					Debug.print("Plan solved in: " + elapsed + " ms.");
 				}
 //				for (Plan p : plans) {
 				List<String> actionStrings = new ArrayList<>();
