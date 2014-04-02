@@ -100,16 +100,80 @@ public class ConstraintCheck {
 			return true;
 		}
 		for (Relation relation : relations) {
-			if (relation.getEntityA().getForm().equals(Entity.FORM.PLANK) || relation.getEntityA().getForm().equals(Entity.FORM.PYRAMID)) {
-				if (relation.getEntityA().getSize().equals(relation.getEntityB().getSize()))
-					// Boxes cannot contain planks or pyramids of the same size
-					// as the box.
+			if (relation.getType().equals(Relation.TYPE.INSIDE)) {
+				/*
+				 * Check the INSIDE relation type.
+				 */
+				
+				// Objects are only inside boxes.
+				if (relation.getEntityB().getForm() != Entity.FORM.BOX) {
 					return false;
-				else if (relation.getEntityB().getSize().equals(Entity.SIZE.SMALL)) {
-					if (relation.getEntityA().getSize().equals(Entity.SIZE.LARGE))
-						// I assume that a small box cannot contain large planks
-						// or pyramids?
+				}
+				
+				// Small boxes can only contain small items.
+				if (relation.getEntityB().getSize() == Entity.SIZE.SMALL) {
+					if (relation.getEntityA().getSize() != Entity.SIZE.SMALL) {
 						return false;
+					}
+				}
+				
+				if (relation.getEntityA().getForm() == Entity.FORM.PLANK || relation.getEntityA().getForm() == Entity.FORM.PYRAMID || relation.getEntityA().getForm() == Entity.FORM.BOX) {
+					if (relation.getEntityB().getSize() == Entity.SIZE.LARGE) {
+						// Boxes cannot contain planks or pyramids of the same size
+						// as the box.
+						if (relation.getEntityA().getSize() != Entity.SIZE.SMALL) {
+							return false;
+						}
+					} else {
+						return false;
+					}
+				}
+			} else if (relation.getType() == Relation.TYPE.ABOVE || relation.getType() == Relation.TYPE.ON_TOP_OF) {
+				/*
+				 * Checking the ABOVE and ON_TOP_OF relations. 
+				 */
+				
+				// Balls cannot support anything.
+				if (relation.getEntityB().getForm() == Entity.FORM.BALL) {
+					return false;
+				}
+
+				// Small objects cannot support large objects.
+				if (relation.getEntityA().getSize() == Entity.SIZE.LARGE && relation.getEntityB().getSize() == Entity.SIZE.SMALL) {
+					return false;
+				}
+				
+				// Boxes can only be supported by tables or planks of the same size, but large boxes can also be supported by large bricks.				
+				if (relation.getEntityA().getForm() == Entity.FORM.BOX) {
+					if (relation.getEntityA().getSize() == Entity.SIZE.LARGE) {
+						if (relation.getEntityB().getSize() == Entity.SIZE.LARGE) {
+							if (relation.getEntityB().getForm() != Entity.FORM.BRICK && relation.getEntityB().getForm() != Entity.FORM.TABLE && relation.getEntityB().getForm() != Entity.FORM.PLANK) {
+								Debug.print("fail fail fail");
+								return false;
+							}
+						} else {
+							// If the ball is not on the floor...
+							if (relation.getType() == Relation.TYPE.ON_TOP_OF && relation.getEntityB().getForm() != Entity.FORM.FLOOR) {
+								Debug.print("ball not on floor!");
+								return false;
+							}
+						}
+					} else {
+						// If the box is small it cannot be supported by a small brick.
+						if (relation.getEntityB().getSize() == Entity.SIZE.SMALL && relation.getEntityB().getForm() == Entity.FORM.BRICK) {
+							return false;
+						}
+						
+						if (relation.getEntityB().getForm() != Entity.FORM.BRICK && relation.getEntityB().getForm() != Entity.FORM.TABLE && relation.getEntityB().getForm() != Entity.FORM.PLANK) {
+							return false;
+						} else {
+							// If the ball is not on the floor...
+							if (relation.getType() == Relation.TYPE.ON_TOP_OF && relation.getEntityB().getForm() != Entity.FORM.FLOOR) {
+								return false;
+							}
+						}
+						return false;
+					}
 				}
 			}
 		}
