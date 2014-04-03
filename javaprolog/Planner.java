@@ -58,7 +58,7 @@ public class Planner {
 				}
 				actionList.add(newAction);
 				
-				if (actionList.size() > maxDepth) {
+				if (actionList.size() >= maxDepth) {
 					return null; // TODO Make nicer?
 				}
 				
