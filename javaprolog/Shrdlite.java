@@ -68,6 +68,7 @@ public class Shrdlite {
 				Planner planner = new Planner(interpreter.world);
 				List<Plan> plans = new ArrayList<Plan>();
 				int maxDepth = Integer.MAX_VALUE;
+				
 				for (Goal g : goals) {
 					long start = System.currentTimeMillis();
 					Plan aPlan = planner.solve(g, maxDepth);
@@ -78,16 +79,22 @@ public class Shrdlite {
 					long elapsed = System.currentTimeMillis() - start;
 					Debug.print("Plan solved in: " + elapsed + " ms.");
 				}
-//				for (Plan p : plans) {
-					List<String> actionStrings = new ArrayList<>();
-					Debug.print(plans);
-					for (Action action : plans.get(0).actions) {
-						actionStrings.add(action.toString());
+				
+				// TODO? Create one thread per planner?
+				List<String> actionStrings = new ArrayList<>();
+				Debug.print(plans);
+				List<Action> smallestPlan = plans.get(0).actions;
+				for(Plan p : plans) {
+					if(p.actions.size() < smallestPlan.size()) {
+						smallestPlan = p.actions;
 					}
-//					Debug.print(p);
-					// TODO: We need to make sure to pick the best plan somehow.
-					result.put("plan", actionStrings);
-//				}
+				}
+				
+				for (Action action: smallestPlan) {
+					actionStrings.add(action.toString());
+				}
+				result.put("plan", actionStrings);
+				
 				if (plans.isEmpty()) {
 					result.put("output", "Planning error!");
 				} else {

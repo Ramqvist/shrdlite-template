@@ -262,6 +262,12 @@ public class ConstraintCheck {
 		return true;
 	}
 
+	/**
+	 * For every column in the given world, checks if it is valid using isValidColumn(column).
+	 * 
+	 * @param world the world to check validity for.
+	 * @return true if the given world is valid, otherwise false.
+	 */
 	public static boolean isValidWorld(List<List<Entity>> world) {
 		for(List<Entity> column : world) {
 			if(!isValidColumn(column)) {

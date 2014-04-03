@@ -218,8 +218,13 @@ public class Relation {
 			// If no relation is given, we can match against any object.
 			Debug.print("No relation given, matching " + entity + " against all objects in the world.");
 			for (List<Entity> column : world) {
-				if (column.contains(entity))
-					matchedEntities.add(column.get(column.indexOf(entity)));
+				if (column.contains(entity)) {
+					for (Entity centity : column) {
+						if (centity.equals(entity)) {
+							matchedEntities.add(centity);
+						}
+					}
+				}
 			}
 		}
 		return matchedEntities;
