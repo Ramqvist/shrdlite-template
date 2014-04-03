@@ -36,6 +36,14 @@ public class Planner {
 				break;
 			}
 
+			/*
+			 * Optimization to add:
+			 * 
+			 * Check for cycles.
+			 * 
+			 * Find the object to move, prefer to pick from that column?
+			 */
+			
 			List<Action> possibleActions = new ArrayList<Action>();
 			for (int i = 0; i < world.size(); i++) {
 				// Small optimization. No point in dropping in the same location we last picked, or picking in the same location we last dropped.
@@ -62,10 +70,6 @@ public class Planner {
 				
 				if (actionList.size() >= maxDepth) {
 					return null; // TODO Make nicer?
-				}
-				
-				if (actionList.size() == 11) {
-					Debug.print(actionList);
 				}
 
 				try {
