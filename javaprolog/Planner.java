@@ -27,7 +27,6 @@ public class Planner {
 		
 		boolean reachedGoal = false;
 		Plan goalPlan = null;
-		// Hey I didn't even know Java HAD labels!
 		while (true) {
 			Plan plan = queue.poll();
 			reachedGoal = hasReachedGoal(goal, plan.currentState);
@@ -83,7 +82,6 @@ public class Planner {
 				}
 			}
 		}
-//		Debug.print(queue);
 		return goalPlan;
 	}
 	
