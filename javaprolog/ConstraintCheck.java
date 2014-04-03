@@ -33,6 +33,72 @@ public class ConstraintCheck {
 		if (entityList.isEmpty()) {
 			return true;
 		}
+		boolean previousIsSmall = false;
+		for (int i = 0; i < entityList.size(); i++) {
+			//Balls must be in boxes or on the floor, otherwise they roll away.
+			Entity e = entityList.get(i);
+			if (e.getForm() == Entity.FORM.BALL && i != 0 && entityList.get(i-1).getForm() != Entity.FORM.BOX) {
+				return false;
+			}
+
+			// If Any ball is NOT the last Entity, then the Column is not Valid!
+			// (Balls cannot support anything)
+			if (e.getForm() == Entity.FORM.BALL && i + 1 != entityList.size()) {
+				return false;
+			}
+
+			// Small objects cannot support large objects.
+			if (e.getSize() == Entity.SIZE.LARGE && previousIsSmall) {
+				return false;
+			}
+			previousIsSmall = e.getSize() == Entity.SIZE.SMALL;
+
+			//Boxes cannot contain pyramids or planks of the same size. 
+			if(e.getForm() == Entity.FORM.BOX && i != entityList.size() - 1) {
+				Entity next = entityList.get(i+1);
+				if(next.getForm() == Entity.FORM.PYRAMID || next.getForm() == Entity.FORM.PLANK) {
+					if(e.getSize() == Entity.SIZE.LARGE && next.getSize() == Entity.SIZE.LARGE) {
+						return false;
+					}
+					if(e.getSize() == Entity.SIZE.SMALL) {
+						return false;
+					}
+				}
+			}
+			
+			//Boxes can only be supported by tables or planks of the same size, but large boxes can also be supported by large bricks.
+			if(i != 0 && e.getForm() == Entity.FORM.BOX) {
+				Entity previous = entityList.get(i-1);
+				if (previous.getForm() == Entity.FORM.TABLE || previous.getForm() == Entity.FORM.PLANK) {
+					//..of the same size
+					if(e.getSize() == Entity.SIZE.LARGE && previous.getSize() == Entity.SIZE.SMALL) {
+						return false;
+					}
+				} else if (previous.getForm() == Entity.FORM.BRICK) {
+					if(previous.getSize() == Entity.SIZE.SMALL) {
+						return false;
+					}
+				} else {
+					//Boxes can only be supported by tables or planks.
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+
+	/**
+	 * The original isValidColumn without merged loops.
+	 */
+	public static boolean isValidColumnOriginal(List<Entity> entityList) {
+		if (entityList == null) {
+			System.err.println("NullPointer in isValidColumn!");
+			return false;
+		}
+		if (entityList.isEmpty()) {
+			return true;
+		}
 		//TODO: Merge for loops.
 		
 		//Balls must be in boxes or on the floor, otherwise they roll away.
@@ -100,6 +166,7 @@ public class ConstraintCheck {
 		}
 		return true;
 	}
+
 
 	/**
 	 * @return Checks if the Relations are valid under the constraints.
