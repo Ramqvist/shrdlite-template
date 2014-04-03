@@ -38,13 +38,16 @@ public class Planner {
 
 			List<Action> possibleActions = new ArrayList<Action>();
 			for (int i = 0; i < world.size(); i++) {
-				if (plan.currentState.isHolding()) {
-					possibleActions.add(new Action(Action.COMMAND.DROP, i));
-				} else {
-					// Big optimization. No need to try to pick something from
-					// an empty column.
-					if (!plan.currentState.world.get(i).isEmpty()) {
-						possibleActions.add(new Action(Action.COMMAND.PICK, i));
+				// Small optimization. No point in dropping in the same location we last picked, or picking in the same location we last dropped.
+				if (plan.actions.size() == 0 || plan.actions.get(plan.actions.size() - 1).column != i) {
+					if (plan.currentState.isHolding()) {
+						possibleActions.add(new Action(Action.COMMAND.DROP, i));
+					} else {
+						// Big optimization. No need to try to pick something from
+						// an empty column.
+						if (!plan.currentState.world.get(i).isEmpty()) {
+							possibleActions.add(new Action(Action.COMMAND.PICK, i));
+						}
 					}
 				}
 			}
@@ -61,6 +64,10 @@ public class Planner {
 					return null; // TODO Make nicer?
 				}
 				
+				if (actionList.size() == 11) {
+					Debug.print(actionList);
+				}
+
 				try {
 					Plan p = new Plan(plan.currentState.takeAction(newAction), actionList);
 					

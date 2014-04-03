@@ -183,19 +183,19 @@ public class Interpreter {
 				for (Entity pentity : possibleEntities) {
 					for (Relation arelation : relationList) {
 						if (Relation.matchEntityAndRelationExact(pentity, arelation, world).isEmpty()) {
+							Debug.print(arelation);
+							Debug.print(Relation.matchEntityAndRelation(pentity, arelation, world));
 							if (Relation.matchEntityAndRelation(pentity, arelation, world).isEmpty()) {
-								// throw new
-								// InterpretationException("No need to do more, world is already matching relation.");
 								if (quantifier.equals("any")) {
 									relations = new ArrayList<Relation>();
 								}
-
+								
 								finalRelation = new Relation(pentity, arelation.getEntityB(), arelation.getType());
-								relations.add(finalRelation);
-
+								addToRelations(finalRelation);
+								
 								for (Relation srelation : secondRelations) {
 									if (srelation.getEntityA().equalsExact(finalRelation.getEntityB())) {
-										relations.add(srelation);
+										addToRelations(srelation);
 									}
 								}
 								/*
@@ -205,7 +205,10 @@ public class Interpreter {
 								 * our code with checking logic here.
 								 */
 								if (ConstraintCheck.isValidRelations(relations)) {
-									goalList.add(new Goal(relations));
+									Debug.print("VALID!");
+									if (relations.size() > 0) {
+										goalList.add(new Goal(relations));
+									}
 								}
 							}
 						}
@@ -281,7 +284,7 @@ public class Interpreter {
 					 */
 					if (relativeChild && moveRelation) {
 						Debug.print("relativeChild && moveRelation: Success! Added " + finalRelation + " to relations.");
-						relations.add(finalRelation);
+						addToRelations(finalRelation);
 					}
 
 					/*
@@ -387,6 +390,18 @@ public class Interpreter {
 		}
 		Debug.print();
 		return null;
+	}
+
+	/**
+	 * This is called to add an item to the relation list. It makes sure that
+	 * there are no relations created where an object is related to itself.
+	 * 
+	 * @param relation The relation to (maybe) add.
+	 */
+	private void addToRelations(Relation relation) {
+		if (!relation.getEntityA().equalsExact(relation.getEntityB())) {
+			relations.add(relation);
+		}
 	}
 
 	/**
