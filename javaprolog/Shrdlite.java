@@ -81,9 +81,13 @@ public class Shrdlite {
 //				for (Plan p : plans) {
 					List<String> actionStrings = new ArrayList<>();
 					Debug.print(plans);
-					for (Action action : plans.get(0).actions) {
-						actionStrings.add(action.toString());
+					List<Action> smallestPlan = plans.get(0).actions;
+					for(Plan p : plans) {
+						if(p.actions.size() < smallestPlan.size()) {
+							smallestPlan = p.actions;
+						}
 					}
+					actionStrings.add(smallestPlan.toString());
 //					Debug.print(p);
 					// TODO: We need to make sure to pick the best plan somehow.
 					result.put("plan", actionStrings);
