@@ -175,34 +175,30 @@ public class Interpreter {
 				for (Entity pentity : possibleEntities) {
 					for (Relation arelation : relationList) {
 						if (Relation.matchEntityAndRelationExact(pentity, arelation, world).isEmpty()) {
-							if (!Relation.matchEntityAndRelation(pentity, arelation, world).isEmpty()) {
-								throw new InterpretationException("No need to do more, world is already matching relation.");
+							if (Relation.matchEntityAndRelation(pentity, arelation, world).isEmpty()) {
+//								throw new InterpretationException("No need to do more, world is already matching relation.");
+								if (quantifier.equals("any")) {
+									relations = new ArrayList<Relation>();
+								}
+								
+								finalRelation = new Relation(pentity, arelation.getEntityB(), arelation.getType());
+								relations.add(finalRelation);
+								
+								for (Relation srelation : secondRelations) {
+									if (srelation.getEntityA().equalsExact(finalRelation.getEntityB())) {
+										relations.add(srelation);
+									}
+								}
+								/*
+								 * Here we check if this relation makes sense in the world. This
+								 * check is done by another class, ConstraintCheck. No need to
+								 * clutter up our code with checking logic here.
+								 */
+								if (ConstraintCheck.isValidRelations(relations)) {
+									goalList.add(new Goal(relations));
+								}
 							}
 						}
-
-						if (quantifier.equals("any")) {
-							relations = new ArrayList<Relation>();
-						}
-						
-						finalRelation = new Relation(pentity, arelation.getEntityB(), arelation.getType());
-						relations.add(finalRelation);
-						
-						for (Relation srelation : secondRelations) {
-							if (srelation.getEntityA().equalsExact(finalRelation.getEntityB())) {
-								relations.add(srelation);
-							}
-						}
-						
-						/*
-						 * Here we check if this relation makes sense in the world. This
-						 * check is done by another class, ConstraintCheck. No need to
-						 * clutter up our code with checking logic here.
-						 */
-						if (!ConstraintCheck.isValidRelations(relations)) {
-							throw new InterpretationException("The created relation " + relations + " don't match the rules of the world.");
-						}
-						
-						goalList.add(new Goal(relations));
 					}
 				}
 
@@ -298,8 +294,12 @@ public class Interpreter {
 							 * relation.
 							 */
 							if (relativeChild && moveRelation) {
-								Debug.print("relativeChild && moveRelation: Success! Added " + finalRelation + " to relations.");
-								secondRelations.add(finalRelation);
+								if (ConstraintCheck.isValidRelations(secondRelations)) {
+									Debug.print("relativeChild && moveRelation: Success! Added " + finalRelation + " to relations.");
+//									throw new InterpretationException("The created relation " + secondRelations + " don't match the rules of the world.");
+									secondRelations.add(finalRelation);
+								}
+//								secondRelations.add(finalRelation);
 							}
 							
 							/*
@@ -307,9 +307,9 @@ public class Interpreter {
 							 * check is done by another class, ConstraintCheck. No need to
 							 * clutter up our code with checking logic here.
 							 */
-							if (!ConstraintCheck.isValidRelations(secondRelations)) {
-								throw new InterpretationException("The created relation " + secondRelations + " don't match the rules of the world.");
-							}
+//							if (!ConstraintCheck.isValidRelations(secondRelations)) {
+//								throw new InterpretationException("The created relation " + secondRelations + " don't match the rules of the world.");
+//							}
 						}
 					}
 				}

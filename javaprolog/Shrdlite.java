@@ -53,8 +53,13 @@ public class Shrdlite {
 					goals.add(goal);
 				}
 			}
-			result.put("goals", "");
-
+			
+			JSONArray goalArray = new JSONArray();
+			for (Goal g : goals) {
+				goalArray.add(g.toString());
+			}
+			result.put("goals", goalArray);
+			
 			if (goals.isEmpty()) {
 				result.put("output", "Interpretation error!");
 			} else if (goals.size() > 100) { // TODO: Temporarily changed so we can ignore ambiguity errors for now.
@@ -62,14 +67,20 @@ public class Shrdlite {
 			} else {
 				Planner planner = new Planner(interpreter.world);
 				List<Plan> plans = new ArrayList<Plan>();
+				int maxDepth = Integer.MAX_VALUE;
 				for (Goal g : goals) {
 					long start = System.currentTimeMillis();
-					plans.add(planner.solve(g));
+					Plan aPlan = planner.solve(g, maxDepth);
+					if (aPlan != null) {
+						maxDepth = aPlan.actions.size();
+						plans.add(aPlan);
+					}
 					long elapsed = System.currentTimeMillis() - start;
 					Debug.print("Plan solved in: " + elapsed + " ms.");
 				}
 //				for (Plan p : plans) {
 					List<String> actionStrings = new ArrayList<>();
+					Debug.print(plans);
 					for (Action action : plans.get(0).actions) {
 						actionStrings.add(action.toString());
 					}
