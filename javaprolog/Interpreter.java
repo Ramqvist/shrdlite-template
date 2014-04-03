@@ -54,7 +54,7 @@ public class Interpreter {
 
 	private List<Relation> relations;
 	private List<Goal> goalList;
-	
+
 	/**
 	 * Interprets the given tree, returning a (possibly empty) list of goals
 	 * that satisfy the "meaning" of the given tree.
@@ -75,7 +75,7 @@ public class Interpreter {
 
 		try {
 			walkTree(tree);
-//			goalList.add(new Goal(relations));
+			// goalList.add(new Goal(relations));
 		} catch (InterpretationException e) {
 			Debug.print(e);
 		}
@@ -116,9 +116,17 @@ public class Interpreter {
 	 * red box should be on top of the floor.
 	 */
 	private boolean relativeChild = false, moveRelation = false;
-	
+
+	/*
+	 * This is to handle the different quantifiers, like "any", "the" and "all".
+	 */
 	private String quantifier;
-	
+
+	/*
+	 * This is used to store the second relations, for example when parsing the
+	 * utterance "put a white ball in a box on the floor" this list will contain
+	 * the "ontop box floor" relation.
+	 */
 	private List<Relation> secondRelations = new ArrayList<>();
 
 	/**
@@ -176,23 +184,25 @@ public class Interpreter {
 					for (Relation arelation : relationList) {
 						if (Relation.matchEntityAndRelationExact(pentity, arelation, world).isEmpty()) {
 							if (Relation.matchEntityAndRelation(pentity, arelation, world).isEmpty()) {
-//								throw new InterpretationException("No need to do more, world is already matching relation.");
+								// throw new
+								// InterpretationException("No need to do more, world is already matching relation.");
 								if (quantifier.equals("any")) {
 									relations = new ArrayList<Relation>();
 								}
-								
+
 								finalRelation = new Relation(pentity, arelation.getEntityB(), arelation.getType());
 								relations.add(finalRelation);
-								
+
 								for (Relation srelation : secondRelations) {
 									if (srelation.getEntityA().equalsExact(finalRelation.getEntityB())) {
 										relations.add(srelation);
 									}
 								}
 								/*
-								 * Here we check if this relation makes sense in the world. This
-								 * check is done by another class, ConstraintCheck. No need to
-								 * clutter up our code with checking logic here.
+								 * Here we check if this relation makes sense in
+								 * the world. This check is done by another
+								 * class, ConstraintCheck. No need to clutter up
+								 * our code with checking logic here.
 								 */
 								if (ConstraintCheck.isValidRelations(relations)) {
 									goalList.add(new Goal(relations));
@@ -202,7 +212,6 @@ public class Interpreter {
 					}
 				}
 
-//				Debug.print("MOVE: Added new relation to relations: " + finalRelation);
 				Debug.print("Returning from move");
 				return null;
 			case "relative":
@@ -216,9 +225,9 @@ public class Interpreter {
 				Debug.print("saw relative");
 				Relation.TYPE relationType = (Relation.TYPE) walkTree(cterm.args[0]);
 				relativeChild = true;
-				
+
 				possibleEntities = (List<Entity>) walkTree(cterm.args[1]);
-				
+
 				relationList = new ArrayList<Relation>();
 				if (quantifier.equals("the")) {
 					relationList.add(new Relation(new Entity(), possibleEntities.get(0), relationType));
@@ -248,8 +257,8 @@ public class Interpreter {
 				 * Relative_entity has three children. The left child is always
 				 * a quantifier.
 				 * 
-				 * The middle child is always an object. For us, this means it is
-				 * an Entity.
+				 * The middle child is always an object. For us, this means it
+				 * is an Entity.
 				 * 
 				 * The right child is always relative. For us, this means it is
 				 * a Relation.
@@ -258,27 +267,27 @@ public class Interpreter {
 				quantifier = (String) walkTree(cterm.args[0]);
 				relationList = (List<Relation>) walkTree(cterm.args[2]);
 				givenRelation = relation = (Relation) relationList.get(0);
-				
+
 				Debug.print("Relations " + relationList);
 				possibleEntities = (List<Entity>) walkTree(cterm.args[1]);
 				entity = possibleEntities.get(0); // TODO?????
 				if (quantifier.equals("the")) {
 					finalRelation = new Relation(entity, relation.getEntityB(), relation.getType());
-					
+
 					/*
-					 * If this relative_entity has been reached from the right child
-					 * of "move" and is a child of relative, we should save this
-					 * relation.
+					 * If this relative_entity has been reached from the right
+					 * child of "move" and is a child of relative, we should
+					 * save this relation.
 					 */
 					if (relativeChild && moveRelation) {
 						Debug.print("relativeChild && moveRelation: Success! Added " + finalRelation + " to relations.");
 						relations.add(finalRelation);
 					}
-					
+
 					/*
-					 * Here we check if this relation makes sense in the world. This
-					 * check is done by another class, ConstraintCheck. No need to
-					 * clutter up our code with checking logic here.
+					 * Here we check if this relation makes sense in the world.
+					 * This check is done by another class, ConstraintCheck. No
+					 * need to clutter up our code with checking logic here.
 					 */
 					if (!ConstraintCheck.isValidRelations(relations)) {
 						throw new InterpretationException("The created relation " + relations + " don't match the rules of the world.");
@@ -287,29 +296,18 @@ public class Interpreter {
 					for (Entity pentity : possibleEntities) {
 						for (Relation arelation : relationList) {
 							finalRelation = new Relation(pentity, arelation.getEntityB(), arelation.getType());
-							
+
 							/*
-							 * If this relative_entity has been reached from the right child
-							 * of "move" and is a child of relative, we should save this
-							 * relation.
+							 * If this relative_entity has been reached from the
+							 * right child of "move" and is a child of relative,
+							 * we should save this relation.
 							 */
 							if (relativeChild && moveRelation) {
 								if (ConstraintCheck.isValidRelations(secondRelations)) {
 									Debug.print("relativeChild && moveRelation: Success! Added " + finalRelation + " to relations.");
-//									throw new InterpretationException("The created relation " + secondRelations + " don't match the rules of the world.");
 									secondRelations.add(finalRelation);
 								}
-//								secondRelations.add(finalRelation);
 							}
-							
-							/*
-							 * Here we check if this relation makes sense in the world. This
-							 * check is done by another class, ConstraintCheck. No need to
-							 * clutter up our code with checking logic here.
-							 */
-//							if (!ConstraintCheck.isValidRelations(secondRelations)) {
-//								throw new InterpretationException("The created relation " + secondRelations + " don't match the rules of the world.");
-//							}
 						}
 					}
 				}
@@ -339,7 +337,6 @@ public class Interpreter {
 				 * Check if any entity matched the given relation, and act
 				 * accordingly.
 				 */
-//				Debug.print(givenRelation);
 				List<Entity> matchedEntities = Relation.matchEntityAndRelation(entity, givenRelation, world);
 				Object returnEntity;
 				if (matchedEntities.isEmpty()) {
