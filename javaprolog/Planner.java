@@ -10,7 +10,7 @@ public class Planner {
 		this.world = world;
 	}
 
-	public Plan solve(Goal goal) {
+	public Plan solve(Goal goal, int maxDepth) {
 		// We use a PriorityQueue to order all possible plans by their cost.
 		PriorityQueue<Plan> queue = new PriorityQueue<>();
 
@@ -57,6 +57,10 @@ public class Planner {
 					actionList.add(c);
 				}
 				actionList.add(newAction);
+				
+				if (actionList.size() >= maxDepth) {
+					return null; // TODO Make nicer?
+				}
 				
 				try {
 					Plan p = new Plan(plan.currentState.takeAction(newAction), actionList);

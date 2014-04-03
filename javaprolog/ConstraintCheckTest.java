@@ -35,7 +35,14 @@ public class ConstraintCheckTest {
 			entityList.add(new Entity(Entity.FORM.BALL, Entity.SIZE.SMALL, Entity.COLOR.BLACK));
 			entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.LARGE, Entity.COLOR.BLACK));
 			if (!ConstraintCheck.isValidColumn(entityList)) {
-				System.out.println("Test testBoxOnlySupportedbyTablesPlanks() Passed");
+				entityList = new ArrayList<Entity>();
+				entityList.add(new Entity(Entity.FORM.BOX, Entity.SIZE.SMALL, Entity.COLOR.BLACK));
+				entityList.add(new Entity(Entity.FORM.BALL, Entity.SIZE.SMALL, Entity.COLOR.BLACK));
+				if (ConstraintCheck.isValidColumn(entityList)) {
+					System.out.println("Test testBoxOnlySupportedbyTablesPlanks() Passed");
+				} else {
+					System.err.println("Test testBoxOnlySupportedbyTablesPlanks() Failed 3");
+				}
 			} else {
 				System.err.println("Test testBoxOnlySupportedbyTablesPlanks() Failed 2");
 			}
