@@ -243,6 +243,7 @@ public class Interpreter {
 				relationList = (List<Relation>) walkTree(cterm.args[1]);
 				moveRelation = false;
 				Debug.print(relations);
+				List<Relation> relationListAll = new ArrayList<>();
 				for (Entity pentity : possibleEntities) {
 					for (Relation arelation : relationList) {
 						if (Relation.matchEntityAndRelationExact(pentity, arelation, world).isEmpty()) {
@@ -257,6 +258,7 @@ public class Interpreter {
 										addToRelations(srelation);
 									}
 								}
+								
 								/*
 								 * Here we check if this relation makes sense in
 								 * the world. This check is done by another
@@ -264,14 +266,22 @@ public class Interpreter {
 								 * our code with checking logic here.
 								 */
 								if (ConstraintCheck.isValidRelations(relations)) {
-									if (relations.size() > 0) {
-										goalList.add(new Goal(relations));
-										Debug.print("Added a new goal: " + relations);
+									if (quantifier.equals("all")) {
+										relationListAll.addAll(relations);
+									} else {
+										if (relations.size() > 0) {
+											goalList.add(new Goal(relations));
+											Debug.print("Added a new goal: " + relations);
+										}
 									}
 								}
 							}
 						}
 					}
+				}
+				
+				if (quantifier.equals("all")) {
+					goalList.add(new Goal(relationListAll));
 				}
 
 				Debug.print("Returning from move");
@@ -293,7 +303,7 @@ public class Interpreter {
 				relationList = new ArrayList<Relation>();
 				if (quantifier.equals("the")) {
 					relationList.add(new Relation(new Entity(), possibleEntities.get(0), relationType));
-				} else if (quantifier.equals("any")) {
+				} else if (quantifier.equals("any") || quantifier.equals("all")) {
 					for (Entity someEntity : possibleEntities) {
 						relationList.add(new Relation(new Entity(), someEntity, relationType));
 					}
@@ -355,7 +365,7 @@ public class Interpreter {
 					if (!ConstraintCheck.isValidRelations(relations)) {
 						throw new InterpretationException("The created relation " + relations + " don't match the rules of the world.");
 					}
-				} else if (quantifier.equals("any")) {
+				} else if (quantifier.equals("any") || quantifier.equals("any")) {
 					for (Entity pentity : possibleEntities) {
 						for (Relation arelation : relationList) {
 							finalRelation = new Relation(pentity, arelation.getEntityB(), arelation.getType());
