@@ -329,4 +329,29 @@ public class Relation {
 		return matchedEntities;
 	}
 
+	/**
+	 * Returns a value that corresponds to how much the given world differs from
+	 * this relation.
+	 * 
+	 * @param world
+	 *            The world to compare against.
+	 * @return An integer value.
+	 */
+	public int compareToWorld(List<List<Entity>> world) {
+		int count = 0;
+		for (int x = 0; x < world.size(); x++) {
+			for (int y = 0; y < world.get(x).size(); y++) {
+				if (type == TYPE.ON_TOP_OF) {
+					if (world.get(x).get(y).equalsExact(b)) {
+						if (y != world.get(x).size() - 1) {
+							count -= world.get(x).size() - 1 - y;
+						}
+					}
+				}
+				// count++;
+			}
+		}
+		return count;
+	}
+
 }

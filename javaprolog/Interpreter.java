@@ -247,7 +247,7 @@ public class Interpreter {
 				for (Entity pentity : possibleEntities) {
 					for (Relation arelation : relationList) {
 						if (Relation.matchEntityAndRelationExact(pentity, arelation, world).isEmpty()) {
-							if (Relation.matchEntityAndRelation(pentity, arelation, world).isEmpty()) {
+							if (Relation.matchEntityAndRelation(pentity, arelation, world).isEmpty() || quantifier.equals("all")) {
 								relations = new ArrayList<Relation>();
 								
 								finalRelation = new Relation(pentity, arelation.getEntityB(), arelation.getType());
@@ -365,7 +365,7 @@ public class Interpreter {
 					if (!ConstraintCheck.isValidRelations(relations)) {
 						throw new InterpretationException("The created relation " + relations + " don't match the rules of the world.");
 					}
-				} else if (quantifier.equals("any") || quantifier.equals("any")) {
+				} else if (quantifier.equals("any") || quantifier.equals("all")) {
 					for (Entity pentity : possibleEntities) {
 						for (Relation arelation : relationList) {
 							finalRelation = new Relation(pentity, arelation.getEntityB(), arelation.getType());

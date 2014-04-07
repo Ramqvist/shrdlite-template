@@ -18,18 +18,19 @@ public class Planner {
 		// solve the planner, are relations in state necessary?
 		List<Relation> relations = new ArrayList<Relation>();
 		State startState = new State(world, relations);
-		queue.add(new Plan(startState, new ArrayList<Action>()));
+		queue.add(new Plan(startState, new ArrayList<Action>(), goal));
 
 		if (!ConstraintCheck.isValidWorld(world)) {
 			Debug.print("World is not valid!");
 			Debug.print(world);
 			return null;
 		}
-
+		int count = 0;
 		int size = 0;
 		boolean reachedGoal = false;
 		Plan goalPlan = null;
 		while (true) {
+			count++;
 			Plan plan = queue.poll();
 			reachedGoal = hasReachedGoal(goal, plan.currentState);
 			if (reachedGoal) {
@@ -71,6 +72,7 @@ public class Planner {
 
 			// Take all possible actions.
 			for (Action newAction : possibleActions) {
+				count++;
 				List<Action> actionList = new ArrayList<Action>(plan.actions.size() + 1);
 				for (Action c : plan.actions) {
 					actionList.add(c);
@@ -81,13 +83,13 @@ public class Planner {
 					size = actionList.size();
 					Debug.print(size);
 				}				
-
+//				Debug.print(actionList);
 				if (actionList.size() >= maxDepth) {
 					return null; // TODO Make nicer?
 				}
 
 				try {
-					Plan p = new Plan(plan.currentState.takeAction(newAction), actionList);
+					Plan p = new Plan(plan.currentState.takeAction(newAction), actionList, goal);
 
 					if (newAction.command == Action.COMMAND.DROP) {
 						if (ConstraintCheck.isValidColumn(p.currentState.world.get(newAction.column))) {
@@ -99,6 +101,7 @@ public class Planner {
 
 					if (hasReachedGoal(goal, p.currentState)) {
 						Debug.print(p.actions);
+						Debug.print(count);
 						return p;
 					}
 				} catch (Exception e) {
