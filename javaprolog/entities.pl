@@ -1,21 +1,13 @@
-:-[world].
-
-column(Col) :- world(W),member(Col,W).
-
-
-
-box(X) :- entity_in_world(X,box).
-
-
-
-entity_in_world(Id,Form) :- world(W),column(C),entity_in_column(Id,Form,C),column_in_world(C).
-
-
-entity_in_column(Id,Form,Col) :- member(entity(Id,Form,_,_),Col).
-
-
-column_in_world(Col) :- world(W), member(Col,W).
-
-
-
-
+entity(f,ball,small,black).
+entity(g,table,large,blue).
+entity(d,plank,small,green).
+entity(e,ball,large,white).
+entity(b,brick,small,white).
+entity(c,plank,large,red).
+entity(a,brick,large,yellow).
+entity(l,box,large,red).
+entity(m,box,small,blue).
+entity(j,pyramid,small,red).
+entity(k,box,large,yellow).
+entity(h,table,small,red).
+entity(i,pyramid,large,yellow).

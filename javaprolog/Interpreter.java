@@ -2,6 +2,8 @@ import gnu.prolog.term.AtomTerm;
 import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.Term;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +19,7 @@ public class Interpreter {
 
 	List<List<Entity>> world = new ArrayList<List<Entity>>();
 
-	public Interpreter(JSONArray world, String holding, JSONObject objects) {
+	public Interpreter(JSONArray world, String holding, JSONObject objects) throws IOException {
 		convertFromJSON(world, objects);
 	}
 
@@ -30,8 +32,9 @@ public class Interpreter {
 	 * @param objects
 	 *            A JSONObject containing mappings that describe every valid
 	 *            object in the world.
+	 * @throws IOException 
 	 */
-	private void convertFromJSON(JSONArray world, JSONObject objects) {
+	private void convertFromJSON(JSONArray world, JSONObject objects) throws IOException {
 		for (int i = 0; i < world.size(); i++) {
 			JSONArray stack = (JSONArray) world.get(i);
 
@@ -47,11 +50,58 @@ public class Interpreter {
 
 			this.world.add(column);
 		}
+		JSONToProlog(world,objects);
+
 		Debug.print("World Representation");
 		Debug.print(this.world);
 		Debug.print();
 	}
 
+	public void JSONToProlog(JSONArray JSONWorld,JSONObject jObjects) throws IOException {
+
+		PrintWriter world = new PrintWriter("world.pl", "UTF-8");
+		PrintWriter objects = new PrintWriter("entities.pl", "UTF-8");
+
+		String worldWithQuotesRemoved = JSONWorld.toString().replace("\"","");
+
+		world.write("world(");
+		world.write(worldWithQuotesRemoved);
+		world.write(").");
+
+		world.close();
+
+		for(Object key : jObjects.keySet()) {
+			String id = key.toString(); 
+			Object value = jObjects.get(key);
+			int index = 0;
+			String str = value.toString();
+			int begin = str.indexOf(":\"")+2;
+			int end = str.indexOf("\",");
+			index = end+1;
+
+			String form = str.substring(begin,end);
+
+			begin = str.indexOf(":\"",index)+2;
+			end = str.indexOf("\",",index);
+			index = end+1;
+			
+			String color = str.substring(begin,end);
+			
+			begin = str.indexOf(":\"",index)+2;
+			end = str.indexOf("\"}",index);
+			
+			String size = str.substring(begin,end);
+
+			objects.write("entity("+id+",");
+			objects.write(form+",");
+			objects.write(size+",");
+			objects.write(color+").\n");
+		}
+		objects.close();
+	}
+
+	
+	
 	private List<Relation> relations;
 	private List<Goal> goalList;
 
