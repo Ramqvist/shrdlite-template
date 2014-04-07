@@ -31,6 +31,12 @@ public class Shrdlite {
 		result.put("utterance", utterance);
 
 		DCGParser parser = new DCGParser("shrdlite_grammar.pl");
+		
+		//************
+		RelationParser repa = new RelationParser("relations.pl");
+		repa.checkRelations("above_test","X","e");
+		//************
+
 		List<Term> trees = parser.parseSentence("command", utterance);
 		List tstrs = new ArrayList();
 		result.put("trees", tstrs);
@@ -53,13 +59,13 @@ public class Shrdlite {
 					goals.add(goal);
 				}
 			}
-			
+
 			JSONArray goalArray = new JSONArray();
 			for (Goal g : goals) {
 				goalArray.add(g.toString());
 			}
 			result.put("goals", goalArray);
-			
+
 			if (goals.isEmpty()) {
 				result.put("output", "Interpretation error!");
 			} else if (goals.size() > 100) { // TODO: Temporarily changed so we can ignore ambiguity errors for now.
@@ -68,7 +74,7 @@ public class Shrdlite {
 				Planner planner = new Planner(interpreter.world);
 				List<Plan> plans = new ArrayList<Plan>();
 				int maxDepth = Integer.MAX_VALUE;
-				
+
 				for (Goal g : goals) {
 					long start = System.currentTimeMillis();
 					Plan aPlan = planner.solve(g, maxDepth);
@@ -79,7 +85,7 @@ public class Shrdlite {
 					long elapsed = System.currentTimeMillis() - start;
 					Debug.print("Plan solved in: " + elapsed + " ms.");
 				}
-				
+
 				// TODO? Create one thread per planner?
 				List<String> actionStrings = new ArrayList<>();
 				Debug.print(plans);
@@ -89,12 +95,12 @@ public class Shrdlite {
 						smallestPlan = p.actions;
 					}
 				}
-				
+
 				for (Action action: smallestPlan) {
 					actionStrings.add(action.toString());
 				}
 				result.put("plan", actionStrings);
-				
+
 				if (plans.isEmpty()) {
 					result.put("output", "Planning error!");
 				} else {
