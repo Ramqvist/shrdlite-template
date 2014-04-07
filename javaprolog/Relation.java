@@ -200,7 +200,6 @@ public class Relation {
 						for (int i = world.indexOf(column) + 1; i < world.size(); i++) {
 							if (world.get(i).contains(relation.getEntityB())) {
 								matchedEntities.add(column.get(column.indexOf(entity)));
-								Debug.print("match! " + column.get(column.indexOf(entity)));
 							}
 						}
 					} else if (relation.getType().equals(Relation.TYPE.RIGHT_OF)) {

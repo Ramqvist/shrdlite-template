@@ -418,7 +418,7 @@ public class Interpreter {
 					} else {
 						returnEntity = matchEntity(world, givenRelation);
 						if (returnEntity == null) {
-							throw new InterpretationException("[" + entity + "] does not match anything in the world.");
+							throw new InterpretationException("The " + entity + " and the " + givenRelation + " does not match anything in the world.");
 						}
 					}
 				} else {
