@@ -310,7 +310,7 @@ public class Relation {
 						// Relation says the entity should be left of
 						// another entity, is it?
 						for (int i = world.indexOf(column) + 1; i < world.size(); i++) {
-							if (world.get(i).contains(relation.getEntityB())) {
+							if (world.get(i).contains(relation.getEntityB()) && column.contains(entity)) {
 								matchedEntities.add(column.get(column.indexOf(entity)));
 							}
 						}
@@ -318,7 +318,7 @@ public class Relation {
 						// Relation says the entity should be right of
 						// another entity, is it
 						for (int i = world.indexOf(column) - 1; i >= 0; i--) {
-							if (world.get(i).contains(relation.getEntityB())) {
+							if (world.get(i).contains(relation.getEntityB()) && column.contains(entity)) {
 								matchedEntities.add(column.get(column.indexOf(entity)));
 							}
 						}
@@ -342,12 +342,14 @@ public class Relation {
 		for (int x = 0; x < world.size(); x++) {
 			for (int y = 0; y < world.get(x).size(); y++) {
 				if (type == TYPE.ON_TOP_OF) {
+					// The less items above the the item that should be beneath the other item the better.
 					if (world.get(x).get(y).equalsExact(b)) {
 						if (y != world.get(x).size() - 1) {
 							count -= world.get(x).size() - 1 - y;
 						}
 					}
 				}
+				// TODO: Handle the other relation types!
 				// count++;
 			}
 		}

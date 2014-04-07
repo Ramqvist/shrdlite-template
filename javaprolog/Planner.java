@@ -94,12 +94,16 @@ public class Planner {
 					if (newAction.command == Action.COMMAND.DROP) {
 						if (ConstraintCheck.isValidColumn(p.currentState.world.get(newAction.column))) {
 							queue.add(p);
+						} else {
+							// Ugly hack. We do this because if the plan was rejected we don't want to check if it has reached the goal.
+							p = null; 
 						}
 					} else {
 						queue.add(p);
 					}
 
-					if (hasReachedGoal(goal, p.currentState)) {
+					// p is set to null if it is rejected by the constraints.
+					if (p != null && hasReachedGoal(goal, p.currentState)) {
 						Debug.print(p.actions);
 						Debug.print(count);
 						return p;

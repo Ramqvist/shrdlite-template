@@ -5,7 +5,7 @@
  */
 public class Debug {
 
-	public static boolean debug = true;
+	public static boolean debug = false;
 
 	/**
 	 * Prints the given message to standard output if the Debug.debug variable
@@ -29,7 +29,7 @@ public class Debug {
 	 */
 	public static void print(Object object) {
 		if (debug) {
-			System.out.println(object == null ? "null" : object.toString());
+			System.out.println(object.toString());
 		}
 	}
 
