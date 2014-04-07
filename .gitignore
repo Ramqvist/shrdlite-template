@@ -9,6 +9,10 @@ __pycache__
 cgi-bin/ajaxwrapper.py
 /cgi-bin/ajaxwrapper.py
 
+# These files are generated when the Interpreter is run.
+/javaprolog/world.pl
+/javaprolog/entities.pl
+
 # Directories #
 /build/
 /bin/

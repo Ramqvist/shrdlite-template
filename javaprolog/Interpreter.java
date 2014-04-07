@@ -247,11 +247,7 @@ public class Interpreter {
 					for (Relation arelation : relationList) {
 						if (Relation.matchEntityAndRelationExact(pentity, arelation, world).isEmpty()) {
 							if (Relation.matchEntityAndRelation(pentity, arelation, world).isEmpty()) {
-//								if (quantifier.equals("any")) {
-									relations = new ArrayList<Relation>();
-//								} else if (quantifier.equals("the")) {
-//									Debug.print("THE");
-////								}
+								relations = new ArrayList<Relation>();
 								
 								finalRelation = new Relation(pentity, arelation.getEntityB(), arelation.getType());
 								addToRelations(finalRelation);
