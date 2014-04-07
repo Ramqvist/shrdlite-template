@@ -183,7 +183,7 @@ public class Interpreter {
 	/*
 	 * This is to handle the different quantifiers, like "any", "the" and "all".
 	 */
-	private String quantifier;
+	private List<String> quantifier = new ArrayList<>();
 
 	/*
 	 * This is used to store the second relations, for example when parsing the
@@ -247,7 +247,7 @@ public class Interpreter {
 				for (Entity pentity : possibleEntities) {
 					for (Relation arelation : relationList) {
 						if (Relation.matchEntityAndRelationExact(pentity, arelation, world).isEmpty()) {
-							if (Relation.matchEntityAndRelation(pentity, arelation, world).isEmpty() || quantifier.equals("all")) {
+							if (Relation.matchEntityAndRelation(pentity, arelation, world).isEmpty() || quantifier.get(0).equals("all")) {
 								relations = new ArrayList<Relation>();
 								
 								finalRelation = new Relation(pentity, arelation.getEntityB(), arelation.getType());
@@ -266,7 +266,7 @@ public class Interpreter {
 								 * our code with checking logic here.
 								 */
 								if (ConstraintCheck.isValidRelations(relations)) {
-									if (quantifier.equals("all")) {
+									if (quantifier.get(0).equals("all")) {
 										relationListAll.addAll(relations);
 									} else {
 										if (relations.size() > 0) {
@@ -280,7 +280,7 @@ public class Interpreter {
 					}
 				}
 				
-				if (quantifier.equals("all")) {
+				if (quantifier.get(0).equals("all")) {
 					goalList.add(new Goal(relationListAll));
 				}
 
@@ -301,9 +301,9 @@ public class Interpreter {
 				possibleEntities = (List<Entity>) walkTree(cterm.args[1]);
 
 				relationList = new ArrayList<Relation>();
-				if (quantifier.equals("the")) {
+				if (quantifier.get(quantifier.size()-1).equals("the")) {
 					relationList.add(new Relation(new Entity(), possibleEntities.get(0), relationType));
-				} else if (quantifier.equals("any") || quantifier.equals("all")) {
+				} else if (quantifier.get(quantifier.size()-1).equals("any") || quantifier.get(quantifier.size()-1).equals("all")) {
 					for (Entity someEntity : possibleEntities) {
 						relationList.add(new Relation(new Entity(), someEntity, relationType));
 					}
@@ -320,7 +320,7 @@ public class Interpreter {
 				 * an Entity.
 				 */
 				Debug.print("saw basic_entity");
-				quantifier = (String) walkTree(cterm.args[0]);
+				quantifier.add((String) walkTree(cterm.args[0]));
 				Object anObject = walkTree(cterm.args[1]);
 				Debug.print("Returning from basic_entity");
 				return anObject;
@@ -336,7 +336,7 @@ public class Interpreter {
 				 * a Relation.
 				 */
 				Debug.print("saw relative_entity");
-				quantifier = (String) walkTree(cterm.args[0]);
+				quantifier.add((String) walkTree(cterm.args[0]));
 				relationList = (List<Relation>) walkTree(cterm.args[2]);
 				givenRelation = relation = (Relation) relationList.get(0);
 
@@ -344,7 +344,7 @@ public class Interpreter {
 				possibleEntities = (List<Entity>) walkTree(cterm.args[1]);
 				
 				entity = possibleEntities.get(0); // TODO?????
-				if (quantifier.equals("the")) {
+				if (quantifier.get(quantifier.size()-1).equals("the")) {
 					finalRelation = new Relation(entity, relation.getEntityB(), relation.getType());
 
 					/*
@@ -365,7 +365,7 @@ public class Interpreter {
 					if (!ConstraintCheck.isValidRelations(relations)) {
 						throw new InterpretationException("The created relation " + relations + " don't match the rules of the world.");
 					}
-				} else if (quantifier.equals("any") || quantifier.equals("all")) {
+				} else if (quantifier.get(quantifier.size()-1).equals("any") || quantifier.get(quantifier.size()-1).equals("all")) {
 					for (Entity pentity : possibleEntities) {
 						for (Relation arelation : relationList) {
 							finalRelation = new Relation(pentity, arelation.getEntityB(), arelation.getType());
@@ -411,12 +411,18 @@ public class Interpreter {
 				 * accordingly.
 				 */
 				List<Entity> matchedEntities = Relation.matchEntityAndRelation(entity, givenRelation, world);
+				Debug.print(matchedEntities);
 				Object returnEntity;
 				if (matchedEntities.isEmpty()) {
 					if (givenRelation == null) {
 						throw new InterpretationException("[" + entity + "] does not match anything in the world.");
 					} else {
-						Entity tempEntity = matchEntity(world, givenRelation);
+						Entity tempEntity = null;
+						if (quantifier.get(quantifier.size()-1).equals("all")) {
+							tempEntity = matchEntity(world, givenRelation);							
+						}
+//						tempEntity = matchEntity(world, givenRelation);
+//						tempEntity = matchEntity(world, entity);//, givenRelation);
 						if (tempEntity == null) {
 							throw new InterpretationException("The " + entity + " and the " + givenRelation + " does not match anything in the world.");
 						}
@@ -491,6 +497,17 @@ public class Interpreter {
 		for (List<Entity> column : world) {
 			for (Entity cEntity : column) {
 				if (cEntity.equals(givenRelation.getEntityA())) {
+					return cEntity;
+				}
+			}
+		}
+		return null;
+	}
+	
+	private Entity matchEntity(List<List<Entity>> world, Entity entity) {
+		for (List<Entity> column : world) {
+			for (Entity cEntity : column) {
+				if (cEntity.equals(entity)) {
 					return cEntity;
 				}
 			}

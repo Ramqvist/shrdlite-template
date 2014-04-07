@@ -341,7 +341,7 @@ public class Relation {
 		for (int x = 0; x < world.size(); x++) {
 			for (int y = 0; y < world.get(x).size(); y++) {
 				if (type == TYPE.ON_TOP_OF) {
-					// The less items above the the item that should be beneath the other item the better.
+					// The less items above the item that should be beneath the other item the better.
 					if (world.get(x).get(y).equalsExact(b)) {
 						if (y != world.get(x).size() - 1) {
 							count -= world.get(x).size() - 1 - y;
@@ -352,6 +352,20 @@ public class Relation {
 					if (world.get(x).get(y).equalsExact(b)) {
 						if (x > 0) {
 							count -= 1;
+						}
+					}
+				} else if (type == TYPE.RIGHT_OF) {
+					// If there is any column to the right of B that is good 
+					if (world.get(x).get(y).equalsExact(b)) {
+						if (x < world.size() - 1) {
+							count -= 1;
+						}
+					}
+				} else if (type == TYPE.UNDER) {
+					// The less items above the item that should be above the other item the better.
+					if (world.get(x).get(y).equalsExact(b)) {
+						if (y != world.get(x).size() - 1) {
+							count -= world.get(x).size() - 1 - y;
 						}
 					}
 				}
