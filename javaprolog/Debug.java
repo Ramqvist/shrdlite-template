@@ -29,7 +29,7 @@ public class Debug {
 	 */
 	public static void print(Object object) {
 		if (debug) {
-			System.out.println(object.toString());
+			System.out.println(object == null ? "null" : object.toString());
 		}
 	}
 
