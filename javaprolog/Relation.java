@@ -276,16 +276,20 @@ public class Relation {
 						}
 					} else if (relation.getType().equals(Relation.TYPE.ABOVE)) {
 						// Check for entities below this entity.
-						for (int i = column.indexOf(entity); i >= 0; i--) {
-							if (column.get(i).equalsExact(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
+						if (column.contains(entity)) {
+							for (int i = column.indexOf(entity); i >= 0; i--) {
+								if (column.get(i).equalsExact(relation.getEntityB())) {
+									matchedEntities.add(column.get(column.indexOf(entity)));
+								}
 							}
 						}
 					} else if (relation.getType().equals(Relation.TYPE.UNDER)) {
 						// Check for entities above this entity.
-						for (int i = column.indexOf(entity); i < column.size(); i++) {
-							if (column.get(i).equalsExact(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
+						if (column.contains(entity)) {
+							for (int i = column.indexOf(entity); i < column.size(); i++) {
+								if (column.get(i).equalsExact(relation.getEntityB())) {
+									matchedEntities.add(column.get(column.indexOf(entity)));
+								}
 							}
 						}
 					} else if (relation.getType().equals(Relation.TYPE.BESIDE)) {
