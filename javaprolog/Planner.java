@@ -25,6 +25,7 @@ public class Planner {
 			return null;
 		}
 
+		int size = 0;
 		boolean reachedGoal = false;
 		Plan goalPlan = null;
 		while (true) {
@@ -74,6 +75,11 @@ public class Planner {
 					actionList.add(c);
 				}
 				actionList.add(newAction);
+				
+				if (actionList.size() > size) {
+					size = actionList.size();
+					Debug.print(size);
+				}				
 
 				if (actionList.size() >= maxDepth) {
 					return null; // TODO Make nicer?

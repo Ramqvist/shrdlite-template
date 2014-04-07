@@ -183,8 +183,6 @@ public class Interpreter {
 				for (Entity pentity : possibleEntities) {
 					for (Relation arelation : relationList) {
 						if (Relation.matchEntityAndRelationExact(pentity, arelation, world).isEmpty()) {
-							Debug.print(arelation);
-							Debug.print(Relation.matchEntityAndRelation(pentity, arelation, world));
 							if (Relation.matchEntityAndRelation(pentity, arelation, world).isEmpty()) {
 								if (quantifier.equals("any")) {
 									relations = new ArrayList<Relation>();
@@ -205,7 +203,6 @@ public class Interpreter {
 								 * our code with checking logic here.
 								 */
 								if (ConstraintCheck.isValidRelations(relations)) {
-									Debug.print("VALID!");
 									if (relations.size() > 0) {
 										goalList.add(new Goal(relations));
 									}
