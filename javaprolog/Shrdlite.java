@@ -83,17 +83,20 @@ public class Shrdlite {
 				// TODO? Create one thread per planner?
 				List<String> actionStrings = new ArrayList<>();
 				Debug.print(plans);
-				List<Action> smallestPlan = plans.get(0).actions;
-				for(Plan p : plans) {
-					if(p.actions.size() < smallestPlan.size()) {
-						smallestPlan = p.actions;
+				if (!plans.isEmpty()) {
+					List<Action> smallestPlan = plans.get(0).actions;
+					for(Plan p : plans) {
+						if(p.actions.size() < smallestPlan.size()) {
+							smallestPlan = p.actions;
+						}
 					}
+					
+					for (Action action: smallestPlan) {
+						actionStrings.add(action.toString());
+					}
+					
+					result.put("plan", actionStrings);
 				}
-				
-				for (Action action: smallestPlan) {
-					actionStrings.add(action.toString());
-				}
-				result.put("plan", actionStrings);
 				
 				if (plans.isEmpty()) {
 					result.put("output", "Planning error!");

@@ -18,8 +18,8 @@ SCRIPTDIR = 'javaprolog'
 SCRIPT = ['/usr/bin/java', '-cp', 'json-simple-1.1.1.jar:gnuprologjava-0.2.6.jar:.', 'Shrdlite']
 
 # # SWI Prolog
-#SCRIPTDIR = 'javaprolog'
-#SCRIPT = ['/usr/local/bin/swipl', '-q', '-g', 'main,halt', '-t', 'halt(1)', '-s', 'shrdlite.pl']
+# SCRIPTDIR = 'javaprolog'
+# SCRIPT = ['/usr/local/bin/swipl', '-q', '-g', 'main,halt', '-t', 'halt(1)', '-s', 'shrdlite.pl']
 
 # # Haskell
 # SCRIPTDIR = 'haskell'

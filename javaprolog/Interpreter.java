@@ -85,10 +85,23 @@ public class Interpreter {
 		Debug.print("================");
 		Debug.print();
 
-		if (goalList.size() > 0)
+		if (goalList.size() > 0) {
+//			System.out.print("There are " + goalList.size() + " items that match your query.");
+//			for (Goal goal : goalList) {
+//				String responseString = "";
+//				for (int i = 0; i < goal.getRelations().size(); i++) {
+//					if (i == goal.getRelations().size() - 1) {
+//						responseString += goal.getRelations().get(i).getEntityA(); 
+//					} else {
+//						responseString += goal.getRelations().get(i).getEntityA() + ", ";
+//					}
+//				}
+//				System.out.print(responseString);
+//			}
 			Debug.print(goalList);
-		else
+		} else {	
 			Debug.print("No goal could be produced.");
+		}
 
 		Debug.print();
 
@@ -184,9 +197,11 @@ public class Interpreter {
 					for (Relation arelation : relationList) {
 						if (Relation.matchEntityAndRelationExact(pentity, arelation, world).isEmpty()) {
 							if (Relation.matchEntityAndRelation(pentity, arelation, world).isEmpty()) {
-								if (quantifier.equals("any")) {
+//								if (quantifier.equals("any")) {
 									relations = new ArrayList<Relation>();
-								}
+//								} else if (quantifier.equals("the")) {
+//									Debug.print("THE");
+////								}
 								
 								finalRelation = new Relation(pentity, arelation.getEntityB(), arelation.getType());
 								addToRelations(finalRelation);
@@ -205,6 +220,7 @@ public class Interpreter {
 								if (ConstraintCheck.isValidRelations(relations)) {
 									if (relations.size() > 0) {
 										goalList.add(new Goal(relations));
+										Debug.print("Added a new goal: " + relations);
 									}
 								}
 							}
@@ -270,6 +286,7 @@ public class Interpreter {
 
 				Debug.print("Relations " + relationList);
 				possibleEntities = (List<Entity>) walkTree(cterm.args[1]);
+				
 				entity = possibleEntities.get(0); // TODO?????
 				if (quantifier.equals("the")) {
 					finalRelation = new Relation(entity, relation.getEntityB(), relation.getType());
@@ -351,7 +368,6 @@ public class Interpreter {
 				} else {
 					returnEntity = matchedEntities;
 				}
-				Debug.print(matchedEntities);
 
 				Debug.print("Success: [" + entity + "] exists in the world as [" + returnEntity + "].");
 				givenRelation = null; // Reset the givenRelation value.

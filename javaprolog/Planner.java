@@ -22,6 +22,7 @@ public class Planner {
 
 		if (!ConstraintCheck.isValidWorld(world)) {
 			Debug.print("World is not valid!");
+			Debug.print(world);
 			return null;
 		}
 

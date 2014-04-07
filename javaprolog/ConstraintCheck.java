@@ -79,8 +79,11 @@ public class ConstraintCheck {
 						return false;
 					}
 				} else {
-					//Boxes can only be supported by tables or planks.
-					return false;
+					// Boxes can only be supported by tables or planks.
+					// We say that small boxes CAN be in large boxes, though. 
+					if (previous.getForm() != Entity.FORM.BOX || previous.getSize() != Entity.SIZE.LARGE || e.getForm() != Entity.FORM.BOX || e.getSize() != Entity.SIZE.SMALL) {
+						return false;
+					}
 				}
 			}
 		}

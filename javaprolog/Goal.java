@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,7 +10,11 @@ public class Goal {
 	private List<Relation> relations;
 
 	public Goal(List<Relation> relations) {
-		this.relations = relations;
+		this.relations = new ArrayList<>();
+		for (Relation relation : relations) {
+			this.relations.add(relation.copy());
+		}
+//		this.relations = relations;
 	}
 
 	public List<Relation> getRelations() {
