@@ -22,6 +22,7 @@ public class Plan implements Comparable<Plan>{
 		compareCount = 0;
 		compareCount += compareWithGoal();
 		for (Relation relation : goal.getRelations()) {
+//			Debug.print(compareCount);
 			compareCount += relation.compareToWorld(currentState.world);
 		}
 	}

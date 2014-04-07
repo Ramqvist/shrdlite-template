@@ -347,6 +347,13 @@ public class Relation {
 							count -= world.get(x).size() - 1 - y;
 						}
 					}
+				} else if (type == TYPE.LEFT_OF) {
+					// If there is any column to the left of B that is good 
+					if (world.get(x).get(y).equalsExact(b)) {
+						if (x > 0) {
+							count -= 1;
+						}
+					}
 				}
 				// TODO: Handle the other relation types!
 				// count++;

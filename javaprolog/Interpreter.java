@@ -416,10 +416,12 @@ public class Interpreter {
 					if (givenRelation == null) {
 						throw new InterpretationException("[" + entity + "] does not match anything in the world.");
 					} else {
-						returnEntity = matchEntity(world, givenRelation);
-						if (returnEntity == null) {
+						Entity tempEntity = matchEntity(world, givenRelation);
+						if (tempEntity == null) {
 							throw new InterpretationException("The " + entity + " and the " + givenRelation + " does not match anything in the world.");
 						}
+						returnEntity = new ArrayList<Entity>();
+						((ArrayList) returnEntity).add(tempEntity);
 					}
 				} else {
 					returnEntity = matchedEntities;

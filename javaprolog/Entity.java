@@ -88,6 +88,9 @@ public class Entity {
 		case "box":
 			this.form = Entity.FORM.BOX;
 			break;
+		default:
+			this.form = Entity.FORM.UNDEFINED;
+			break;
 		}
 
 		switch (size) {
@@ -173,7 +176,7 @@ public class Entity {
 		if (color != other.color && color != Entity.COLOR.UNDEFINED && other.color != Entity.COLOR.UNDEFINED) {
 			return false;
 		}
-		if (form != other.form) {
+		if (form != other.form && form != Entity.FORM.UNDEFINED && other.form != Entity.FORM.UNDEFINED) {
 			return false;
 		}
 		if (size != other.size && size != Entity.SIZE.UNDEFINED && other.size != Entity.SIZE.UNDEFINED) {
