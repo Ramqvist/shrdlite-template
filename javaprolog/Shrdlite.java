@@ -68,7 +68,7 @@ public class Shrdlite {
 
 			if (goals.isEmpty()) {
 				result.put("output", "Interpretation error!");
-			} else if (goals.size() > 100) { // TODO: Temporarily changed so we can ignore ambiguity errors for now.
+			} else if (goals.size() > 1000) { // TODO: Temporarily changed so we can ignore ambiguity errors for now.
 				result.put("output", "Ambiguity error!");
 			} else {
 				Planner planner = new Planner(interpreter.world, interpreter.heldEntity);

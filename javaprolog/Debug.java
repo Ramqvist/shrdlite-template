@@ -5,7 +5,7 @@
  */
 public class Debug {
 
-	public static boolean debug = false;
+	public static boolean debug = true;
 
 	/**
 	 * Prints the given message to standard output if the Debug.debug variable

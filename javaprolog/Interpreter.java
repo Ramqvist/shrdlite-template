@@ -242,12 +242,6 @@ public class Interpreter {
 					}
 
 					goalList.add(new Goal(new Relation(tentity, new Entity(), Relation.TYPE.HELD)));
-					/*
-					 * TODO: HOW DO WE EXPLAIN THIS AS A RELATION?
-					 * 
-					 * Quote from the course page:
-					 * "For the take and put commands, the procedure is similar but different…"
-					 */
 				}
 				break;
 			case "move":
@@ -327,7 +321,9 @@ public class Interpreter {
 					}
 					// TODO: Is this right? If the goalList is empty here, then there was no need to split relations.
 					if (goalList.isEmpty()) {
-						goalList.add(new Goal(relationListAll));
+						if (ConstraintCheck.isValidRelations(relationListAll)) {
+							goalList.add(new Goal(relationListAll));
+						}
 					}
 				}
 

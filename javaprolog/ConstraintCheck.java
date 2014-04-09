@@ -260,6 +260,13 @@ public class ConstraintCheck {
 						return false;
 					}
 				}
+			} else if (relation.getType() == Relation.TYPE.UNDER) {
+				if (relation.getEntityA().getForm() == Entity.FORM.BALL){
+					return false;
+				}
+				if (relation.getEntityA().getSize() == Entity.SIZE.SMALL && relation.getEntityB().getSize() == Entity.SIZE.LARGE) {
+					return false;
+				}
 			}
 		}
 		return true;
