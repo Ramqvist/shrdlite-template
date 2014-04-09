@@ -8,7 +8,7 @@ import java.util.List;
 public class Relation {
 
 	public enum TYPE {
-		ON_TOP_OF, ABOVE, UNDER, BESIDE, LEFT_OF, RIGHT_OF, INSIDE, UNDEFINED
+		ON_TOP_OF, ABOVE, UNDER, BESIDE, LEFT_OF, RIGHT_OF, INSIDE, HELD, UNDEFINED
 	}
 
 	private TYPE type;
@@ -41,6 +41,8 @@ public class Relation {
 			return TYPE.UNDER;
 		case "inside":
 			return TYPE.INSIDE;
+		case "held":
+			return TYPE.HELD;
 		default:
 			return TYPE.UNDEFINED;
 		}
@@ -136,9 +138,9 @@ public class Relation {
 	 *            a 2D array of entities that describes the world.
 	 * @return a list of all the entities that match the given relation.
 	 */
-	public static List<Entity> matchEntityAndRelation(Entity entity, Relation relation, List<List<Entity>> world) {
+	public static List<Entity> matchEntityAndRelation(Entity entity, Relation relation, List<List<Entity>> world, Entity heldEntity) {
 		List<Entity> matchedEntities = new ArrayList<>();
-
+		
 		if (relation != null) {
 			// If a relation is given, we need to make sure that we only
 			// match against objects that also match the given relation.
@@ -216,6 +218,10 @@ public class Relation {
 		} else {
 			// If no relation is given, we can match against any object.
 			Debug.print("No relation given, matching " + entity + " against all objects in the world.");
+			if (heldEntity != null && heldEntity.equals(entity)) {
+				matchedEntities.add(heldEntity);
+			}
+			
 			for (List<Entity> column : world) {
 				if (column.contains(entity)) {
 					for (Entity centity : column) {
@@ -243,7 +249,7 @@ public class Relation {
 	 *            a 2D array of entities that describes the world.
 	 * @return a list of all the entities that match the given relation.
 	 */
-	public static List<Entity> matchEntityAndRelationExact(Entity entity, Relation relation, List<List<Entity>> world) {
+	public static List<Entity> matchEntityAndRelationExact(Entity entity, Relation relation, List<List<Entity>> world, Entity heldEntity) {
 		List<Entity> matchedEntities = new ArrayList<>();
 
 		if (relation != null) {
@@ -325,6 +331,7 @@ public class Relation {
 				}
 			}
 		}
+		
 		return matchedEntities;
 	}
 

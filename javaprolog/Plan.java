@@ -39,7 +39,7 @@ public class Plan implements Comparable<Plan>{
 		for (List<Entity> column : currentState.world) {
 			for (Entity entity : column) {
 				for (Relation relation : goal.getRelations()) {
-					if (!Relation.matchEntityAndRelationExact(entity, relation, currentState.world).isEmpty()) {
+					if (!Relation.matchEntityAndRelationExact(entity, relation, currentState.world, currentState.holding).isEmpty()) {
 						count++;
 					}
 				}

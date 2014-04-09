@@ -18,9 +18,10 @@ import org.json.simple.JSONObject;
 public class Interpreter {
 
 	List<List<Entity>> world = new ArrayList<List<Entity>>();
+	Entity heldEntity;
 
 	public Interpreter(JSONArray world, String holding, JSONObject objects) throws IOException {
-		convertFromJSON(world, objects);
+		convertFromJSON(world, objects, holding);
 	}
 
 	/**
@@ -34,7 +35,7 @@ public class Interpreter {
 	 *            object in the world.
 	 * @throws IOException 
 	 */
-	private void convertFromJSON(JSONArray world, JSONObject objects) throws IOException {
+	private void convertFromJSON(JSONArray world, JSONObject objects, String holding) throws IOException {
 		for (int i = 0; i < world.size(); i++) {
 			JSONArray stack = (JSONArray) world.get(i);
 
@@ -52,8 +53,22 @@ public class Interpreter {
 		}
 		JSONToProlog(world,objects);
 
+		if (holding != null) {
+			JSONObject description = (JSONObject) objects.get(holding);
+			heldEntity = new Entity((String) description.get("form"), (String) description.get("size"),
+					(String) description.get("color"));
+		}
+		
 		Debug.print("World Representation");
 		Debug.print(this.world);
+		Debug.print();
+		
+		Debug.print("Held Entity");
+		if (heldEntity != null) {
+			Debug.print(heldEntity);
+		} else {
+			Debug.print("Nothing");
+		}
 		Debug.print();
 	}
 
@@ -220,13 +235,20 @@ public class Interpreter {
 				 * basic_entity or relative_entity.
 				 */
 				Debug.print("saw take");
-				entity = (Entity) walkTree(cterm.args[0]);
-				/*
-				 * TODO: HOW DO WE EXPLAIN THIS AS A RELATION?
-				 * 
-				 * Quote from the course page:
-				 * "For the take and put commands, the procedure is similar but different…"
-				 */
+				List<Entity> takeEntities= (List<Entity>) walkTree(cterm.args[0]);
+				for (Entity tentity : takeEntities) {
+					if (tentity.getForm() == Entity.FORM.FLOOR) {
+						throw new InterpretationException("You can't take the floor, stupid.");
+					}
+
+					goalList.add(new Goal(new Relation(tentity, new Entity(), Relation.TYPE.HELD)));
+					/*
+					 * TODO: HOW DO WE EXPLAIN THIS AS A RELATION?
+					 * 
+					 * Quote from the course page:
+					 * "For the take and put commands, the procedure is similar but different…"
+					 */
+				}
 				break;
 			case "move":
 				/*
@@ -246,8 +268,8 @@ public class Interpreter {
 				List<Relation> relationListAll = new ArrayList<>();
 				for (Entity pentity : possibleEntities) {
 					for (Relation arelation : relationList) {
-						if (Relation.matchEntityAndRelationExact(pentity, arelation, world).isEmpty()) {
-							if (Relation.matchEntityAndRelation(pentity, arelation, world).isEmpty() || quantifier.get(0).equals("all")) {
+						if (Relation.matchEntityAndRelationExact(pentity, arelation, world, heldEntity).isEmpty()) {
+							if (Relation.matchEntityAndRelation(pentity, arelation, world, heldEntity).isEmpty() || quantifier.get(0).equals("all")) {
 								relations = new ArrayList<Relation>();
 								
 								finalRelation = new Relation(pentity, arelation.getEntityB(), arelation.getType());
@@ -288,14 +310,10 @@ public class Interpreter {
 							if (i != j) {
 								if (relationListAll.get(i).getEntityA().equalsExact(relationListAll.get(j).getEntityA())) {
 									if (relationListAll.get(i).getType() == relationListAll.get(j).getType()) {
-										Debug.print(relationListAll.get(i).getEntityA() + " exists twice as the same kind of relation");
 										splitRelations.add(relationListAll.get(i));
-										Debug.print(splitRelations);
 										for (Relation r : relationListAll) {
-											Debug.print(r);
 											if (!relationListAll.get(i).equals(r)) {
 												if (!r.getEntityA().equals(relationListAll.get(i).getEntityA()) && !r.getEntityB().equals(relationListAll.get(i).getEntityB())) {
-													Debug.print(r + " NOT EQUALS " + relationListAll.get(i));
 													splitRelations.add(r);
 													goalList.add(new Goal(splitRelations));
 													splitRelations = new ArrayList<>();
@@ -439,12 +457,12 @@ public class Interpreter {
 				 * Check if any entity matched the given relation, and act
 				 * accordingly.
 				 */
-				List<Entity> matchedEntities = Relation.matchEntityAndRelation(entity, givenRelation, world);
+				List<Entity> matchedEntities = Relation.matchEntityAndRelation(entity, givenRelation, world, heldEntity);
 				Debug.print(matchedEntities);
 				Object returnEntity;
 				if (matchedEntities.isEmpty()) {
 					if (givenRelation == null) {
-						throw new InterpretationException("[" + entity + "] does not match anything in the world.");
+						throw new InterpretationException("[" + entity + "] does not match anything in the world, and there is no given relation.");
 					} else {
 						Entity tempEntity = null;
 						if (quantifier.get(quantifier.size()-1).equals("all")) {
@@ -452,6 +470,7 @@ public class Interpreter {
 						}
 //						tempEntity = matchEntity(world, givenRelation);
 //						tempEntity = matchEntity(world, entity);//, givenRelation);
+						
 						if (tempEntity == null) {
 							throw new InterpretationException("The " + entity + " and the " + givenRelation + " does not match anything in the world.");
 						}

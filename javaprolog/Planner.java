@@ -5,9 +5,11 @@ import java.util.PriorityQueue;
 public class Planner {
 
 	List<List<Entity>> world;
+	Entity heldEntity;
 
-	public Planner(List<List<Entity>> world) {
+	public Planner(List<List<Entity>> world, Entity heldEntity) {
 		this.world = world;
+		this.heldEntity = heldEntity;
 	}
 
 	public Plan solve(Goal goal, int maxDepth) {
@@ -17,7 +19,7 @@ public class Planner {
 		// TODO: We've discussed this before, but as we've currently tried to
 		// solve the planner, are relations in state necessary?
 		List<Relation> relations = new ArrayList<Relation>();
-		State startState = new State(world, relations);
+		State startState = new State(world, relations, heldEntity);
 		queue.add(new Plan(startState, new ArrayList<Action>(), goal));
 
 		if (!ConstraintCheck.isValidWorld(world)) {
@@ -119,15 +121,25 @@ public class Planner {
 
 	private static boolean hasReachedGoal(Goal goal, State state) {
 		int count = 0;
+		for (Relation relation : goal.getRelations()) {
+			if (relation.getType() == Relation.TYPE.HELD) {
+				if (state.holding != null && state.holding.equalsExact(relation.getEntityA())) {
+					count++;
+					break;
+				}
+			}
+		}
+		
 		for (List<Entity> column : state.world) {
 			for (Entity entity : column) {
 				for (Relation relation : goal.getRelations()) {
-					if (!Relation.matchEntityAndRelationExact(entity, relation, state.world).isEmpty()) {
+					if (!Relation.matchEntityAndRelationExact(entity, relation, state.world, state.holding).isEmpty()) {
 						count++;
 					}
 				}
 			}
 		}
+		
 		return count == goal.getRelations().size();
 	}
 

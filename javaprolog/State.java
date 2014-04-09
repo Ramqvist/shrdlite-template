@@ -12,9 +12,10 @@ public class State {
 	List<Relation> relations;
 	Entity holding = null;
 
-	public State(List<List<Entity>> world, List<Relation> relations) {
+	public State(List<List<Entity>> world, List<Relation> relations, Entity heldEntity) {
 		this.world = world;
 		this.relations = relations;
+		this.holding = heldEntity;
 	}
 
 	/**
@@ -89,7 +90,7 @@ public class State {
 
 	@Override
 	public String toString() {
-		return "(State " + world + " : " + relations + ")";
+		return "(State " + world + " : " + relations + " : HOLDING " + holding + ")";
 	}
 
 }

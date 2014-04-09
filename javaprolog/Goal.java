@@ -9,6 +9,11 @@ public class Goal {
 
 	private List<Relation> relations;
 
+	public Goal(Relation relation) {
+		this.relations = new ArrayList<>();
+		this.relations.add(relation);
+	}
+	
 	public Goal(List<Relation> relations) {
 		this.relations = new ArrayList<>();
 		for (Relation relation : relations) {

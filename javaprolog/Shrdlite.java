@@ -71,7 +71,7 @@ public class Shrdlite {
 			} else if (goals.size() > 100) { // TODO: Temporarily changed so we can ignore ambiguity errors for now.
 				result.put("output", "Ambiguity error!");
 			} else {
-				Planner planner = new Planner(interpreter.world);
+				Planner planner = new Planner(interpreter.world, interpreter.heldEntity);
 				List<Plan> plans = new ArrayList<Plan>();
 				int maxDepth = Integer.MAX_VALUE;
 
