@@ -351,14 +351,14 @@ public class Relation {
 					// If there is any column to the left of B that is good 
 					if (world.get(x).get(y).equalsExact(b)) {
 						if (x > 0) {
-							count -= 1;
+							count += 1;
 						}
 					}
 				} else if (type == TYPE.RIGHT_OF) {
 					// If there is any column to the right of B that is good 
 					if (world.get(x).get(y).equalsExact(b)) {
 						if (x < world.size() - 1) {
-							count -= 1;
+							count += 1;
 						}
 					}
 				} else if (type == TYPE.UNDER) {
@@ -370,7 +370,6 @@ public class Relation {
 					}
 				}
 				// TODO: Handle the other relation types!
-				// count++;
 			}
 		}
 		return count;

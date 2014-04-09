@@ -281,7 +281,36 @@ public class Interpreter {
 				}
 				
 				if (quantifier.get(0).equals("all")) {
-					goalList.add(new Goal(relationListAll));
+					List<Relation> splitRelations = new ArrayList<>();
+					// TODO: Check if this needs to be split up and do so.
+					for (int i = 0; i < relationListAll.size(); i++) {
+						for (int j = 0; j < relationListAll.size(); j++) {
+							if (i != j) {
+								if (relationListAll.get(i).getEntityA().equalsExact(relationListAll.get(j).getEntityA())) {
+									if (relationListAll.get(i).getType() == relationListAll.get(j).getType()) {
+										Debug.print(relationListAll.get(i).getEntityA() + " exists twice as the same kind of relation");
+										splitRelations.add(relationListAll.get(i));
+										Debug.print(splitRelations);
+										for (Relation r : relationListAll) {
+											Debug.print(r);
+											if (!relationListAll.get(i).equals(r)) {
+												if (!r.getEntityA().equals(relationListAll.get(i).getEntityA()) && !r.getEntityB().equals(relationListAll.get(i).getEntityB())) {
+													Debug.print(r + " NOT EQUALS " + relationListAll.get(i));
+													splitRelations.add(r);
+													goalList.add(new Goal(splitRelations));
+													splitRelations = new ArrayList<>();
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+					// TODO: Is this right? If the goalList is empty here, then there was no need to split relations.
+					if (goalList.isEmpty()) {
+						goalList.add(new Goal(relationListAll));
+					}
 				}
 
 				Debug.print("Returning from move");
