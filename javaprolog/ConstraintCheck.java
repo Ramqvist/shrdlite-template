@@ -183,95 +183,111 @@ public class ConstraintCheck {
 			return true;
 		}
 		for (Relation relation : relations) {
-			if (relation.getType().equals(Relation.TYPE.INSIDE)) {
-				/*
-				 * Check the INSIDE relation type.
-				 */
-				
-				// Balls must be inside boxes. (On the floor handled below.)
-				if (relation.getEntityA().getForm() == Entity.FORM.BALL && relation.getEntityB().getForm() != Entity.FORM.BOX) {
-					return false;
-				}
-				
-				// Objects are only inside boxes.
-				if (relation.getEntityB().getForm() != Entity.FORM.BOX) {
-					return false;
-				}
-				
-				// Small boxes can only contain small items.
-				if (relation.getEntityB().getSize() == Entity.SIZE.SMALL) {
-					if (relation.getEntityA().getSize() != Entity.SIZE.SMALL) {
-						return false;
-					}
-				}
-				
-				if (relation.getEntityA().getForm() == Entity.FORM.PLANK || relation.getEntityA().getForm() == Entity.FORM.PYRAMID || relation.getEntityA().getForm() == Entity.FORM.BOX) {
-					if (relation.getEntityB().getSize() == Entity.SIZE.LARGE) {
-						// Boxes cannot contain planks or pyramids of the same size
-						// as the box.
-						if (relation.getEntityA().getSize() != Entity.SIZE.SMALL) {
-							return false;
-						}
-					} else {
-						return false;
-					}
-				}
-			} else if (relation.getType() == Relation.TYPE.ON_TOP_OF) {
-				/*
-				 * Checking the ON_TOP_OF relations. 
-				 */
-				
-				// Balls cannot support anything.
-				if (relation.getEntityB().getForm() == Entity.FORM.BALL) {
-					return false;
-				}
-
-				// Small objects cannot support large objects.
-				if (relation.getEntityA().getSize() == Entity.SIZE.LARGE && relation.getEntityB().getSize() == Entity.SIZE.SMALL) {
-					return false;
-				}
-				
-				// Boxes can only be supported by tables or planks of the same size, but large boxes can also be supported by large bricks.				
-				if (relation.getEntityA().getForm() == Entity.FORM.BOX) {
-					if (relation.getEntityB().getForm() != Entity.FORM.FLOOR) {
-						if (relation.getEntityA().getSize() == Entity.SIZE.LARGE) {
-							if (relation.getEntityB().getSize() == Entity.SIZE.LARGE) {
-								if (relation.getEntityB().getForm() != Entity.FORM.BRICK && relation.getEntityB().getForm() != Entity.FORM.TABLE && relation.getEntityB().getForm() != Entity.FORM.PLANK) {
-									Debug.print("fail fail fail");
-									return false;
-								}
-							}
-						} else {
-							// If the box is small it cannot be supported by a small brick.
-							if (relation.getEntityB().getSize() == Entity.SIZE.SMALL && relation.getEntityB().getForm() == Entity.FORM.BRICK) {
-								return false;
-							}
-							
-							if (relation.getEntityB().getForm() != Entity.FORM.BRICK && relation.getEntityB().getForm() != Entity.FORM.TABLE && relation.getEntityB().getForm() != Entity.FORM.PLANK) {
-								return false;
-							}
-						}
-					}
-				}
-				
-				// Balls can only be on top of the floor or inside a box
-				if (relation.getEntityA().getForm() == Entity.FORM.BALL && relation.getType() == Relation.TYPE.ON_TOP_OF) {
-					if (relation.getEntityB().getForm() != Entity.FORM.FLOOR) {
-						return false;
-					}
-				}
-			} else if (relation.getType() == Relation.TYPE.UNDER) {
-				if (relation.getEntityA().getForm() == Entity.FORM.BALL){
-					return false;
-				}
-				if (relation.getEntityA().getSize() == Entity.SIZE.SMALL && relation.getEntityB().getSize() == Entity.SIZE.LARGE) {
-					return false;
-				}
+			if (!isValidRelation(relation)) {
+				return false;
 			}
 		}
 		return true;
 	}
 
+	public static boolean isValidRelation(Relation relation) {
+		if (relation.getType().equals(Relation.TYPE.INSIDE)) {
+			/*
+			 * Check the INSIDE relation type.
+			 */
+			
+			// Balls must be inside boxes. (On the floor handled below.)
+			if (relation.getEntityA().getForm() == Entity.FORM.BALL && relation.getEntityB().getForm() != Entity.FORM.BOX) {
+				return false;
+			}
+			
+			// Objects are only inside boxes.
+			if (relation.getEntityB().getForm() != Entity.FORM.BOX) {
+				return false;
+			}
+			
+			// Small boxes can only contain small items.
+			if (relation.getEntityB().getSize() == Entity.SIZE.SMALL) {
+				if (relation.getEntityA().getSize() != Entity.SIZE.SMALL) {
+					return false;
+				}
+			}
+			
+			// Only large boxes can contain small boxes.
+			if (relation.getEntityA().getSize() == Entity.SIZE.LARGE && relation.getEntityA().getForm() == Entity.FORM.BOX) {
+				return false;
+			}
+			
+			if (relation.getEntityA().getForm() == Entity.FORM.PLANK || relation.getEntityA().getForm() == Entity.FORM.PYRAMID || relation.getEntityA().getForm() == Entity.FORM.BOX) {
+				if (relation.getEntityB().getSize() == Entity.SIZE.LARGE) {
+					// Boxes cannot contain planks or pyramids of the same size
+					// as the box.
+					if (relation.getEntityA().getSize() != Entity.SIZE.SMALL) {
+						return false;
+					}
+				} else {
+					return false;
+				}
+			}
+		} else if (relation.getType() == Relation.TYPE.ON_TOP_OF) {
+			/*
+			 * Checking the ON_TOP_OF relations. 
+			 */
+			
+			// Balls cannot support anything.
+			if (relation.getEntityB().getForm() == Entity.FORM.BALL) {
+				return false;
+			}
+
+			// Small objects cannot support large objects.
+			if (relation.getEntityA().getSize() == Entity.SIZE.LARGE && relation.getEntityB().getSize() == Entity.SIZE.SMALL) {
+				return false;
+			}
+			
+			// Boxes can only be supported by tables or planks of the same size, but large boxes can also be supported by large bricks.				
+			if (relation.getEntityA().getForm() == Entity.FORM.BOX) {
+				if (relation.getEntityB().getForm() != Entity.FORM.FLOOR) {
+					if (relation.getEntityA().getSize() == Entity.SIZE.LARGE) {
+						if (relation.getEntityB().getSize() == Entity.SIZE.LARGE) {
+							if (relation.getEntityB().getForm() != Entity.FORM.BRICK && relation.getEntityB().getForm() != Entity.FORM.TABLE && relation.getEntityB().getForm() != Entity.FORM.PLANK) {
+								Debug.print("fail fail fail");
+								return false;
+							}
+						}
+					} else {
+						// If the box is small it cannot be supported by a small brick.
+						if (relation.getEntityB().getSize() == Entity.SIZE.SMALL && relation.getEntityB().getForm() == Entity.FORM.BRICK) {
+							return false;
+						}
+						
+						if (relation.getEntityB().getForm() != Entity.FORM.BRICK && relation.getEntityB().getForm() != Entity.FORM.TABLE && relation.getEntityB().getForm() != Entity.FORM.PLANK) {
+							return false;
+						}
+					}
+				}
+			}
+			
+			// Balls can only be on top of the floor or inside a box
+			if (relation.getEntityA().getForm() == Entity.FORM.BALL && relation.getType() == Relation.TYPE.ON_TOP_OF) {
+				if (relation.getEntityB().getForm() != Entity.FORM.FLOOR) {
+					return false;
+				}
+			}
+		} else if (relation.getType() == Relation.TYPE.UNDER) {
+			if (relation.getEntityA().getForm() == Entity.FORM.BALL){
+				return false;
+			}
+			if (relation.getEntityA().getSize() == Entity.SIZE.SMALL && relation.getEntityB().getSize() == Entity.SIZE.LARGE) {
+				return false;
+			}
+		}
+		// An object cannot be related to itself.
+		if (relation.getEntityA().equalsExact(relation.getEntityB())) {
+			return false;
+		}
+		return true;
+	}
+	
 	/**
 	 * For every column in the given world, checks if it is valid using isValidColumn(column).
 	 * 

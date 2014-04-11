@@ -127,116 +127,6 @@ public class Relation {
 
 	/**
 	 * Returns a list of all entities in the given world that match the given
-	 * entity and relation.
-	 * 
-	 * @param entity
-	 *            the Entity to match against a relation.
-	 * @param relation
-	 *            the Relation that describes the relation that should hold for
-	 *            the given entity.
-	 * @param world
-	 *            a 2D array of entities that describes the world.
-	 * @return a list of all the entities that match the given relation.
-	 */
-	public static List<Entity> matchEntityAndRelation(Entity entity, Relation relation, List<List<Entity>> world, Entity heldEntity) {
-		List<Entity> matchedEntities = new ArrayList<>();
-		
-		if (relation != null) {
-			// If a relation is given, we need to make sure that we only
-			// match against objects that also match the given relation.
-			for (List<Entity> column : world) {
-				if (column.contains(entity)) {
-					if (relation.getType().equals(Relation.TYPE.ON_TOP_OF)) {
-						if (relation.getEntityB().getForm().equals(Entity.FORM.FLOOR)) {
-							// The floor is a special case, since it is
-							// not represented in our world.
-							if (column.indexOf(entity) == 0) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
-							}
-						} else if (!relation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
-							// An entity is never on top of a box.
-							// Check for entities below this entity.
-							if (column.indexOf(entity) > 0 && column.get(column.indexOf(entity) - 1).equals(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
-							}
-						}
-					} else if (relation.getType().equals(Relation.TYPE.INSIDE)) {
-						// Entities are always inside boxes, nothing
-						// else. Only boxes.
-						if (relation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
-							if (column.indexOf(entity) > 0 && column.get(column.indexOf(entity) - 1).equals(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
-							}
-						}
-					} else if (relation.getType().equals(Relation.TYPE.ABOVE)) {
-						// Check for entities below this entity.
-						for (int i = column.indexOf(entity); i >= 0; i--) {
-							if (column.get(i).equals(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
-							}
-						}
-					} else if (relation.getType().equals(Relation.TYPE.UNDER)) {
-						// Check for entities above this entity.
-						for (int i = column.indexOf(entity); i < column.size(); i++) {
-							if (column.get(i).equals(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
-							}
-						}
-					} else if (relation.getType().equals(Relation.TYPE.BESIDE)) {
-						// Relation says the entity should be beside
-						// another entity, is it?
-						if (world.indexOf(column) + 1 < world.size()) {
-							// Is it to the right of this entity?
-							if (world.get(world.indexOf(column) + 1).contains(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
-							}
-						} else if (world.indexOf(column) - 1 >= 0) {
-							// Is is to the left of this entity?
-							if (world.get(world.indexOf(column) - 1).contains(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
-							}
-						}
-					} else if (relation.getType().equals(Relation.TYPE.LEFT_OF)) {
-						// Relation says the entity should be left of
-						// another entity, is it?
-						for (int i = world.indexOf(column) + 1; i < world.size(); i++) {
-							if (world.get(i).contains(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
-							}
-						}
-					} else if (relation.getType().equals(Relation.TYPE.RIGHT_OF)) {
-						// Relation says the entity should be right of
-						// another entity, is it
-						for (int i = world.indexOf(column) - 1; i >= 0; i--) {
-							if (world.get(i).contains(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
-							}
-						}
-					}
-				}
-			}
-		} else {
-			// If no relation is given, we can match against any object.
-			Debug.print("No relation given, matching " + entity + " against all objects in the world.");
-			if (heldEntity != null && heldEntity.equals(entity)) {
-				matchedEntities.add(heldEntity);
-			}
-			
-			for (List<Entity> column : world) {
-				if (column.contains(entity)) {
-					for (Entity centity : column) {
-						if (centity.equals(entity)) {
-							matchedEntities.add(centity);
-						}
-					}
-				}
-			}
-		}
-		return matchedEntities;
-	}
-
-	/**
-	 * Returns a list of all entities in the given world that match the given
 	 * entity and relation exactly, by using the equalsExact method of the
 	 * Entity class.
 	 * 
@@ -262,21 +152,23 @@ public class Relation {
 							// The floor is a special case, since it is
 							// not represented in our world.
 							if (column.indexOf(entity) == 0) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
+								matchedEntities.add(entity);
 							}
 						} else if (!relation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
 							// An entity is never on top of a box.
-							if (column.indexOf(entity) > 0 && column.get(column.indexOf(entity) - 1).equalsExact(relation.getEntityB())) {
+							if (column.contains(entity) && column.get(column.indexOf(entity) - 1).equalsExact(relation.getEntityB())) {
 								// Check for entities below this entity.
-								matchedEntities.add(column.get(column.indexOf(entity)));
+								matchedEntities.add(entity);
 							}
 						}
 					} else if (relation.getType().equals(Relation.TYPE.INSIDE)) {
 						// Entities are always inside boxes, nothing
 						// else. Only boxes.
 						if (relation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
-							if (column.indexOf(entity) > 0 && column.get(column.indexOf(entity) - 1).equalsExact(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
+							if (column.contains(entity) && column.indexOf(entity) - 1 >= 0) {
+								if (column.get(column.indexOf(entity) - 1).equals(relation.getEntityB())) {
+									matchedEntities.add(entity);
+								}
 							}
 						}
 					} else if (relation.getType().equals(Relation.TYPE.ABOVE)) {
@@ -284,54 +176,59 @@ public class Relation {
 						if (column.contains(entity)) {
 							for (int i = column.indexOf(entity); i >= 0; i--) {
 								if (column.get(i).equalsExact(relation.getEntityB())) {
-									matchedEntities.add(column.get(column.indexOf(entity)));
+									matchedEntities.add(entity);
 								}
 							}
 						}
 					} else if (relation.getType().equals(Relation.TYPE.UNDER)) {
 						// Check for entities above this entity.
 						if (column.contains(entity)) {
-							for (int i = column.indexOf(entity); i < column.size(); i++) {
+							for (int i = column.indexOf(entity) + 1; i < column.size() - 1; i++) {
 								if (column.get(i).equalsExact(relation.getEntityB())) {
-									matchedEntities.add(column.get(column.indexOf(entity)));
+									matchedEntities.add(entity);
 								}
 							}
 						}
 					} else if (relation.getType().equals(Relation.TYPE.BESIDE)) {
 						// Relation says the entity should be beside
 						// another entity, is it?
-						if (world.indexOf(column) + 1 < world.size()) {
-							// Is it to the right of this entity?
-							if (world.get(world.indexOf(column) + 1).contains(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
-							}
-						} else if (world.indexOf(column) - 1 >= 0) {
-							// Is is to the left of this entity?
-							if (world.get(world.indexOf(column) - 1).contains(relation.getEntityB())) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
+						if (column.contains(entity)) {
+							if (world.indexOf(column) + 1 < world.size()) {
+								// Is it to the right of this entity?
+								if (world.get(world.indexOf(column) + 1).contains(relation.getEntityB())) {
+									matchedEntities.add(entity);
+								}
+							} else if (world.indexOf(column) - 1 >= 0) {
+								// Is is to the left of this entity?
+								if (world.get(world.indexOf(column) - 1).contains(relation.getEntityB())) {
+									matchedEntities.add(entity);
+								}
 							}
 						}
 					} else if (relation.getType().equals(Relation.TYPE.LEFT_OF)) {
 						// Relation says the entity should be left of
 						// another entity, is it?
-						for (int i = world.indexOf(column) + 1; i < world.size(); i++) {
-							if (world.get(i).contains(relation.getEntityB()) && column.contains(entity)) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
+						if (column.contains(entity)) {
+							for (int i = world.indexOf(column) + 1; i < world.size(); i++) {
+								if (world.get(i).contains(relation.getEntityB())) {
+									matchedEntities.add(entity);
+								}
 							}
 						}
 					} else if (relation.getType().equals(Relation.TYPE.RIGHT_OF)) {
 						// Relation says the entity should be right of
 						// another entity, is it
-						for (int i = world.indexOf(column) - 1; i >= 0; i--) {
-							if (world.get(i).contains(relation.getEntityB()) && column.contains(entity)) {
-								matchedEntities.add(column.get(column.indexOf(entity)));
+						if (column.contains(entity)) {
+							for (int i = world.indexOf(column) - 1; i >= 0; i--) {
+								if (world.get(i).contains(relation.getEntityB())) {
+									matchedEntities.add(entity);
+								}
 							}
 						}
 					}
 				}
 			}
 		}
-		
 		return matchedEntities;
 	}
 
