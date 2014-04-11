@@ -14,7 +14,7 @@ public class ErikThePlanner {
 		this.world = world;
 		this.heldEntity = heldEntity;
 	}
-
+ 
 	public Plan solve(Goal goal, int maxDepth) {
 		// We use a PriorityQueue to order all possible plans by their cost.
 		PriorityQueue<Plan> queue = new PriorityQueue<>();
@@ -95,7 +95,10 @@ public class ErikThePlanner {
 
 				try {
 					Plan p = new Plan(plan.currentState.takeAction(newAction), actionList, goal);
-
+					if(!tabuList.add(p)) {
+						Debug.print("Found a Plan in Tabu list.");
+						continue;
+					}
 					if (newAction.command == Action.COMMAND.DROP) {
 						if (ConstraintCheck.isValidColumn(p.currentState.world.get(newAction.column))) {
 							queue.add(p);
