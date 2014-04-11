@@ -559,15 +559,17 @@ public class InterpreterNew {
 				} else if (!relation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
 					// An entity is never on top of a box.
 					// Check for entities below this entity.
-					if (column.contains(entity) && column.get(column.indexOf(entity) - 1).equals(relation.getEntityB())) {
-						return true;
+					if (column.contains(entity) && column.indexOf(entity) > 0) {
+						if (column.get(column.indexOf(entity) - 1).equals(relation.getEntityB())) {
+							return true;
+						}
 					}
 				}
 			} else if (relation.getType().equals(Relation.TYPE.INSIDE)) {
 				// Entities are always inside boxes, nothing
 				// else. Only boxes.
 				if (relation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
-					if (column.contains(entity) && column.indexOf(entity) - 1 >= 0) {
+					if (column.contains(entity) && column.indexOf(entity) > 0) {
 						if (column.get(column.indexOf(entity) - 1).equals(relation.getEntityB())) {
 							return true;
 						}

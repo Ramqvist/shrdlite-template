@@ -156,16 +156,18 @@ public class Relation {
 							}
 						} else if (!relation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
 							// An entity is never on top of a box.
-							if (column.contains(entity) && column.get(column.indexOf(entity) - 1).equalsExact(relation.getEntityB())) {
-								// Check for entities below this entity.
-								matchedEntities.add(entity);
+							if (column.contains(entity) && column.indexOf(entity) > 0) {
+								if (column.get(column.indexOf(entity) - 1).equalsExact(relation.getEntityB())) {
+									// Check for entities below this entity.
+									matchedEntities.add(entity);
+								}
 							}
 						}
 					} else if (relation.getType().equals(Relation.TYPE.INSIDE)) {
 						// Entities are always inside boxes, nothing
 						// else. Only boxes.
 						if (relation.getEntityB().getForm().equals(Entity.FORM.BOX)) {
-							if (column.contains(entity) && column.indexOf(entity) - 1 >= 0) {
+							if (column.contains(entity) && column.indexOf(entity) > 0) {
 								if (column.get(column.indexOf(entity) - 1).equals(relation.getEntityB())) {
 									matchedEntities.add(entity);
 								}
@@ -183,7 +185,7 @@ public class Relation {
 					} else if (relation.getType().equals(Relation.TYPE.UNDER)) {
 						// Check for entities above this entity.
 						if (column.contains(entity)) {
-							for (int i = column.indexOf(entity) + 1; i < column.size() - 1; i++) {
+							for (int i = column.indexOf(entity) + 1; i < column.size(); i++) {
 								if (column.get(i).equalsExact(relation.getEntityB())) {
 									matchedEntities.add(entity);
 								}
