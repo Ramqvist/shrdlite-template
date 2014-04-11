@@ -63,5 +63,51 @@ public class Plan implements Comparable<Plan>{
 	public String toString() {
 		return "(Plan " + actions + " : " + currentState + ")";
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((actions == null) ? 0 : actions.hashCode());
+		result = prime * result + ((currentState == null) ? 0 : currentState.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Plan)) {
+			return false;
+		}
+		Plan other = (Plan) obj;
+		if (actions == null) {
+			if (other.actions != null) {
+				return false;
+			}
+		} else if (!actions.equals(other.actions)) {
+			return false;
+		}
+		if (currentState == null) {
+			if (other.currentState != null) {
+				return false;
+			}
+		} else if (!currentState.equals(other.currentState)) {
+			return false;
+		}
+		return true;
+	}
+	
+	
 	
 }
