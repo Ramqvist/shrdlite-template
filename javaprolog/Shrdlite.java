@@ -71,24 +71,18 @@ public class Shrdlite {
 			} else if (goals.size() > 1000) { // TODO: Temporarily changed so we can ignore ambiguity errors for now.
 				result.put("output", "Ambiguity error!");
 			} else {
-				Planner planner = new Planner(interpreter.world, interpreter.heldEntity);
-				List<Plan> plans = new ArrayList<Plan>();
-				int maxDepth = Integer.MAX_VALUE;
-
-				for (Goal g : goals) {
-					long start = System.currentTimeMillis();
-					Plan aPlan = planner.solve(g, maxDepth);
-					if (aPlan != null) {
-						maxDepth = aPlan.actions.size();
-						plans.add(aPlan);
-					}
-					long elapsed = System.currentTimeMillis() - start;
-					Debug.print("Plan solved in: " + elapsed + " ms.");
+				GoalSolver goalSolver;
+				List<Plan> plans;
+				if (true) {
+					goalSolver = new ConcurrentGoalSolver(interpreter.world, interpreter.heldEntity, goals);
+					plans = goalSolver.solve();
+				} else {
+					goalSolver = new StandardGoalSolver(interpreter.world, interpreter.heldEntity, goals);
+					plans = goalSolver.solve();
 				}
 
 				// TODO? Create one thread per planner?
 				List<String> actionStrings = new ArrayList<>();
-				Debug.print(plans);
 				if (!plans.isEmpty()) {
 					List<Action> smallestPlan = plans.get(0).actions;
 					for(Plan p : plans) {

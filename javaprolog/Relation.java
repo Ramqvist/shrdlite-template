@@ -195,14 +195,19 @@ public class Relation {
 						// Relation says the entity should be beside
 						// another entity, is it?
 						if (column.contains(entity)) {
+//							Debug.print(relation);
 							if (world.indexOf(column) + 1 < world.size()) {
 								// Is it to the right of this entity?
+//								Debug.print("To the right " + world.get(world.indexOf(column) + 1));
 								if (world.get(world.indexOf(column) + 1).contains(relation.getEntityB())) {
+//									Debug.print("Matched!");
 									matchedEntities.add(entity);
 								}
 							} else if (world.indexOf(column) - 1 >= 0) {
 								// Is is to the left of this entity?
+//								Debug.print("To the left " + world.get(world.indexOf(column) - 1));
 								if (world.get(world.indexOf(column) - 1).contains(relation.getEntityB())) {
+//									Debug.print("Matched!");
 									matchedEntities.add(entity);
 								}
 							}
@@ -272,6 +277,16 @@ public class Relation {
 					if (world.get(x).get(y).equalsExact(b)) {
 						if (y != world.get(x).size() - 1) {
 							count -= world.get(x).size() - 1 - y;
+						}
+					}
+				} else if (type == TYPE.BESIDE) {
+					// The more items to the left or to the right of this item the better.
+					if (world.get(x).get(y).equalsExact(b)) {
+						if (x > 0) {
+							count += world.get(x - 1).size();
+						}
+						if (x < world.size() - 1) {
+							count += world.get(x + 1).size();
 						}
 					}
 				}

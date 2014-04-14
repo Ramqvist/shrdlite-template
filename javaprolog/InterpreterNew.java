@@ -264,11 +264,12 @@ public class InterpreterNew {
 
 		List<List<Relation>> relationsList = (List<List<Relation>>) walkTree(cterm.args[1]);
 		Debug.print("move: relationsList: " + relationsList);
-
+		
 		for (List<Entity> matchedEntities : matchedEntitiesList) {
-			List<Relation> goalRelationList = new ArrayList<>();
-			for (Entity matchedEntity : matchedEntities) {
-				for (List<Relation> relationList : relationsList) {
+			for (List<Relation> relationList : relationsList) {
+				List<Relation> goalRelationList = new ArrayList<>();
+				for (Entity matchedEntity : matchedEntities) {
+//					goalRelationList = new ArrayList<>();
 					for (Relation relation : relationList) {
 						Relation newRelation = new Relation(matchedEntity, relation.getEntityB(), relation.getType());
 						if (checkRelation(newRelation, goalRelationList)) {
@@ -276,9 +277,8 @@ public class InterpreterNew {
 						}
 					}
 				}
-			}
-			Debug.print(goalRelationList);
-			for (List<Relation> relationList : relationsList) {
+				Debug.print(goalRelationList);
+//				for (List<Relation> relationList : relationsList) {
 				int countOfRelationsToSelf = 0;
 				for (Entity matchedEntity : matchedEntities) {
 					for (Relation relation : relationList) {
@@ -291,9 +291,10 @@ public class InterpreterNew {
 				if (goalRelationList.size() < relationList.size() - countOfRelationsToSelf) {
 					goalRelationList.clear();
 				}
-			}
-			if (!goalRelationList.isEmpty()) {
-				goalList.add(new Goal(goalRelationList));
+//				}
+				if (!goalRelationList.isEmpty()) {
+					goalList.add(new Goal(goalRelationList));
+				}
 			}
 		}
 		return null;
