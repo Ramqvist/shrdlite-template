@@ -38,18 +38,16 @@ public class ConcurrentGoalSolver implements GoalSolver {
 				Plan plan = future.get();
 				plans.add(plan);
 				Debug.print(plan + " received!");;
-			} catch (InterruptedException e) {
+			} catch (InterruptedException | ExecutionException e) {
 				Debug.print(e.getMessage());
-			} catch (ExecutionException e) {
-				Debug.print(e.getMessage());
-				e.printStackTrace();
 			}
 		}
 		
 		executorService.shutdownNow();
 		
+		Debug.print();
 		Debug.print("All goals solved!");
-		Debug.print(plans);
+		Debug.print("Received the following plans: " + plans);
 		return plans;
 	}
 	

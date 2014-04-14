@@ -45,7 +45,6 @@ public class ConcurrentPlanner implements Callable<Plan> {
 		while (true) {
 			count++;
 			plan = queue.poll();
-//			Debug.print(this + ": " + plan.actions);
 			if (hasReachedGoal(goal, plan.currentState)) {
 				Debug.print(this + ": " + plan + " reached the goal state " + goal);
 				Debug.print(this + ": Planning finished!");
@@ -91,7 +90,6 @@ public class ConcurrentPlanner implements Callable<Plan> {
 					size = actionList.size();
 					Debug.print(this + ": " + size);
 					if (size > maxDepth) {
-						Debug.print(maxDepth + " " + size);
 						throw new InterruptedException(this + ": interrupted, my plan is too long: " + size + " > " + maxDepth);
 					}
 				}

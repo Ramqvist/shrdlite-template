@@ -81,7 +81,6 @@ public class Shrdlite {
 					plans = goalSolver.solve();
 				}
 
-				// TODO? Create one thread per planner?
 				List<String> actionStrings = new ArrayList<>();
 				if (!plans.isEmpty()) {
 					List<Action> smallestPlan = plans.get(0).actions;
@@ -90,6 +89,10 @@ public class Shrdlite {
 							smallestPlan = p.actions;
 						}
 					}
+
+					Debug.print();
+					Debug.print("Picked " + smallestPlan + "!");
+					Debug.print();
 					
 					for (Action action: smallestPlan) {
 						actionStrings.add(action.toString());
