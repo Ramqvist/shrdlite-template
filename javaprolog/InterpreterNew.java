@@ -547,7 +547,6 @@ public class InterpreterNew {
 					}
 				}
 			}
-//			throw new InterpretationException("No objects matching " + relationsList + " could be found.");
 		} else {
 			for (Entity entity : matchedEntities) {
 				matchedEntitiesPair.add(new Pair<Entity, Relation>(entity, null));
@@ -555,21 +554,6 @@ public class InterpreterNew {
 		}
 		Debug.print("relative_entity: matchedEntitiesPair: " + matchedEntitiesPair);
 
-//		List<List<Entity>> matchedEntitiesPruned = new ArrayList<List<Entity>>();
-//		if (quantifier.equals("the")) {
-//			Entity temp = matchedEntities.get(0);
-//			matchedEntities.clear();
-//			matchedEntities.add(temp);
-//			matchedEntitiesPruned.add(matchedEntities);
-//		} else if (quantifier.equals("any")) {
-//			for (Entity matchedEntity : matchedEntities) {
-//				List<Entity> tempList = new ArrayList<>();
-//				tempList.add(matchedEntity);
-//				matchedEntitiesPruned.add(tempList);
-//			}
-//		} else if (quantifier.equals("all")) {
-//			matchedEntitiesPruned.add(matchedEntities);
-//		}
 		List<List<Pair<Entity, Relation>>> matchedEntitiesPruned = new ArrayList<>();
 		if (quantifier.equals("the")) {
 			Pair<Entity, Relation> temp = matchedEntitiesPair.get(0);
