@@ -192,9 +192,9 @@ public class InterpreterNew {
 			switch (aterm.value) {
 			case "floor":
 				Debug.print("saw floor");
-				List<List<Entity>> tempListList = new ArrayList<List<Entity>>();
-				List<Entity> tempList = new ArrayList<Entity>();
-				tempList.add(new Entity(Entity.FORM.FLOOR, Entity.SIZE.UNDEFINED, Entity.COLOR.UNDEFINED));
+				List<List<Pair<Entity, Relation>>> tempListList = new ArrayList<>();
+				List<Pair<Entity, Relation>> tempList = new ArrayList<>();
+				tempList.add(new Pair<Entity, Relation>(new Entity(Entity.FORM.FLOOR, Entity.SIZE.UNDEFINED, Entity.COLOR.UNDEFINED), null));
 				tempListList.add(tempList);
 				return tempListList;
 			case "the":
@@ -226,14 +226,14 @@ public class InterpreterNew {
 	 */
 	private Object take(CompoundTerm cterm) throws InterpretationException {
 		Debug.print("saw take");
-		List<List<Entity>> matchedEntitiesList = (List<List<Entity>>) walkTree(cterm.args[0]);
-		for (List<Entity> matchedEntities : matchedEntitiesList) {
-			for (Entity matchedEntity : matchedEntities) {
-				if (matchedEntity.getForm() == Entity.FORM.FLOOR) {
+		List<List<Pair<Entity, Relation>>> matchedEntitiesList = (List<List<Pair<Entity, Relation>>>) walkTree(cterm.args[0]);
+		for (List<Pair<Entity, Relation>> matchedEntities : matchedEntitiesList) {
+			for (Pair<Entity, Relation> matchedEntity : matchedEntities) {
+				if (matchedEntity.a.getForm() == Entity.FORM.FLOOR) {
 					throw new InterpretationException("You can't take the floor, stupid.");
 				}
 
-				goalList.add(new Goal(new Relation(matchedEntity, new Entity(), Relation.TYPE.HELD)));
+				goalList.add(new Goal(new Relation(matchedEntity.a, new Entity(), Relation.TYPE.HELD)));
 			}
 		}
 		return null;
@@ -259,17 +259,27 @@ public class InterpreterNew {
 		 */
 		Debug.print("saw move");
 
-		List<List<Entity>> matchedEntitiesList = (List<List<Entity>>) walkTree(cterm.args[0]);
+		List<List<Pair<Entity, Relation>>> matchedEntitiesList = (List<List<Pair<Entity, Relation>>>) walkTree(cterm.args[0]);
 		Debug.print("move: matchedEntitiesList: " + matchedEntitiesList);
 
-		List<List<Relation>> relationsList = (List<List<Relation>>) walkTree(cterm.args[1]);
+		// There is no need to continue if no matched entities could be found. Also, we only care about the new relations possibly created
+		// if they are created on the right side.
+		if (matchedEntitiesList.isEmpty() || matchedEntitiesList.get(0).get(0).b != null) {
+			return null;
+		}
+		
+		List<List<List<Relation>>> relationsList = (List<List<List<Relation>>>) walkTree(cterm.args[1]);
 		Debug.print("move: relationsList: " + relationsList);
+		
+		if (relationsList.isEmpty()) {
+			return null;
+		}
 
 		// Check if "a" inside / on top of "all".
 		if (matchedEntitiesList.size() >= 1 && relationsList.size() == 1) {
 			if (matchedEntitiesList.get(0).size() == 1 && relationsList.get(0).size() > 1) {
-				if (relationsList.get(0).get(0).getType() == Relation.TYPE.INSIDE
-						|| relationsList.get(0).get(0).getType() == Relation.TYPE.ON_TOP_OF) {
+				if (relationsList.get(0).get(0).get(0).getType() == Relation.TYPE.INSIDE
+						|| relationsList.get(0).get(0).get(0).getType() == Relation.TYPE.ON_TOP_OF) {
 					// TODO: Try to fix or just deny?
 					return null;
 				}
@@ -280,46 +290,63 @@ public class InterpreterNew {
 		// fix these.
 		if (matchedEntitiesList.size() == 1 && relationsList.size() >= 1) {
 			if (matchedEntitiesList.get(0).size() > 1 && relationsList.get(0).size() == 1) {
-				if (relationsList.get(0).get(0).getType() == Relation.TYPE.INSIDE
-						|| relationsList.get(0).get(0).getType() == Relation.TYPE.ON_TOP_OF) {
-					List<Relation> tempList = new ArrayList<>();
-					for (List<Relation> relations : relationsList) {
-						tempList.add(relations.get(0));
+				if (relationsList.get(0).get(0).get(0).getType() == Relation.TYPE.INSIDE
+						|| relationsList.get(0).get(0).get(0).getType() == Relation.TYPE.ON_TOP_OF) {
+					List<List<Relation>> tempList = new ArrayList<>();
+					for (List<List<Relation>> relationList : relationsList) {
+						tempList.add(relationList.get(0));
 					}
 					relationsList.clear();
 					relationsList.add(tempList);
-					Debug.print("move: found an all to a relation, fixed it. New relationsList: " + relationsList);
+					Debug.print("move: found an \"all -> a\" relation, fixed it. New relationsList: " + relationsList);
 				}
 			}
 		}
 
-		for (List<Entity> matchedEntities : matchedEntitiesList) {
-			for (List<Relation> relationList : relationsList) {
+		for (List<Pair<Entity, Relation>> matchedEntities : matchedEntitiesList) {
+			for (List<List<Relation>> relationListList : relationsList) {
+				Debug.print(relationListList);
 				List<Relation> goalRelationList = new ArrayList<>();
-				for (Entity matchedEntity : matchedEntities) {
-					Debug.print(matchedEntity);
+				for (Pair<Entity, Relation> matchedEntityPair : matchedEntities) {
+					Debug.print("move: matchedEntityPair: " + matchedEntityPair);
 					// goalRelationList = new ArrayList<>();
-					for (Relation relation : relationList) {
-						Debug.print(relation);
-						Relation newRelation = new Relation(matchedEntity, relation.getEntityB(), relation.getType());
-						if (checkRelation(newRelation, goalRelationList)) {
-							Debug.print("move: added " + newRelation);
-							goalRelationList.add(newRelation);
+					for (List<Relation> relationList : relationListList) {
+						Debug.print("move: relationList: " + relationList);
+//						goalRelationList = tryToAddRelation(relationList, matchedEntityPair, goalRelationList);
+						for (Relation relation : relationList) {
+							Debug.print("move: relation: " + relation);
+							if (relation.getEntityA().getForm() == Entity.FORM.UNDEFINED) {
+								Relation newRelation = new Relation(matchedEntityPair.a, relation.getEntityB(), relation.getType());
+								if (checkRelation(newRelation, goalRelationList)) {
+									Debug.print("move: added " + newRelation);
+									goalRelationList.add(newRelation);
+								} else {
+//									return new ArrayList<Relation>();
+								}
+							} else {
+								if (checkRelation(relation, goalRelationList)) {
+									Debug.print("move: added " + relation);
+									goalRelationList.add(relation);
+								}
+							}
 						}
+						Debug.print("move: goalRelationList: " + goalRelationList);
 					}
 				}
 				Debug.print(goalRelationList);
 				// for (List<Relation> relationList : relationsList) {
 				int countOfRelationsToSelf = 0;
-				for (Entity matchedEntity : matchedEntities) {
-					for (Relation relation : relationList) {
-						if (relation.getEntityB().equalsExact(matchedEntity)) {
-							Debug.print(matchedEntity + " exists in relationList.");
-							countOfRelationsToSelf++;
+				for (Pair<Entity, Relation> matchedEntity : matchedEntities) {
+					for (List<Relation> relationList : relationListList) {
+						for (Relation relation : relationList) {
+							if (relation.getEntityB().equalsExact(matchedEntity.a)) {
+								Debug.print(matchedEntity.a + " exists in relationList.");
+								countOfRelationsToSelf++;
+							}
 						}
 					}
 				}
-				if (goalRelationList.size() < relationList.size() - countOfRelationsToSelf) {
+				if (goalRelationList.size() < relationListList.size() - countOfRelationsToSelf) {
 					goalRelationList.clear();
 				}
 				// }
@@ -329,6 +356,28 @@ public class InterpreterNew {
 			}
 		}
 		return null;
+	}
+	
+	private List<Relation> tryToAddRelation(List<Relation> relationList, Pair<Entity, Relation> matchedEntityPair, List<Relation> goalRelationList) {
+		List<Relation> tempGoalRelationList = new ArrayList<>(goalRelationList);
+		for (Relation relation : relationList) {
+			Debug.print("move: relation: " + relation);
+			if (relation.getEntityA().getForm() == Entity.FORM.UNDEFINED) {
+				Relation newRelation = new Relation(matchedEntityPair.a, relation.getEntityB(), relation.getType());
+				if (checkRelation(newRelation, tempGoalRelationList)) {
+					Debug.print("move: added " + newRelation);
+					tempGoalRelationList.add(newRelation);
+				} else {
+					return new ArrayList<Relation>();
+				}
+			} else {
+				if (checkRelation(relation, tempGoalRelationList)) {
+					Debug.print("move: added " + relation);
+					tempGoalRelationList.add(relation);
+				}
+			}
+		}
+		return tempGoalRelationList;
 	}
 
 	/**
@@ -343,6 +392,7 @@ public class InterpreterNew {
 	 */
 	private boolean checkRelation(Relation relation, List<Relation> relationList) {
 		if (!ConstraintCheck.isValidRelation(relation)) {
+			Debug.print("checkRelation: " + relation + " is false cause it isn't valid.");
 			return false;
 		}
 		if (relation.getType() == Relation.TYPE.INSIDE || relation.getType() == Relation.TYPE.ON_TOP_OF) {
@@ -375,22 +425,25 @@ public class InterpreterNew {
 	 *             if no matching entities could be found.
 	 */
 	private Object relative(CompoundTerm cterm) throws InterpretationException {
-		// TODO: This should ONLY return a list of relations, one for each item
-		// returned from the right child.
 		Debug.print("saw relative");
 		Relation.TYPE relationType = (Relation.TYPE) walkTree(cterm.args[0]);
 		Debug.print("relative: relationType: " + relationType);
 
-		List<List<Entity>> matchedEntitiesList = (List<List<Entity>>) walkTree(cterm.args[1]);
+		List<List<Pair<Entity, Relation>>> matchedEntitiesList = (List<List<Pair<Entity, Relation>>>) walkTree(cterm.args[1]);
 		Debug.print("relative: matchedEntitiesList: " + matchedEntitiesList);
 
-		List<List<Relation>> relationsList = new ArrayList<List<Relation>>();
-		for (List<Entity> matchedEntities : matchedEntitiesList) {
-			List<Relation> tempList = new ArrayList<>();
-			for (Entity someEntity : matchedEntities) {
-				tempList.add(new Relation(new Entity(), someEntity, relationType));
+		List<List<List<Relation>>> relationsList = new ArrayList<>();
+		for (List<Pair<Entity, Relation>> matchedEntities : matchedEntitiesList) {
+			List<List<Relation>> tempListList = new ArrayList<>();
+			for (Pair<Entity, Relation> someEntity : matchedEntities) {
+				List<Relation> tempList = new ArrayList<>();
+				tempList.add(new Relation(new Entity(), someEntity.a, relationType));
+				if (someEntity.b != null) {
+					tempList.add(someEntity.b);
+				}
+				tempListList.add(tempList);
 			}
-			relationsList.add(tempList);
+			relationsList.add(tempListList);
 		}
 		Debug.print("relative: relationsList: " + relationsList);
 		return relationsList;
@@ -417,20 +470,27 @@ public class InterpreterNew {
 		List<Entity> matchedEntities = (List<Entity>) walkTree(cterm.args[1]);
 		Debug.print("basicEntity: matchedEntities: " + matchedEntities);
 
-		List<List<Entity>> matchedEntitiesPruned = new ArrayList<List<Entity>>();
+		List<List<Pair<Entity, Relation>>> matchedEntitiesPruned = new ArrayList<>();
 		if (quantifier.equals("the")) {
 			Entity temp = matchedEntities.get(0);
-			matchedEntities.clear();
-			matchedEntities.add(temp);
-			matchedEntitiesPruned.add(matchedEntities);
+			Pair<Entity, Relation> pair = new Pair<>(temp, null);
+			List<Pair<Entity, Relation>> matchedEntitiesPair = new ArrayList<>();
+			matchedEntitiesPair.add(pair);
+			matchedEntitiesPruned.add(matchedEntitiesPair);
 		} else if (quantifier.equals("any")) {
 			for (Entity matchedEntity : matchedEntities) {
-				List<Entity> tempList = new ArrayList<>();
-				tempList.add(matchedEntity);
-				matchedEntitiesPruned.add(tempList);
+				Pair<Entity, Relation> pair = new Pair<>(matchedEntity, null);
+				List<Pair<Entity, Relation>> matchedEntitiesPair = new ArrayList<>();
+				matchedEntitiesPair.add(pair);
+				matchedEntitiesPruned.add(matchedEntitiesPair);
 			}
 		} else if (quantifier.equals("all")) {
-			matchedEntitiesPruned.add(matchedEntities);
+			List<Pair<Entity, Relation>> matchedEntitiesPair = new ArrayList<>();
+			for (Entity matchedEntity : matchedEntities) {
+				Pair<Entity, Relation> pair = new Pair<>(matchedEntity, null);
+				matchedEntitiesPair.add(pair);
+			}
+			matchedEntitiesPruned.add(matchedEntitiesPair);
 		}
 		Debug.print("basicEntity: " + quantifier + ": picked " + matchedEntitiesPruned);
 		return matchedEntitiesPruned;
@@ -455,40 +515,76 @@ public class InterpreterNew {
 		String quantifier = (String) walkTree(cterm.args[0]);
 		Debug.print("relativeEntity: quantifier: " + quantifier);
 
-		List<List<Relation>> relationsList = (List<List<Relation>>) walkTree(cterm.args[2]);
+		List<List<List<Relation>>> relationsList = (List<List<List<Relation>>>) walkTree(cterm.args[2]);
 		Debug.print("relativeEntity: relationList: " + relationsList);
 
 		List<Entity> matchedEntities = (List<Entity>) walkTree(cterm.args[1]);
+		List<Entity> matchedEntitiesPrePrune = new ArrayList<>(matchedEntities);
 		Debug.print("relativeEntity: matchedEntities pre-prune: " + matchedEntities);
 
 		// We can first prune away all the entities that cannot be applied to
 		// any of the relations. Balls under objects etc.
 		List<Entity> tempEntityList = new ArrayList<>();
-		for (List<Relation> relationList : relationsList) {
-			tempEntityList.addAll(matchEntitiesAndRelations(world, matchedEntities, relationList, heldEntity));
-			Debug.print("relativeEntity: tempEntityList: " + tempEntityList);
+		for (List<List<Relation>> relationListList : relationsList) {
+			for (List<Relation> relationList : relationListList) {
+				tempEntityList.addAll(matchEntitiesAndRelations(world, matchedEntities, relationList, heldEntity));
+			}
 		}
 		matchedEntities = tempEntityList;
 		Debug.print("relativeEntity: matchedEntities post-prune: " + matchedEntities);
 
+		List<Pair<Entity, Relation>> matchedEntitiesPair = new ArrayList<>();
 		if (matchedEntities.isEmpty()) {
-			throw new InterpretationException("No objects matching " + relationsList + " could be found.");
+			for (List<List<Relation>> relationListList : relationsList) {
+				for (List<Relation> relationList : relationListList) {
+					for (Relation relation : relationList) {
+						for (Entity entity : matchedEntitiesPrePrune) {
+							Relation tempRelation = new Relation(entity, relation.getEntityB(), relation.getType());
+							if (ConstraintCheck.isValidRelation(tempRelation)) {
+								matchedEntitiesPair.add(new Pair<Entity, Relation>(entity, tempRelation));
+							}
+						}
+						Debug.print(relation);
+					}
+				}
+			}
+//			throw new InterpretationException("No objects matching " + relationsList + " could be found.");
+		} else {
+			for (Entity entity : matchedEntities) {
+				matchedEntitiesPair.add(new Pair<Entity, Relation>(entity, null));
+			}
 		}
+		Debug.print("relative_entity: matchedEntitiesPair: " + matchedEntitiesPair);
 
-		List<List<Entity>> matchedEntitiesPruned = new ArrayList<List<Entity>>();
+//		List<List<Entity>> matchedEntitiesPruned = new ArrayList<List<Entity>>();
+//		if (quantifier.equals("the")) {
+//			Entity temp = matchedEntities.get(0);
+//			matchedEntities.clear();
+//			matchedEntities.add(temp);
+//			matchedEntitiesPruned.add(matchedEntities);
+//		} else if (quantifier.equals("any")) {
+//			for (Entity matchedEntity : matchedEntities) {
+//				List<Entity> tempList = new ArrayList<>();
+//				tempList.add(matchedEntity);
+//				matchedEntitiesPruned.add(tempList);
+//			}
+//		} else if (quantifier.equals("all")) {
+//			matchedEntitiesPruned.add(matchedEntities);
+//		}
+		List<List<Pair<Entity, Relation>>> matchedEntitiesPruned = new ArrayList<>();
 		if (quantifier.equals("the")) {
-			Entity temp = matchedEntities.get(0);
-			matchedEntities.clear();
-			matchedEntities.add(temp);
-			matchedEntitiesPruned.add(matchedEntities);
+			Pair<Entity, Relation> temp = matchedEntitiesPair.get(0);
+			matchedEntitiesPair.clear();
+			matchedEntitiesPair.add(temp);
+			matchedEntitiesPruned.add(matchedEntitiesPair);
 		} else if (quantifier.equals("any")) {
-			for (Entity matchedEntity : matchedEntities) {
-				List<Entity> tempList = new ArrayList<>();
-				tempList.add(matchedEntity);
-				matchedEntitiesPruned.add(tempList);
+			for (Pair<Entity, Relation> matchedEntityPair : matchedEntitiesPair) {
+				List<Pair<Entity, Relation>> tempMatchedEntitiesPair = new ArrayList<>();
+				tempMatchedEntitiesPair.add(matchedEntityPair);
+				matchedEntitiesPruned.add(tempMatchedEntitiesPair);
 			}
 		} else if (quantifier.equals("all")) {
-			matchedEntitiesPruned.add(matchedEntities);
+			matchedEntitiesPruned.add(matchedEntitiesPair);
 		}
 		Debug.print("relativeEntity: " + quantifier + ": picked " + matchedEntitiesPruned);
 		return matchedEntitiesPruned;
@@ -519,19 +615,6 @@ public class InterpreterNew {
 		}
 
 		return matchedEntities;
-	}
-
-	/**
-	 * This is called to add an item to the relation list. It makes sure that
-	 * there are no relations created where an object is related to itself.
-	 * 
-	 * @param relation
-	 *            The relation to (maybe) add.
-	 */
-	private void addToRelations(Relation relation) {
-		if (!relation.getEntityA().equalsExact(relation.getEntityB())) {
-			relations.add(relation);
-		}
 	}
 
 	private List<Entity> matchEntity(List<List<Entity>> world, Entity entity) {
@@ -668,6 +751,23 @@ public class InterpreterNew {
 		return false;
 	}
 
+	private class Pair<A, B> {
+		
+		public final A a;
+		public final B b;
+		
+		public Pair(A a, B b) {
+			this.a = a;
+			this.b = b;
+		}
+		
+		@Override
+		public String toString() {
+			return "Pair<" + a + ", " + b + ">";
+		}
+		
+	}
+	
 	public class InterpretationException extends Exception {
 
 		private static final long serialVersionUID = 2280978916235342656L;
