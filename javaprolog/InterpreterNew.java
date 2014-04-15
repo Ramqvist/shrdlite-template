@@ -265,14 +265,45 @@ public class InterpreterNew {
 		List<List<Relation>> relationsList = (List<List<Relation>>) walkTree(cterm.args[1]);
 		Debug.print("move: relationsList: " + relationsList);
 		
+		// Check if 
+		if (matchedEntitiesList.size() >= 1 && relationsList.size() == 1) {
+			if (matchedEntitiesList.get(0).size() == 1 && relationsList.get(0).size() > 1) {
+				if (relationsList.get(0).get(0).getType() == Relation.TYPE.INSIDE || 
+						relationsList.get(0).get(0).getType() == Relation.TYPE.ON_TOP_OF) {
+					// "a" inside / on top of "all"
+					// TODO: Try to fix or just deny?
+					return null;
+				}
+			}
+		}
+		
+		if (matchedEntitiesList.size() == 1 && relationsList.size() >= 1) {
+			if (matchedEntitiesList.get(0).size() > 1 && relationsList.get(0).size() == 1) {
+				if (relationsList.get(0).get(0).getType() == Relation.TYPE.INSIDE || 
+						relationsList.get(0).get(0).getType() == Relation.TYPE.ON_TOP_OF) {
+					// "all" inside / on top of "a"
+					List<Relation> tempList = new ArrayList<>();
+					for (List<Relation> relations : relationsList) {
+						tempList.add(relations.get(0));
+					}
+					relationsList.clear();
+					relationsList.add(tempList);
+					Debug.print("move: found an all to a relation, fixed it. New relationsList: " + relationsList);
+				}
+			}
+		}
+		
 		for (List<Entity> matchedEntities : matchedEntitiesList) {
 			for (List<Relation> relationList : relationsList) {
 				List<Relation> goalRelationList = new ArrayList<>();
 				for (Entity matchedEntity : matchedEntities) {
+					Debug.print(matchedEntity);
 //					goalRelationList = new ArrayList<>();
 					for (Relation relation : relationList) {
+						Debug.print(relation);
 						Relation newRelation = new Relation(matchedEntity, relation.getEntityB(), relation.getType());
 						if (checkRelation(newRelation, goalRelationList)) {
+							Debug.print("move: added " + newRelation);
 							goalRelationList.add(newRelation);
 						}
 					}
