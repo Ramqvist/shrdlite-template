@@ -309,10 +309,8 @@ public class InterpreterNew {
 				List<Relation> goalRelationList = new ArrayList<>();
 				for (Pair<Entity, Relation> matchedEntityPair : matchedEntities) {
 					Debug.print("move: matchedEntityPair: " + matchedEntityPair);
-					// goalRelationList = new ArrayList<>();
 					for (List<Relation> relationList : relationListList) {
 						Debug.print("move: relationList: " + relationList);
-//						goalRelationList = tryToAddRelation(relationList, matchedEntityPair, goalRelationList);
 						for (Relation relation : relationList) {
 							Debug.print("move: relation: " + relation);
 							if (relation.getEntityA().getForm() == Entity.FORM.UNDEFINED) {
@@ -320,8 +318,6 @@ public class InterpreterNew {
 								if (checkRelation(newRelation, goalRelationList)) {
 									Debug.print("move: added " + newRelation);
 									goalRelationList.add(newRelation);
-								} else {
-//									return new ArrayList<Relation>();
 								}
 							} else {
 								if (checkRelation(relation, goalRelationList)) {
@@ -333,8 +329,9 @@ public class InterpreterNew {
 						Debug.print("move: goalRelationList: " + goalRelationList);
 					}
 				}
-				Debug.print(goalRelationList);
-				// for (List<Relation> relationList : relationsList) {
+				Debug.print("move: goalRelationList is now finished for " + "matchedEntityPair.");
+				Debug.print("move: goalRelationList: " + goalRelationList);
+				Debug.print("move: Is " + goalRelationList + " OK to add?");
 				int countOfRelationsToSelf = 0;
 				for (Pair<Entity, Relation> matchedEntity : matchedEntities) {
 					for (List<Relation> relationList : relationListList) {
@@ -347,11 +344,13 @@ public class InterpreterNew {
 					}
 				}
 				if (goalRelationList.size() < relationListList.size() - countOfRelationsToSelf) {
+					Debug.print("move: No, " + goalRelationList + " wasn't OK. Ignoring it.");
 					goalRelationList.clear();
 				}
-				// }
 				if (!goalRelationList.isEmpty()) {
+					Debug.print("move: Yes it was!");
 					goalList.add(new Goal(goalRelationList));
+					Debug.print("move: Added to goalList, which is now: " + goalList);
 				}
 			}
 		}
