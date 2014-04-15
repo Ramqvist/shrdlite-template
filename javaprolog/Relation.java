@@ -203,7 +203,8 @@ public class Relation {
 //									Debug.print("Matched!");
 									matchedEntities.add(entity);
 								}
-							} else if (world.indexOf(column) - 1 >= 0) {
+							}
+							if (world.indexOf(column) - 1 >= 0) {
 								// Is is to the left of this entity?
 //								Debug.print("To the left " + world.get(world.indexOf(column) - 1));
 								if (world.get(world.indexOf(column) - 1).contains(relation.getEntityB())) {

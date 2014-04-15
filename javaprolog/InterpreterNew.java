@@ -619,7 +619,7 @@ public class InterpreterNew {
 			} else if (relation.getType().equals(Relation.TYPE.UNDER)) {
 				// Check for entities above this entity.
 				if (column.contains(entity)) {
-					for (int i = column.indexOf(entity) + 1; i < column.size() - 1; i++) {
+					for (int i = column.indexOf(entity) + 1; i < column.size(); i++) {
 						if (column.get(i).equals(relation.getEntityB())) {
 							Debug.print(entity + " is UNDER " + relation.getEntityB());
 							return true;
@@ -635,7 +635,8 @@ public class InterpreterNew {
 						if (world.get(world.indexOf(column) + 1).contains(relation.getEntityB())) {
 							return true;
 						}
-					} else if (world.indexOf(column) - 1 >= 0) {
+					}
+					if (world.indexOf(column) - 1 >= 0) {
 						// Is is to the left of this entity?
 						if (world.get(world.indexOf(column) - 1).contains(relation.getEntityB())) {
 							return true;
