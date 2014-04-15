@@ -264,24 +264,24 @@ public class InterpreterNew {
 
 		List<List<Relation>> relationsList = (List<List<Relation>>) walkTree(cterm.args[1]);
 		Debug.print("move: relationsList: " + relationsList);
-		
-		// Check if 
+
+		// Check if "a" inside / on top of "all".
 		if (matchedEntitiesList.size() >= 1 && relationsList.size() == 1) {
 			if (matchedEntitiesList.get(0).size() == 1 && relationsList.get(0).size() > 1) {
-				if (relationsList.get(0).get(0).getType() == Relation.TYPE.INSIDE || 
-						relationsList.get(0).get(0).getType() == Relation.TYPE.ON_TOP_OF) {
-					// "a" inside / on top of "all"
+				if (relationsList.get(0).get(0).getType() == Relation.TYPE.INSIDE
+						|| relationsList.get(0).get(0).getType() == Relation.TYPE.ON_TOP_OF) {
 					// TODO: Try to fix or just deny?
 					return null;
 				}
 			}
 		}
-		
+
+		// Check if the relation to create is "all" inside / on top of "a" and
+		// fix these.
 		if (matchedEntitiesList.size() == 1 && relationsList.size() >= 1) {
 			if (matchedEntitiesList.get(0).size() > 1 && relationsList.get(0).size() == 1) {
-				if (relationsList.get(0).get(0).getType() == Relation.TYPE.INSIDE || 
-						relationsList.get(0).get(0).getType() == Relation.TYPE.ON_TOP_OF) {
-					// "all" inside / on top of "a"
+				if (relationsList.get(0).get(0).getType() == Relation.TYPE.INSIDE
+						|| relationsList.get(0).get(0).getType() == Relation.TYPE.ON_TOP_OF) {
 					List<Relation> tempList = new ArrayList<>();
 					for (List<Relation> relations : relationsList) {
 						tempList.add(relations.get(0));
@@ -292,13 +292,13 @@ public class InterpreterNew {
 				}
 			}
 		}
-		
+
 		for (List<Entity> matchedEntities : matchedEntitiesList) {
 			for (List<Relation> relationList : relationsList) {
 				List<Relation> goalRelationList = new ArrayList<>();
 				for (Entity matchedEntity : matchedEntities) {
 					Debug.print(matchedEntity);
-//					goalRelationList = new ArrayList<>();
+					// goalRelationList = new ArrayList<>();
 					for (Relation relation : relationList) {
 						Debug.print(relation);
 						Relation newRelation = new Relation(matchedEntity, relation.getEntityB(), relation.getType());
@@ -309,7 +309,7 @@ public class InterpreterNew {
 					}
 				}
 				Debug.print(goalRelationList);
-//				for (List<Relation> relationList : relationsList) {
+				// for (List<Relation> relationList : relationsList) {
 				int countOfRelationsToSelf = 0;
 				for (Entity matchedEntity : matchedEntities) {
 					for (Relation relation : relationList) {
@@ -322,7 +322,7 @@ public class InterpreterNew {
 				if (goalRelationList.size() < relationList.size() - countOfRelationsToSelf) {
 					goalRelationList.clear();
 				}
-//				}
+				// }
 				if (!goalRelationList.isEmpty()) {
 					goalList.add(new Goal(goalRelationList));
 				}
