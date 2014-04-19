@@ -4,5 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="gnuprologjava-0.2.6.jar" sourcepath="gnuprologjava-0.2.6-src.zip"/>
 	<classpathentry kind="lib" path="json-simple-1.1.1.jar" sourcepath="json_simple-1.1-all.zip"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path=""/>
 </classpath>

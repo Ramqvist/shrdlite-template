@@ -7,6 +7,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -286,6 +288,8 @@ public class InterpreterNew {
 			}
 		}
 
+		boolean isInsideOrOnTopOf = true;
+		
 		// Check if the relation to create is "all" inside / on top of "a" and
 		// fix these.
 		if (matchedEntitiesList.size() == 1 && relationsList.size() >= 1) {
@@ -299,85 +303,187 @@ public class InterpreterNew {
 					relationsList.clear();
 					relationsList.add(tempList);
 					Debug.print("move: found an \"all -> a\" relation, fixed it. New relationsList: " + relationsList);
+					if (relationsList.get(0).get(0).get(0).getType() == Relation.TYPE.ON_TOP_OF
+							&& relationsList.get(0).get(0).get(0).getEntityB().getForm() == Entity.FORM.FLOOR) {
+						isInsideOrOnTopOf = false;
+					}
+				} else {
+					isInsideOrOnTopOf = false;
 				}
 			}
 		}
-
+		
+		// An entity cannot be related to itself. Therefore, we remove all relations that relate to any matched entity.
+		List<List<List<Relation>>> tempRelationsList = relationsList;
+		relationsList = removeRelationsRelatingToMatched(matchedEntitiesList, relationsList);
+		if (relationsList.isEmpty()) {
+			relationsList = tempRelationsList;
+			List<List<Pair<Entity, Relation>>> tempMatchedEntitiesList = matchedEntitiesList;
+			matchedEntitiesList = removeEntitiesRelatingToRelations(matchedEntitiesList, relationsList);
+			if (matchedEntitiesList.isEmpty()) {
+				matchedEntitiesList = tempMatchedEntitiesList;
+			}
+		}
+		
 		for (List<Pair<Entity, Relation>> matchedEntities : matchedEntitiesList) {
+			int matchedEntitiesSize;
+			if (isInsideOrOnTopOf) {
+				matchedEntitiesSize = matchedEntities.size();
+			} else {
+				matchedEntitiesSize = 1;
+			}
 			for (List<List<Relation>> relationListList : relationsList) {
-				Debug.print(relationListList);
-				List<Relation> goalRelationList = new ArrayList<>();
-				for (Pair<Entity, Relation> matchedEntityPair : matchedEntities) {
-					Debug.print("move: matchedEntityPair: " + matchedEntityPair);
-					for (List<Relation> relationList : relationListList) {
-						Debug.print("move: relationList: " + relationList);
-						for (Relation relation : relationList) {
-							Debug.print("move: relation: " + relation);
-							if (relation.getEntityA().getForm() == Entity.FORM.UNDEFINED) {
-								Relation newRelation = new Relation(matchedEntityPair.a, relation.getEntityB(), relation.getType());
-								if (checkRelation(newRelation, goalRelationList)) {
-									Debug.print("move: added " + newRelation);
-									goalRelationList.add(newRelation);
-								}
-							} else {
-								if (checkRelation(relation, goalRelationList)) {
-									Debug.print("move: added " + relation);
-									goalRelationList.add(relation);
-								}
-							}
-						}
-						Debug.print("move: goalRelationList: " + goalRelationList);
+				int relationListListSize;
+				if (isInsideOrOnTopOf) {
+					relationListListSize = relationListList.size();
+				} else {
+					relationListListSize = 1;
+				}
+				for (int i = 0; i < matchedEntitiesSize; i++) {
+					for (int j = 0; j < relationListListSize; j++) {
+						createGoalRelations(matchedEntities, relationListList);
+						List<Relation> removed = relationListList.remove(relationListList.size() - 1);
+						relationListList.add(0, removed);
 					}
-				}
-				Debug.print("move: goalRelationList is now finished for " + "matchedEntityPair.");
-				Debug.print("move: goalRelationList: " + goalRelationList);
-				Debug.print("move: Is " + goalRelationList + " OK to add?");
-				int countOfRelationsToSelf = 0;
-				for (Pair<Entity, Relation> matchedEntity : matchedEntities) {
-					for (List<Relation> relationList : relationListList) {
-						for (Relation relation : relationList) {
-							if (relation.getEntityB().equalsExact(matchedEntity.a)) {
-								Debug.print(matchedEntity.a + " exists in relationList.");
-								countOfRelationsToSelf++;
-							}
-						}
-					}
-				}
-				if (goalRelationList.size() < relationListList.size() - countOfRelationsToSelf) {
-					Debug.print("move: No, " + goalRelationList + " wasn't OK. Ignoring it.");
-					goalRelationList.clear();
-				}
-				if (!goalRelationList.isEmpty()) {
-					Debug.print("move: Yes it was!");
-					goalList.add(new Goal(goalRelationList));
-					Debug.print("move: Added to goalList, which is now: " + goalList);
+					Pair<Entity, Relation> removed = matchedEntities.remove(matchedEntities.size() - 1);
+					matchedEntities.add(0, removed);
 				}
 			}
 		}
 		return null;
 	}
 	
-	private List<Relation> tryToAddRelation(List<Relation> relationList, Pair<Entity, Relation> matchedEntityPair, List<Relation> goalRelationList) {
-		List<Relation> tempGoalRelationList = new ArrayList<>(goalRelationList);
-		for (Relation relation : relationList) {
-			Debug.print("move: relation: " + relation);
-			if (relation.getEntityA().getForm() == Entity.FORM.UNDEFINED) {
-				Relation newRelation = new Relation(matchedEntityPair.a, relation.getEntityB(), relation.getType());
-				if (checkRelation(newRelation, tempGoalRelationList)) {
-					Debug.print("move: added " + newRelation);
-					tempGoalRelationList.add(newRelation);
-				} else {
-					return new ArrayList<Relation>();
+	private List<List<List<Relation>>> removeRelationsRelatingToMatched(List<List<Pair<Entity, Relation>>> matchedEntitiesList, List<List<List<Relation>>> relationsList) {
+		List<List<List<Relation>>> tempRelationsList = new ArrayList<>();
+		for (List<List<Relation>> relationListList : relationsList) {
+			List<List<Relation>> tempRelationListList = new ArrayList<>();
+			for (List<Relation> relationList : relationListList) {
+				List<Relation> tempRelationList = new ArrayList<>(relationList);
+				for (List<Pair<Entity, Relation>> matchedEntities : matchedEntitiesList) {
+					for (Pair<Entity, Relation> matchedEntityPair : matchedEntities) {
+						for (Relation relation : relationList) {
+							if (relation.getEntityB().equalsExact(matchedEntityPair.a)) {
+								tempRelationList.remove(relation);
+							}
+						}
+					}
 				}
-			} else {
-				if (checkRelation(relation, tempGoalRelationList)) {
-					Debug.print("move: added " + relation);
-					tempGoalRelationList.add(relation);
+				if (!tempRelationList.isEmpty()) {
+					tempRelationListList.add(tempRelationList);
+				}
+			}
+			if (!tempRelationListList.isEmpty()) {
+				tempRelationsList.add(tempRelationListList);
+			}
+		}
+		return tempRelationsList;
+	}
+	
+	private List<List<Pair<Entity, Relation>>> removeEntitiesRelatingToRelations(List<List<Pair<Entity, Relation>>> matchedEntitiesList, List<List<List<Relation>>> relationsList) {
+		List<List<Pair<Entity, Relation>>> tempMatchedEntitiesList = new ArrayList<>();
+		for (List<Pair<Entity, Relation>> matchedEntities : matchedEntitiesList) {
+			List<Pair<Entity, Relation>> tempMatchedEntities = new ArrayList<>(matchedEntities);
+			for (Pair<Entity, Relation> matchedEntityPair : matchedEntities) {
+				for (List<List<Relation>> relationListList : relationsList) {
+					for (List<Relation> relationList : relationListList) {
+						for (Relation relation : relationList) {
+							if (relation.getEntityB().equalsExact(matchedEntityPair.a)) {
+								tempMatchedEntities.remove(matchedEntityPair);
+							}
+						}
+					}
+				}
+			}
+			if (!tempMatchedEntities.isEmpty()) {
+				tempMatchedEntitiesList.add(tempMatchedEntities);
+			}
+		}
+		return tempMatchedEntitiesList;
+	}
+	
+	private void createGoalRelations(List<Pair<Entity, Relation>> matchedEntities, List<List<Relation>> relationListList) {
+		List<Relation> goalRelationList = createRelations(matchedEntities, relationListList);
+		Debug.print("move: goalRelationList is now finished for " + "matchedEntityPair.");
+		Debug.print("move: goalRelationList: " + goalRelationList);
+		Debug.print("move: Is " + goalRelationList + " OK to add?");
+		int countOfRelationsToSelf = 0;
+		for (Pair<Entity, Relation> matchedEntity : matchedEntities) {
+			for (List<Relation> relationList : relationListList) {
+				for (Relation relation : relationList) {
+					if (relation.getEntityB().equalsExact(matchedEntity.a)) {
+						Debug.print(matchedEntity.a + " exists in relationList.");
+						countOfRelationsToSelf++;
+					}
 				}
 			}
 		}
-		return tempGoalRelationList;
+		if (goalRelationList.size() < relationListList.size() - countOfRelationsToSelf) {
+			Debug.print("move: No, " + goalRelationList + " wasn't OK. Ignoring it.");
+			goalRelationList.clear();
+		}
+		if (!goalRelationList.isEmpty()) {
+			Debug.print("move: Yes it was!");
+			goalList.add(new Goal(goalRelationList));
+			Debug.print("move: Added to goalList, which is now: " + goalList);
+		}
 	}
+	
+	private List<Relation> createRelations(List<Pair<Entity, Relation>> matchedEntities, List<List<Relation>> relationListList) {
+		List<Relation> goalRelationList = new ArrayList<>();
+		for (Pair<Entity, Relation> matchedEntityPair : matchedEntities) {
+			Debug.print("move: matchedEntityPair: " + matchedEntityPair);
+			for (List<Relation> relationList : relationListList) {
+				Debug.print("move: relationList: " + relationList);
+				for (Relation relation : relationList) {
+					Debug.print("move: relation: " + relation);
+					if (relation.getEntityA().getForm() == Entity.FORM.UNDEFINED) {
+						Relation newRelation = new Relation(matchedEntityPair.a, relation.getEntityB(), relation.getType());
+						if (checkRelation(newRelation, goalRelationList)) {
+							Debug.print("move: added " + newRelation);
+							goalRelationList.add(newRelation);
+						}
+					} else {
+						// This relation is an relation that is supposed to complement the first relation in the relationList. So, we check
+						// if there is a goalRelation for the first relation.
+						boolean keep = false;
+						for (Relation goalRelation : goalRelationList) {
+							if (goalRelation.getEntityB().equalsExact(relation.getEntityA())) {
+								keep = true;
+							}
+						}
+						if (keep && checkRelation(relation, goalRelationList)) {
+							Debug.print("move: added " + relation);
+							goalRelationList.add(relation);
+						}
+					}
+				}
+				Debug.print("move: goalRelationList: " + goalRelationList);
+			}
+		}
+		return goalRelationList;
+	}
+	
+//	private List<Relation> tryToAddRelation(List<Relation> relationList, Pair<Entity, Relation> matchedEntityPair, List<Relation> goalRelationList) {
+//		List<Relation> tempGoalRelationList = new ArrayList<>(goalRelationList);
+//		for (Relation relation : relationList) {
+//			Debug.print("move: relation: " + relation);
+//			if (relation.getEntityA().getForm() == Entity.FORM.UNDEFINED) {
+//				Relation newRelation = new Relation(matchedEntityPair.a, relation.getEntityB(), relation.getType());
+//				if (checkRelation(newRelation, tempGoalRelationList)) {
+//					Debug.print("move: added " + newRelation);
+//					tempGoalRelationList.add(newRelation);
+//				} else {
+//					return new ArrayList<Relation>();
+//				}
+//			} else {
+//				if (checkRelation(relation, tempGoalRelationList)) {
+//					Debug.print("move: added " + relation);
+//					tempGoalRelationList.add(relation);
+//				}
+//			}
+//		}
+//		return tempGoalRelationList;
+//	}
 
 	/**
 	 * Checks if the given relation is OK in regards to a given list of
@@ -526,7 +632,10 @@ public class InterpreterNew {
 		List<Entity> tempEntityList = new ArrayList<>();
 		for (List<List<Relation>> relationListList : relationsList) {
 			for (List<Relation> relationList : relationListList) {
-				tempEntityList.addAll(matchEntitiesAndRelations(world, matchedEntities, relationList, heldEntity));
+				List<Entity> temp = matchEntitiesAndRelations(world, matchedEntities, relationList, heldEntity);
+				if (!tempEntityList.containsAll(temp)) {
+					tempEntityList.addAll(temp);
+				}
 			}
 		}
 		matchedEntities = tempEntityList;
@@ -552,7 +661,7 @@ public class InterpreterNew {
 				matchedEntitiesPair.add(new Pair<Entity, Relation>(entity, null));
 			}
 		}
-		Debug.print("relative_entity: matchedEntitiesPair: " + matchedEntitiesPair);
+		Debug.print("relativeEntity: matchedEntitiesPair: " + matchedEntitiesPair);
 
 		List<List<Pair<Entity, Relation>>> matchedEntitiesPruned = new ArrayList<>();
 		if (quantifier.equals("the")) {
