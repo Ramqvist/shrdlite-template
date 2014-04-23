@@ -324,6 +324,7 @@ public class InterpreterNew {
 				matchedEntitiesList = tempMatchedEntitiesList;
 			}
 		}
+		Debug.print("move: Removed relations relating to matched entitites. relationsList: " + relationsList);
 		
 		for (List<Pair<Entity, Relation>> matchedEntities : matchedEntitiesList) {
 			int matchedEntitiesSize;
@@ -341,10 +342,18 @@ public class InterpreterNew {
 				}
 				for (int i = 0; i < matchedEntitiesSize; i++) {
 					for (int j = 0; j < relationListListSize; j++) {
-						createGoalRelations(matchedEntities, relationListList);
+						Goal tempGoal = createGoalRelations(matchedEntities, relationListList);
+						if (tempGoal != null && !goalList.contains(tempGoal)) {
+							if (ConstraintCheck.isValidRelations(tempGoal.getRelations())) {
+								goalList.add(tempGoal);
+								Debug.print("move: OK, the newly created goals were okay to add. So, added: " + tempGoal);
+							}
+						}
+						// Move last item to the front.
 						List<Relation> removed = relationListList.remove(relationListList.size() - 1);
 						relationListList.add(0, removed);
 					}
+					// Move last item to the front.
 					Pair<Entity, Relation> removed = matchedEntities.remove(matchedEntities.size() - 1);
 					matchedEntities.add(0, removed);
 				}
@@ -361,8 +370,8 @@ public class InterpreterNew {
 				List<Relation> tempRelationList = new ArrayList<>(relationList);
 				for (List<Pair<Entity, Relation>> matchedEntities : matchedEntitiesList) {
 					for (Pair<Entity, Relation> matchedEntityPair : matchedEntities) {
-						for (Relation relation : relationList) {
-							if (relation.getEntityB().equalsExact(matchedEntityPair.a)) {
+						if (relationList.get(0).getEntityB().equalsExact(matchedEntityPair.a)) {
+							for (Relation relation : relationList) {
 								tempRelationList.remove(relation);
 							}
 						}
@@ -401,7 +410,8 @@ public class InterpreterNew {
 		return tempMatchedEntitiesList;
 	}
 	
-	private void createGoalRelations(List<Pair<Entity, Relation>> matchedEntities, List<List<Relation>> relationListList) {
+	private Goal createGoalRelations(List<Pair<Entity, Relation>> matchedEntities, List<List<Relation>> relationListList) {
+		Goal tempGoal = null;
 		List<Relation> goalRelationList = createRelations(matchedEntities, relationListList);
 		Debug.print("move: goalRelationList is now finished for " + "matchedEntityPair.");
 		Debug.print("move: goalRelationList: " + goalRelationList);
@@ -420,12 +430,14 @@ public class InterpreterNew {
 		if (goalRelationList.size() < relationListList.size() - countOfRelationsToSelf) {
 			Debug.print("move: No, " + goalRelationList + " wasn't OK. Ignoring it.");
 			goalRelationList.clear();
+			
 		}
 		if (!goalRelationList.isEmpty()) {
 			Debug.print("move: Yes it was!");
-			goalList.add(new Goal(goalRelationList));
-			Debug.print("move: Added to goalList, which is now: " + goalList);
+			tempGoal = new Goal(goalRelationList);
+//			Debug.print("move: Added to goalList, which is now: " + goalList);
 		}
+		return tempGoal;
 	}
 	
 	private List<Relation> createRelations(List<Pair<Entity, Relation>> matchedEntities, List<List<Relation>> relationListList) {
@@ -434,26 +446,18 @@ public class InterpreterNew {
 			Debug.print("move: matchedEntityPair: " + matchedEntityPair);
 			for (List<Relation> relationList : relationListList) {
 				Debug.print("move: relationList: " + relationList);
-				for (Relation relation : relationList) {
-					Debug.print("move: relation: " + relation);
-					if (relation.getEntityA().getForm() == Entity.FORM.UNDEFINED) {
-						Relation newRelation = new Relation(matchedEntityPair.a, relation.getEntityB(), relation.getType());
-						if (checkRelation(newRelation, goalRelationList)) {
-							Debug.print("move: added " + newRelation);
-							goalRelationList.add(newRelation);
-						}
-					} else {
-						// This relation is an relation that is supposed to complement the first relation in the relationList. So, we check
-						// if there is a goalRelation for the first relation.
-						boolean keep = false;
-						for (Relation goalRelation : goalRelationList) {
-							if (goalRelation.getEntityB().equalsExact(relation.getEntityA())) {
-								keep = true;
+				if (relationList.get(0).getEntityA().getForm() == Entity.FORM.UNDEFINED) {
+					Relation newRelation = new Relation(matchedEntityPair.a, relationList.get(0).getEntityB(), relationList.get(0).getType());
+					if (checkRelation(newRelation, goalRelationList)) {
+						Debug.print("move: added " + newRelation);
+						goalRelationList.add(newRelation);
+						if (relationList.size() > 1) {
+							for (int i = 1; i < relationList.size(); i++) {
+								if (checkRelation(relationList.get(i), goalRelationList)) {
+									goalRelationList.add(relationList.get(i));
+									Debug.print("move: Added an extra relation: " + relationList.get(i));
+								}
 							}
-						}
-						if (keep && checkRelation(relation, goalRelationList)) {
-							Debug.print("move: added " + relation);
-							goalRelationList.add(relation);
 						}
 					}
 				}
@@ -463,28 +467,6 @@ public class InterpreterNew {
 		return goalRelationList;
 	}
 	
-//	private List<Relation> tryToAddRelation(List<Relation> relationList, Pair<Entity, Relation> matchedEntityPair, List<Relation> goalRelationList) {
-//		List<Relation> tempGoalRelationList = new ArrayList<>(goalRelationList);
-//		for (Relation relation : relationList) {
-//			Debug.print("move: relation: " + relation);
-//			if (relation.getEntityA().getForm() == Entity.FORM.UNDEFINED) {
-//				Relation newRelation = new Relation(matchedEntityPair.a, relation.getEntityB(), relation.getType());
-//				if (checkRelation(newRelation, tempGoalRelationList)) {
-//					Debug.print("move: added " + newRelation);
-//					tempGoalRelationList.add(newRelation);
-//				} else {
-//					return new ArrayList<Relation>();
-//				}
-//			} else {
-//				if (checkRelation(relation, tempGoalRelationList)) {
-//					Debug.print("move: added " + relation);
-//					tempGoalRelationList.add(relation);
-//				}
-//			}
-//		}
-//		return tempGoalRelationList;
-//	}
-
 	/**
 	 * Checks if the given relation is OK in regards to a given list of
 	 * relations.

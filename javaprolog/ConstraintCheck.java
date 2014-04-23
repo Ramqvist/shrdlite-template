@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -184,6 +185,18 @@ public class ConstraintCheck {
 		}
 		for (Relation relation : relations) {
 			if (!isValidRelation(relation)) {
+				return false;
+			}
+		}
+		// An entity can not be under another entity that is on top of the floor.
+		List<Entity> entities = new ArrayList<>();
+		for (Relation relation : relations) {
+			if (relation.getType() == Relation.TYPE.ON_TOP_OF && relation.getEntityB().getForm() == Entity.FORM.FLOOR) {
+				entities.add(relation.getEntityA());
+			}
+		}
+		for (Relation relation : relations) {
+			if (relation.getType() == Relation.TYPE.UNDER && entities.contains(relation.getEntityB())) {
 				return false;
 			}
 		}
