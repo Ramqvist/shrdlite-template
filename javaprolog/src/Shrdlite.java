@@ -1,9 +1,9 @@
 package src;
 // First compile the program:
-// javac -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. Shrdlite.java
+// javac -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. src.Shrdlite.java
 
 // Then test from the command line:
-// java -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. Shrdlite < ../examples/medium.json
+// java -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. src.Shrdlite < ../examples/medium.json
 
 import java.util.List;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import org.json.simple.JSONValue;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 
-import src.interpreter.InterpreterNew;
+import src.interpreter.Interpreter;
 import src.planner.Action;
 import src.planner.ConcurrentGoalSolver;
 import src.planner.ErikTheSolver;
@@ -35,6 +35,14 @@ public class Shrdlite {
 		JSONArray world = (JSONArray) jsinput.get("world");
 		String holding = (String) jsinput.get("holding");
 		JSONObject objects = (JSONObject) jsinput.get("objects");
+		JSONObject state = (JSONObject) jsinput.get("state");
+		
+		// TODO: Use state to handle ambiguity resolution.
+		if (state != null && !state.isEmpty()) {
+			Debug.print("State given: " + state.toString());
+		} else {
+			Debug.print("State was empty.");
+		}
 
 		JSONObject result = new JSONObject();
 		result.put("utterance", utterance);
@@ -62,7 +70,7 @@ public class Shrdlite {
 
 		} else {
 			List<Goal> goals = new ArrayList<>();
-			InterpreterNew interpreter = new InterpreterNew(world, holding, objects);
+			Interpreter interpreter = new Interpreter(world, holding, objects);
 			for (Term tree : trees) {
 				for (Goal goal : interpreter.interpret(tree)) {
 					goals.add(goal);
@@ -77,7 +85,28 @@ public class Shrdlite {
 
 			if (goals.isEmpty()) {
 				result.put("output", "Interpretation error!");
-			} else if (goals.size() > 1000) { // TODO: Temporarily changed so we can ignore ambiguity errors for now.
+			} else if (goals.size() > 1) {
+				Debug.print("Ambiguity error!");
+				for (Goal goal : goals) {
+					Debug.print(goal);
+				}
+				Debug.print();
+				state = new JSONObject();
+				state.put("utterance", utterance);
+				
+				JSONArray parsetrees = new JSONArray();
+				for (Term tree : trees) {
+					parsetrees.add(tree.toString());
+				}
+				state.put("parsetrees", parsetrees);
+				
+				JSONArray stategoals = new JSONArray();
+				for (Goal goal : goals) {
+					stategoals.add(goal.toString());
+				}
+				state.put("stategoals", stategoals);
+				
+				result.put("state", state);
 				result.put("output", "Ambiguity error!");
 			} else {
 				GoalSolver goalSolver;
@@ -90,8 +119,8 @@ public class Shrdlite {
 					plans = goalSolver.solve();
 				} else {
 					goalSolver = new StandardGoalSolver(interpreter.world, interpreter.heldEntity, goals);
-					plans = goalSolver.solve();
 				}
+				plans = goalSolver.solve();
 
 				List<String> actionStrings = new ArrayList<>();
 				if (!plans.isEmpty()) {
