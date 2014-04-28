@@ -84,7 +84,28 @@ public class Shrdlite {
 
 			if (goals.isEmpty()) {
 				result.put("output", "Interpretation error!");
-			} else if (goals.size() > 1000) { // TODO: Temporarily changed so we can ignore ambiguity errors for now.
+			} else if (goals.size() > 1) { // TODO: Temporarily changed so we can ignore ambiguity errors for now.
+				Debug.print("Ambiguity error!");
+				for (Goal goal : goals) {
+					Debug.print(goal);
+				}
+				Debug.print();
+				state = new JSONObject();
+				state.put("utterance", utterance);
+				
+				JSONArray parsetrees = new JSONArray();
+				for (Term tree : trees) {
+					parsetrees.add(tree.toString());
+				}
+				state.put("parsetrees", parsetrees);
+				
+				JSONArray stategoals = new JSONArray();
+				for (Goal goal : goals) {
+					stategoals.add(goal.toString());
+				}
+				state.put("stategoals", stategoals);
+				
+				result.put("state", state);
 				result.put("output", "Ambiguity error!");
 			} else {
 				GoalSolver goalSolver;
