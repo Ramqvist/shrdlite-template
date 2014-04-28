@@ -34,6 +34,14 @@ public class Shrdlite {
 		JSONArray world = (JSONArray) jsinput.get("world");
 		String holding = (String) jsinput.get("holding");
 		JSONObject objects = (JSONObject) jsinput.get("objects");
+		JSONObject state = (JSONObject) jsinput.get("state");
+		
+		// TODO: Use state to handle ambiguity resolution.
+		if (state != null && !state.isEmpty()) {
+			Debug.print("State given: " + state.toString());
+		} else {
+			Debug.print("State was empty.");
+		}
 
 		JSONObject result = new JSONObject();
 		result.put("utterance", utterance);
