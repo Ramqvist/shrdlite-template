@@ -19,7 +19,7 @@ import org.json.simple.JSONValue;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 
-import src.interpreter.InterpreterNew;
+import src.interpreter.Interpreter;
 import src.planner.Action;
 import src.planner.ConcurrentGoalSolver;
 import src.planner.GoalSolver;
@@ -61,7 +61,7 @@ public class Shrdlite {
 
 		} else {
 			List<Goal> goals = new ArrayList<>();
-			InterpreterNew interpreter = new InterpreterNew(world, holding, objects);
+			Interpreter interpreter = new Interpreter(world, holding, objects);
 			for (Term tree : trees) {
 				for (Goal goal : interpreter.interpret(tree)) {
 					goals.add(goal);

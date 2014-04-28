@@ -15,7 +15,7 @@ from subprocess import Popen, PIPE, STDOUT
 
 # # Java
 SCRIPTDIR = 'javaprolog'
-SCRIPT = ['/usr/bin/java', '-cp', 'json-simple-1.1.1.jar:gnuprologjava-0.2.6.jar:.', 'Shrdlite']
+SCRIPT = ['/usr/bin/java', '-cp', 'json-simple-1.1.1.jar:gnuprologjava-0.2.6.jar:.', 'src.Shrdlite']
 
 # # SWI Prolog
 # SCRIPTDIR = 'javaprolog'
@@ -42,7 +42,7 @@ try:
     data = form.getfirst('data')
     script = Popen(SCRIPT, cwd=SCRIPTDIR, stdin=PIPE, stdout=PIPE, stderr=PIPE)
     out, err = script.communicate(data)
-
+    
     print(out)
     if err:
         raise Exception(err)
