@@ -22,6 +22,7 @@ import org.json.simple.JSONArray;
 import src.interpreter.InterpreterNew;
 import src.planner.Action;
 import src.planner.ConcurrentGoalSolver;
+import src.planner.ErikTheSolver;
 import src.planner.GoalSolver;
 import src.planner.Plan;
 import src.world.Goal;
@@ -83,6 +84,9 @@ public class Shrdlite {
 				List<Plan> plans;
 				if (true) {
 					goalSolver = new ConcurrentGoalSolver(interpreter.world, interpreter.heldEntity, goals);
+					plans = goalSolver.solve();
+				} else if(true){
+					goalSolver = new ErikTheSolver(interpreter.world, interpreter.heldEntity, goals);
 					plans = goalSolver.solve();
 				} else {
 					goalSolver = new StandardGoalSolver(interpreter.world, interpreter.heldEntity, goals);
