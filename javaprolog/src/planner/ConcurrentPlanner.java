@@ -9,7 +9,6 @@ import src.constraints.ConstraintCheck;
 import src.world.Entity;
 import src.world.Goal;
 import src.world.Relation;
-import src.world.Relation.TYPE;
 
 public class ConcurrentPlanner implements Callable<Plan> {
 
