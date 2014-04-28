@@ -5,6 +5,7 @@ concrete ShrdliteGrammarEng of ShrdliteGrammar =
 
 lincat 
 
+Clarification = Utt;
 Command = Utt;
 Entity = NP;
 Object = CN;

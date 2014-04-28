@@ -15,6 +15,7 @@ fun
 take : Entity -> Command;
 put  : Location -> Command;
 move : Entity -> Location -> Command;
+clarification : Object -> Command;
 
 relative : Relation -> Entity -> Location;
 
