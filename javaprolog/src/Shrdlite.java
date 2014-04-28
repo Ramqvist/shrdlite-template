@@ -84,7 +84,7 @@ public class Shrdlite {
 
 			if (goals.isEmpty()) {
 				result.put("output", "Interpretation error!");
-			} else if (goals.size() > 1) { // TODO: Temporarily changed so we can ignore ambiguity errors for now.
+			} else if (goals.size() > 1) {
 				Debug.print("Ambiguity error!");
 				for (Goal goal : goals) {
 					Debug.print(goal);
@@ -112,11 +112,10 @@ public class Shrdlite {
 				List<Plan> plans;
 				if (true) {
 					goalSolver = new ConcurrentGoalSolver(interpreter.world, interpreter.heldEntity, goals);
-					plans = goalSolver.solve();
 				} else {
 					goalSolver = new StandardGoalSolver(interpreter.world, interpreter.heldEntity, goals);
-					plans = goalSolver.solve();
 				}
+				plans = goalSolver.solve();
 
 				List<String> actionStrings = new ArrayList<>();
 				if (!plans.isEmpty()) {
