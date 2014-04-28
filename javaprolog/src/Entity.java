@@ -1,3 +1,4 @@
+package src;
 /**
  * An Entity, defined by it's form, size and color.
  * 

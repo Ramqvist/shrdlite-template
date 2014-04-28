@@ -1,3 +1,4 @@
+package src;
 /**
  * This is simply so that we can easily turn on / off console println's, since
  * all standard output is fed to the JavaScript client.
@@ -5,7 +6,7 @@
  */
 public class Debug {
 
-	public static boolean debug = true;
+	public static boolean debug = false;
 
 	/**
 	 * Prints the given message to standard output if the Debug.debug variable

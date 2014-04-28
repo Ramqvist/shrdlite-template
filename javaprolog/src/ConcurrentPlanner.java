@@ -1,3 +1,4 @@
+package src;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -17,7 +18,7 @@ public class ConcurrentPlanner implements Callable<Plan> {
 		this.goal = goal;
 	}
 
-	public synchronized void setMaxDepth(Integer newMaxDepth) {
+	public static synchronized void setMaxDepth(Integer newMaxDepth) {
 		if (newMaxDepth <= maxDepth) {
 			maxDepth = newMaxDepth;
 		}

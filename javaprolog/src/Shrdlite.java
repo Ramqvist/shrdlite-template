@@ -1,3 +1,4 @@
+package src;
 // First compile the program:
 // javac -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. Shrdlite.java
 

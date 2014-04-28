@@ -1,5 +1,5 @@
 { 
-    "world": [[],["g","l","m","f"],["k","e"],[],[]],
+    "world": [["e"],["f"],["k"],["l"],["n"]],
     "holding": null,
     "objects": {
         "a": { "form":"brick",   "size":"large",  "color":"green" },
@@ -8,6 +8,7 @@
         "d": { "form":"plank",   "size":"small",  "color":"green" },
         "e": { "form":"ball",    "size":"large",  "color":"white" },
         "f": { "form":"ball",    "size":"small",  "color":"black" },
+        "n": { "form":"ball",    "size":"small",  "color":"yellow" },
         "g": { "form":"table",   "size":"large",  "color":"blue"  },
         "h": { "form":"table",   "size":"small",  "color":"red"   },
         "i": { "form":"pyramid", "size":"large",  "color":"yellow"},
@@ -17,7 +18,7 @@
         "m": { "form":"box",     "size":"small",  "color":"blue"  }
     },
     "utterance": 
-        ["put","all","boxes","on","the","floor"],
+        ["put","the","white","ball","in","a","box","on","the","floor"],
     "examples": [
         ["put","the","white","ball","in","a","box","on","the","floor"],
         ["put","the","black","ball","in","a","box","on","the","floor"],

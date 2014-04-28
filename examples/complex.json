@@ -1,5 +1,5 @@
 { 
-    "world": [["e"],["a","l"],["i","h","j"],["c","k","g","b"],["d","m","f"]],
+    "world": [["e"],["a","m","f"],["i","g","d","h"],["c","k"],["l"]],
     "holding": null,
     "objects": {
         "a": { "form":"brick",   "size":"large",  "color":"yellow" },
@@ -14,17 +14,17 @@
         "j": { "form":"pyramid", "size":"small",  "color":"red"   },
         "k": { "form":"box",     "size":"large",  "color":"yellow"},
         "l": { "form":"box",     "size":"large",  "color":"red"   },
-        "m": { "form":"box",     "size":"small",  "color":"blue"  }
+        "m": { "form":"box",     "size":"small",  "color":"blue"  },
+        "n": { "form":"ball",    "size":"large",  "color":"red"   }
     },
     "utterance": 
-        ["put","all","balls","in","a","large","box"],
+        ["put","all","red","objects","above","a","yellow","object","on","the","floor"],
     "examples": [
-        ["put","a","box","in","a","box"],
         ["put","all","balls","on","the","floor"],
         ["take","the","yellow","box"],
         ["put","any","object","under","all","tables"],
         ["put","any","object","under","all","tables","on","the","floor"],
-        ["put","a","ball","in a small box","in","a","large","box"],
+        ["put","a","ball","in","a","small","box","in","a","large","box"],
         ["put","all","balls","in","a","large","box"],
         ["put","all","balls","left","of","a","ball"],
         ["put","all","balls","beside","a","ball"],

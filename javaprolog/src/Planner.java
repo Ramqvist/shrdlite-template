@@ -1,20 +1,18 @@
-
+package src;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
 
-public class ErikThePlanner {
+public class Planner {
 
 	List<List<Entity>> world;
 	Entity heldEntity;
-	HashSet<Plan> tabuList = new HashSet<>();
 
-	public ErikThePlanner(List<List<Entity>> world, Entity heldEntity) {
+	public Planner(List<List<Entity>> world, Entity heldEntity) {
 		this.world = world;
 		this.heldEntity = heldEntity;
 	}
- 
+
 	public Plan solve(Goal goal, int maxDepth) {
 		// We use a PriorityQueue to order all possible plans by their cost.
 		PriorityQueue<Plan> queue = new PriorityQueue<>();
@@ -56,7 +54,7 @@ public class ErikThePlanner {
 			 * Fill a list of possible actions to take. We only pick the actions
 			 * that make sense to try. (Hopefully!)
 			 */
-			List<Action> possibleActions = new ArrayList<Action>(world.size());
+			List<Action> possibleActions = new ArrayList<Action>();
 			for (int i = 0; i < world.size(); i++) {
 				// Small optimization. No point in dropping in the same location
 				// we last picked, or picking in the same location we last
@@ -95,10 +93,7 @@ public class ErikThePlanner {
 
 				try {
 					Plan p = new Plan(plan.currentState.takeAction(newAction), actionList, goal);
-					if(!tabuList.add(p)) {
-						Debug.print("Found a Plan in Tabu list.");
-						continue;
-					}
+
 					if (newAction.command == Action.COMMAND.DROP) {
 						if (ConstraintCheck.isValidColumn(p.currentState.world.get(newAction.column))) {
 							queue.add(p);
