@@ -19,6 +19,13 @@ import org.json.simple.JSONValue;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 
+import src.interpreter.InterpreterNew;
+import src.planner.Action;
+import src.planner.ConcurrentGoalSolver;
+import src.planner.GoalSolver;
+import src.planner.Plan;
+import src.world.Goal;
+
 public class Shrdlite {
 
 	public static void main(String[] args) throws PrologException, ParseException, IOException {

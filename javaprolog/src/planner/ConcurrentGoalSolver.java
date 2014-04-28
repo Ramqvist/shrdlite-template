@@ -1,4 +1,4 @@
-package src;
+package src.planner;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -7,6 +7,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import src.Debug;
+import src.world.Entity;
+import src.world.Goal;
 
 
 public class ConcurrentGoalSolver implements GoalSolver {

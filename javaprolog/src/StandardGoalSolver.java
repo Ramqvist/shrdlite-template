@@ -2,6 +2,12 @@ package src;
 import java.util.ArrayList;
 import java.util.List;
 
+import src.planner.GoalSolver;
+import src.planner.Plan;
+import src.planner.Planner;
+import src.world.Entity;
+import src.world.Goal;
+
 
 public class StandardGoalSolver implements GoalSolver {
 

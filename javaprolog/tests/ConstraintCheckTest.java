@@ -1,6 +1,12 @@
-package src;
+package tests;
 import java.util.ArrayList;
 import java.util.List;
+
+import src.constraints.ConstraintCheck;
+import src.world.Entity;
+import src.world.Entity.COLOR;
+import src.world.Entity.FORM;
+import src.world.Entity.SIZE;
 
 /**
  * Tests {@link ConstraintCheck#isValidColumn(List)} if it correct.

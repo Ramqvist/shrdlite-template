@@ -1,4 +1,4 @@
-package src;
+package src.interpreter;
 import gnu.prolog.term.AtomTerm;
 import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.Term;

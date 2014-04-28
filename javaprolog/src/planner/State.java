@@ -1,6 +1,9 @@
-package src;
+package src.planner;
 import java.util.ArrayList;
 import java.util.List;
+
+import src.world.Entity;
+import src.world.Relation;
 
 /**
  * Representation of world state. Could be useful to have both array and

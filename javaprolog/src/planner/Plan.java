@@ -1,6 +1,10 @@
-package src;
+package src.planner;
 import java.util.ArrayList;
 import java.util.List;
+
+import src.world.Entity;
+import src.world.Goal;
+import src.world.Relation;
 
 /**
  *  A plan is represented by a list of Actions and a current state.

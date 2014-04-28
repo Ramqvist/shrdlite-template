@@ -1,4 +1,4 @@
-package src;
+package src.interpreter;
 import gnu.prolog.term.AtomTerm;
 import gnu.prolog.term.CompoundTerm;
 import gnu.prolog.term.Term;
@@ -13,6 +13,16 @@ import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import src.Debug;
+import src.constraints.ConstraintCheck;
+import src.world.Entity;
+import src.world.Goal;
+import src.world.Relation;
+import src.world.Entity.COLOR;
+import src.world.Entity.FORM;
+import src.world.Entity.SIZE;
+import src.world.Relation.TYPE;
+
 /**
  * Allows you to interpret any tree parsed by the DCGParser, generating a list
  * of relations that describe the goal that the planner should try to reach.
@@ -20,8 +30,8 @@ import org.json.simple.JSONObject;
  */
 public class InterpreterNew {
 
-	List<List<Entity>> world = new ArrayList<List<Entity>>();
-	Entity heldEntity;
+	public List<List<Entity>> world = new ArrayList<List<Entity>>();
+	public Entity heldEntity;
 
 	public InterpreterNew(JSONArray world, String holding, JSONObject objects) throws IOException {
 		convertFromJSON(world, objects, holding);

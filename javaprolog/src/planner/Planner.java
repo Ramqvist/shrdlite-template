@@ -1,7 +1,14 @@
-package src;
+package src.planner;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
+
+import src.Debug;
+import src.constraints.ConstraintCheck;
+import src.world.Entity;
+import src.world.Goal;
+import src.world.Relation;
+import src.world.Relation.TYPE;
 
 public class Planner {
 

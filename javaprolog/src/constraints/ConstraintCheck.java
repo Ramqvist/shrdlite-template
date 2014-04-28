@@ -1,6 +1,13 @@
-package src;
+package src.constraints;
 import java.util.ArrayList;
 import java.util.List;
+
+import src.Debug;
+import src.world.Entity;
+import src.world.Relation;
+import src.world.Entity.FORM;
+import src.world.Entity.SIZE;
+import src.world.Relation.TYPE;
 
 /**
  * Class for checking constraints.

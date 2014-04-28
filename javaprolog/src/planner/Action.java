@@ -1,4 +1,4 @@
-package src;
+package src.planner;
 public class Action {
 
 	public enum COMMAND {

@@ -1,30 +1,29 @@
-package src;
+package src.planner;
+
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.concurrent.Callable;
 
-public class ConcurrentPlanner implements Callable<Plan> {
+import src.Debug;
+import src.constraints.ConstraintCheck;
+import src.world.Entity;
+import src.world.Goal;
+import src.world.Relation;
+import src.world.Relation.TYPE;
 
-	private List<List<Entity>> world;
-	private Entity heldEntity;
-	private Goal goal;
-	
-	private static Integer maxDepth = Integer.MAX_VALUE;
+public class ErikThePlanner {
 
-	public ConcurrentPlanner(List<List<Entity>> world, Entity heldEntity, Goal goal) {
+	List<List<Entity>> world;
+	Entity heldEntity;
+	HashSet<Plan> tabuList = new HashSet<>();
+
+	public ErikThePlanner(List<List<Entity>> world, Entity heldEntity) {
 		this.world = world;
 		this.heldEntity = heldEntity;
-		this.goal = goal;
 	}
-
-	public static synchronized void setMaxDepth(Integer newMaxDepth) {
-		if (newMaxDepth <= maxDepth) {
-			maxDepth = newMaxDepth;
-		}
-	}
-	
-	private Plan solve(Goal goal) throws InterruptedException {
+ 
+	public Plan solve(Goal goal, int maxDepth) {
 		// We use a PriorityQueue to order all possible plans by their cost.
 		PriorityQueue<Plan> queue = new PriorityQueue<>();
 
@@ -37,29 +36,35 @@ public class ConcurrentPlanner implements Callable<Plan> {
 		if (!ConstraintCheck.isValidWorld(world)) {
 			Debug.print("World is not valid!");
 			Debug.print(world);
-			throw new InterruptedException(this + ": World is not valid!");
+			return null;
 		}
-		
 		int count = 0;
 		int size = 0;
-		Plan plan;
+		boolean reachedGoal = false;
+		Plan goalPlan = null;
 		while (true) {
 			count++;
-			plan = queue.poll();
-			if (hasReachedGoal(goal, plan.currentState)) {
-				Debug.print(this + ": " + plan + " reached the goal state " + goal);
-				Debug.print(this + ": Planning finished!");
-				Debug.print(this + ": Actions: " + plan.actions);
-				Debug.print(this + ": Total iteration count: " + count);
-				setMaxDepth(size);
-				return plan;
+			Plan plan = queue.poll();
+			reachedGoal = hasReachedGoal(goal, plan.currentState);
+			if (reachedGoal) {
+				Debug.print(plan + " reached the goal state " + goal);
+				goalPlan = plan;
+				break;
 			}
+
+			/*
+			 * Optimization to add:
+			 * 
+			 * Check for cycles.
+			 * 
+			 * Find the object to move, prefer to pick from that column?
+			 */
 
 			/*
 			 * Fill a list of possible actions to take. We only pick the actions
 			 * that make sense to try. (Hopefully!)
 			 */
-			List<Action> possibleActions = new ArrayList<Action>();
+			List<Action> possibleActions = new ArrayList<Action>(world.size());
 			for (int i = 0; i < world.size(); i++) {
 				// Small optimization. No point in dropping in the same location
 				// we last picked, or picking in the same location we last
@@ -89,21 +94,35 @@ public class ConcurrentPlanner implements Callable<Plan> {
 				
 				if (actionList.size() > size) {
 					size = actionList.size();
-					Debug.print(this + ": " + size);
-					if (size > maxDepth) {
-						throw new InterruptedException(this + ": interrupted, my plan is too long: " + size + " > " + maxDepth);
-					}
+					Debug.print(size);
+				}				
+//				Debug.print(actionList);
+				if (actionList.size() >= maxDepth) {
+					return null; // TODO Make nicer?
 				}
 
 				try {
 					Plan p = new Plan(plan.currentState.takeAction(newAction), actionList, goal);
-
+					if(!tabuList.add(p)) {
+						Debug.print("Found a Plan in Tabu list.");
+						continue;
+					}
 					if (newAction.command == Action.COMMAND.DROP) {
 						if (ConstraintCheck.isValidColumn(p.currentState.world.get(newAction.column))) {
 							queue.add(p);
+						} else {
+							// Ugly hack. We do this because if the plan was rejected we don't want to check if it has reached the goal.
+							p = null; 
 						}
 					} else {
 						queue.add(p);
+					}
+
+					// p is set to null if it is rejected by the constraints.
+					if (p != null && hasReachedGoal(goal, p.currentState)) {
+						Debug.print(p.actions);
+						Debug.print(count);
+						return p;
 					}
 				} catch (Exception e) {
 					Debug.print(e);
@@ -111,9 +130,10 @@ public class ConcurrentPlanner implements Callable<Plan> {
 				}
 			}
 		}
+		return goalPlan;
 	}
 
-	private boolean hasReachedGoal(Goal goal, State state) {
+	private static boolean hasReachedGoal(Goal goal, State state) {
 		int count = 0;
 		for (Relation relation : goal.getRelations()) {
 			if (relation.getType() == Relation.TYPE.HELD) {
@@ -135,15 +155,6 @@ public class ConcurrentPlanner implements Callable<Plan> {
 		}
 		
 		return count == goal.getRelations().size();
-	}
-
-	@Override
-	public Plan call() throws Exception {
-		long start = System.currentTimeMillis();
-		Plan plan = solve(goal);		
-		long elapsed = System.currentTimeMillis() - start;
-		Debug.print(this + ": Plan solved in: " + elapsed + " ms.");
-		return plan;
 	}
 
 }
