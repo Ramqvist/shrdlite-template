@@ -16,6 +16,7 @@ public class GibbsPlanner implements Callable<Plan> {
 	private List<List<Entity>> world;
 	private Entity heldEntity;
 	private Goal goal;
+	private int count = 0;
 	
 	private static Integer maxDepth = Integer.MAX_VALUE;
 	private Random ran = new Random();	
@@ -35,13 +36,12 @@ public class GibbsPlanner implements Callable<Plan> {
 	private Plan solve(Goal goal) throws InterruptedException {
 //		Debug.print("Started Planning using Gibbs!");
 		// We use a PriorityQueue to order all possible plans by their cost.
-		PriorityQueue<Plan> queue = new PriorityQueue<>();
+//		PriorityQueue<Plan> queue = new PriorityQueue<>();
 
 		// TODO: We've discussed this before, but as we've currently tried to
 		// solve the planner, are relations in state necessary?
 		List<Relation> relations = new ArrayList<Relation>();
 		State startState = new State(world, relations, heldEntity);
-		queue.add(new Plan(startState, new ArrayList<Action>(), goal));
 
 		if (!ConstraintCheck.isValidWorld(world)) {
 			Debug.print("World is not valid!");
@@ -49,12 +49,11 @@ public class GibbsPlanner implements Callable<Plan> {
 			throw new InterruptedException(this + ": World is not valid!");
 		}
 		
-		int count = 0;
 		int size = 0;
-		Plan plan;
-		while (!queue.isEmpty()) {
+		Plan plan = new Plan(startState, new ArrayList<Action>(), goal);
+		while (true) {
 			count++;
-			plan = queue.poll();
+//			plan = queue.poll();
 			if (hasReachedGoal(goal, plan.currentState)) {
 				Debug.print(this + ": " + plan + " reached the goal state " + goal);
 				Debug.print(this + ": Planning finished!");
@@ -72,7 +71,7 @@ public class GibbsPlanner implements Callable<Plan> {
 			// dropped.
 			int i = ran.nextInt(world.size());
 			Action newAction;
-			if (plan.actions.size() != 0 && plan.actions.get(plan.actions.size() - 1).column == i) {
+			while (plan.actions.size() != 0 && plan.actions.get(plan.actions.size() - 1).column == i) {
 				i = ran.nextInt(world.size());
 			}
 			if (plan.currentState.isHolding()) {
@@ -88,15 +87,15 @@ public class GibbsPlanner implements Callable<Plan> {
 			}
 
 			// Take all possible actions.
-			count++;
-			List<Action> actionList = new ArrayList<Action>(plan.actions.size() + 1);
-			for (Action c : plan.actions) {
-				actionList.add(c);
-			}
-			actionList.add(newAction);
+//			count++;
+//			List<Action> actionList = new ArrayList<Action>(plan.actions.size() + 1);
+//			for (Action c : plan.actions) {
+//				actionList.add(c);
+//			}
+			plan.actions.add(newAction);
 			
-			if (actionList.size() > maxDepth) {
-				size = actionList.size();
+			if (plan.actions.size() > maxDepth) {
+				size = plan.actions.size();
 //					Debug.print(this + ": " + size);
 				if (size > maxDepth) {
 					throw new InterruptedException(this + ": interrupted, my plan is too long: " + size + " > " + maxDepth);
@@ -104,22 +103,26 @@ public class GibbsPlanner implements Callable<Plan> {
 			}
 
 			try {
-				Plan p = new Plan(plan.currentState.takeAction(newAction), actionList, goal);
-
+				plan.currentState = plan.currentState.takeAction(newAction);
+//				Plan p = new Plan(plan.currentState.takeAction(newAction), actionList, goal);
+//
 				if (newAction.command == Action.COMMAND.DROP) {
-					if (ConstraintCheck.isValidColumn(p.currentState.world.get(newAction.column))) {
-						queue.add(p);
+					if (ConstraintCheck.isValidColumn(plan.currentState.world.get(newAction.column))) {
+//						queue.add(p);
+					} else {
+						return null;
 					}
 				} else {
-					queue.add(p);
+//					queue.add(p);
 				}
 			} catch (Exception e) {
 				Debug.print(e);
+				return null;
 				// The action was rejected, so we do nothing.
 			}
 		}
 //		Debug.print("No path found for Gibbs");
-		return null; //No Plan found
+//		return null; //No Plan found
 	}
 
 	private boolean hasReachedGoal(Goal goal, State state) {
@@ -148,15 +151,27 @@ public class GibbsPlanner implements Callable<Plan> {
 
 	@Override
 	public Plan call() throws Exception {
+		
+		int MAX_PLANS = 5;
+				
 		long start = System.currentTimeMillis();
-		Plan plan = null;
-		while(plan == null) {
-			plan = solve(goal);
-		}		
-//		setMaxDepth(plan.actions.size());
+		List<Plan> plans = new ArrayList<Plan>();
+		while(plans.size() < MAX_PLANS) {
+			Plan plan = null;
+			while(plan == null) {
+				plan = solve(goal);
+			}	
+			plans.add(plan);
+		}
+		Plan shortestPlan = plans.remove(0);
+		for(Plan p : plans) {
+			if(p.actions.size() < shortestPlan.actions.size()) {
+				shortestPlan = p;
+			}
+		}
 		long elapsed = System.currentTimeMillis() - start;
 		Debug.print(this + ": Plan solved in: " + elapsed + " ms.");
-		return plan;
+		return shortestPlan;
 	}
 
 }
