@@ -61,8 +61,6 @@ public class ConcurrentPlanner implements Callable<Plan> {
 				return plan;
 			}
 
-			Debug.print(queue.size());
-			
 			/*
 			 * Fill a list of possible actions to take. We only pick the actions
 			 * that make sense to try. (Hopefully!)
