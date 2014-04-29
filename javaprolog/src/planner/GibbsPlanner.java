@@ -153,7 +153,7 @@ public class GibbsPlanner implements Callable<Plan> {
 	@Override
 	public Plan call() throws Exception {
 		
-		int MAX_PLANS = 5;
+		int MAX_PLANS = 3;
 				
 		long start = System.currentTimeMillis();
 		List<Plan> plans = new ArrayList<Plan>();
@@ -163,6 +163,15 @@ public class GibbsPlanner implements Callable<Plan> {
 				plan = solve(goal);
 			}	
 			plans.add(plan);
+			Plan shortestPlan = null;
+			for(Plan p : plans) {
+				if(shortestPlan == null) {
+					shortestPlan = p;
+				} else if(p.actions.size() < shortestPlan.actions.size()) {
+					shortestPlan = p;
+				}
+			}
+			setMaxDepth(shortestPlan.actions.size());
 		}
 		Plan shortestPlan = plans.remove(0);
 		for(Plan p : plans) {
