@@ -5,6 +5,9 @@ package src;
 // Then test from the command line:
 // java -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. src.Shrdlite < ../examples/medium.json
 
+
+//Then test from the command line:
+//java -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. src.Shrdlite < ../examples/complex.json
 import java.util.List;
 import java.util.ArrayList;
 import java.io.InputStreamReader;
@@ -23,6 +26,7 @@ import src.interpreter.Interpreter;
 import src.planner.Action;
 import src.planner.ConcurrentGoalSolver;
 import src.planner.ErikTheSolver;
+import src.planner.GibbsSolver;
 import src.planner.GoalSolver;
 import src.planner.Plan;
 import src.world.Goal;
@@ -85,7 +89,7 @@ public class Shrdlite {
 
 			if (goals.isEmpty()) {
 				result.put("output", "Interpretation error!");
-			} else if (goals.size() > 1) {
+			} else if (goals.size() > 1337) {
 				Debug.print("Ambiguity error!");
 				for (Goal goal : goals) {
 					Debug.print(goal);
@@ -111,11 +115,14 @@ public class Shrdlite {
 			} else {
 				GoalSolver goalSolver;
 				List<Plan> plans;
-				if (true) {
+				if (false) {
 					goalSolver = new ConcurrentGoalSolver(interpreter.world, interpreter.heldEntity, goals);
 					plans = goalSolver.solve();
-				} else if(true){
+				} else if(false) {
 					goalSolver = new ErikTheSolver(interpreter.world, interpreter.heldEntity, goals);
+					plans = goalSolver.solve();
+				} else if(true) {
+					goalSolver = new GibbsSolver(interpreter.world, interpreter.heldEntity, goals);
 					plans = goalSolver.solve();
 				} else {
 					goalSolver = new StandardGoalSolver(interpreter.world, interpreter.heldEntity, goals);
