@@ -95,11 +95,12 @@ public class GibbsPlanner implements Callable<Plan> {
 			plan.actions.add(newAction);
 			
 			if (plan.actions.size() > maxDepth) {
-				size = plan.actions.size();
+				return null;
+//				size = plan.actions.size();
 //					Debug.print(this + ": " + size);
-				if (size > maxDepth) {
-					throw new InterruptedException(this + ": interrupted, my plan is too long: " + size + " > " + maxDepth);
-				}
+//				if (size > maxDepth) {
+//					throw new InterruptedException(this + ": interrupted, my plan is too long: " + size + " > " + maxDepth);
+//				}
 			}
 
 			try {
@@ -169,6 +170,7 @@ public class GibbsPlanner implements Callable<Plan> {
 				shortestPlan = p;
 			}
 		}
+		setMaxDepth(shortestPlan.actions.size());
 		long elapsed = System.currentTimeMillis() - start;
 		Debug.print(this + ": Plan solved in: " + elapsed + " ms.");
 		return shortestPlan;
