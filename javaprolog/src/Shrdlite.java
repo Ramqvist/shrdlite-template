@@ -41,13 +41,6 @@ public class Shrdlite {
 		JSONObject objects = (JSONObject) jsinput.get("objects");
 		JSONObject state = (JSONObject) jsinput.get("state");
 		
-		// TODO: Use state to handle ambiguity resolution.
-		if (state != null && !state.isEmpty()) {
-			Debug.print("State given: " + state.toString());
-		} else {
-			Debug.print("State was empty.");
-		}
-
 		JSONObject result = new JSONObject();
 		result.put("utterance", utterance);
 
@@ -69,9 +62,19 @@ public class Shrdlite {
 			Debug.print();
 		}
 
+		// TODO: Use state to handle ambiguity resolution.
+		if (state != null && !state.isEmpty()) {
+			Debug.print("State given: " + state.toString());
+//			JSONArray stateUtterance = (JSONArray) state.get("utterance");
+//			List<Term> statetrees = parser.parseSentence("command", stateUtterance);
+//			List<String> statetstrs = new ArrayList<String>();
+//			Debug.print(stateUtterance);
+		} else {
+			Debug.print("State was empty.");
+		}
+		
 		if (trees.isEmpty()) {
 			result.put("output", "Parse error!");
-
 		} else {
 			List<Goal> goals = new ArrayList<>();
 			Interpreter interpreter = new Interpreter(world, holding, objects);
@@ -98,17 +101,17 @@ public class Shrdlite {
 				state = new JSONObject();
 				state.put("utterance", utterance);
 				
-				JSONArray parsetrees = new JSONArray();
-				for (Term tree : trees) {
-					parsetrees.add(tree.toString());
-				}
-				state.put("parsetrees", parsetrees);
+//				JSONArray parsetrees = new JSONArray();
+//				for (Term tree : trees) {
+//					parsetrees.add(tree.toString());
+//				}
+//				state.put("parsetrees", parsetrees);
 				
-				JSONArray stategoals = new JSONArray();
-				for (Goal goal : goals) {
-					stategoals.add(goal.toString());
-				}
-				state.put("stategoals", stategoals);
+//				JSONArray stategoals = new JSONArray();
+//				for (Goal goal : goals) {
+//					stategoals.add(goal.toString());
+//				}
+//				state.put("stategoals", stategoals);
 				
 				result.put("state", state);
 				result.put("output", "Ambiguity error!");
@@ -153,6 +156,7 @@ public class Shrdlite {
 					result.put("output", "Planning error!");
 				} else {
 					result.put("output", "Success!");
+					result.put("state", new JSONObject());
 				}
 			}
 		}
