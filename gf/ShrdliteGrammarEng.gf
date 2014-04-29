@@ -21,6 +21,7 @@ lin
 take e = mkCommand (mkVP take_V2 e);
 put  l = mkCommand (mkVP (mkVP move_V2 (mkNP it_Pron)) l);
 move e l = mkCommand (mkVP (mkVP move_V2 e) l);
+answer e = mkUtt e;
 
 relative r e = SyntaxEng.mkAdv r e;
 
@@ -86,5 +87,6 @@ floor_N : N = mkN "floor";
 
 move_V2 : V2 = mkV2 "move" | mkV2 "put" | mkV2 "drop";
 take_V2 : V2 = mkV2 I.take_V | mkV2 "grasp" | mkV2 (partV (mkV "pick") "up");
+
 
 }

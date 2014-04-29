@@ -11,6 +11,7 @@ command : Cmd --->
 basic_command : take(Entity) ---> take, entity:Entity.
 basic_command : put(Location) ---> move, it, location:Location.
 basic_command : move(Entity, Location) ---> move, entity:Entity, location:Location.
+basic_command : answer(Entity) ---> entity:Entity.
 
 location : relative(Relation, Entity) ---> relation:Relation, entity:Entity.
 
