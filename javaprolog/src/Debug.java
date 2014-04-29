@@ -6,7 +6,7 @@ package src;
  */
 public class Debug {
 
-	public static boolean debug = true;
+	public static boolean debug = false;
 
 	/**
 	 * Prints the given message to standard output if the Debug.debug variable
