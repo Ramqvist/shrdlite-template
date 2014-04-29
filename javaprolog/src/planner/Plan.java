@@ -76,7 +76,7 @@ public class Plan implements Comparable<Plan>{
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((actions == null) ? 0 : actions.hashCode());
+//		result = prime * result + ((actions == null) ? 0 : actions.hashCode());
 		result = prime * result + ((currentState == null) ? 0 : currentState.hashCode());
 		return result;
 	}

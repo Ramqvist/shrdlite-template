@@ -11,7 +11,7 @@ import src.world.Relation;
  */
 
 public class State {
-
+	
 	List<List<Entity>> world;
 	List<Relation> relations;
 	Entity holding = null;
@@ -105,9 +105,8 @@ public class State {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((holding == null) ? 0 : holding.hashCode());
-		result = prime * result
-				+ ((relations == null) ? 0 : relations.hashCode());
-		result = prime * result + ((world == null) ? 0 : world.hashCode());
+		result = prime * result + ((relations == null) ? 0 : relations.hashCode());
+//		result = prime * result + ((world == null) ? 0 : world.hashCode());
 		return result;
 	}
 
