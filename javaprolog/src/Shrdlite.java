@@ -6,8 +6,8 @@ package src;
 // java -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. src.Shrdlite < ../examples/medium.json
 
 
-//Then test from the command line:
-//java -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. src.Shrdlite < ../examples/complex.json
+// Then test from the command line:
+// java -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. src.Shrdlite < ../examples/complex.json
 
 // python -m CGIHTTPServer 8000
 import java.util.List;

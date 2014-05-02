@@ -353,7 +353,7 @@ public class Interpreter {
 					for (int j = 0; j < relationListListSize; j++) {
 						Goal tempGoal = createGoalRelations(matchedEntities, relationListList);
 						if (tempGoal != null && !goalList.contains(tempGoal)) {
-							if (ConstraintCheck.isValidRelations(tempGoal.getRelations())) {
+							if (ConstraintCheck.isValidRelations(tempGoal.getRelations()) && isNotDuplicateGoal(tempGoal)) {
 								goalList.add(tempGoal);
 								Debug.print("move: OK, the newly created goals were okay to add. So, added: " + tempGoal);
 							}
@@ -508,6 +508,17 @@ public class Interpreter {
 		return true;
 	}
 
+	private boolean isNotDuplicateGoal(Goal goal) {
+		for (Goal existingGoal : goalList) {
+			List<Relation> existingGoalRelations = new ArrayList<>(existingGoal.getRelations());
+			existingGoalRelations.retainAll(goal.getRelations());
+			if (existingGoalRelations.size() == existingGoal.getRelations().size()) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	/**
 	 * Relative has two children. The left child is always a relation type.
 	 * 
