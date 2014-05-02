@@ -120,7 +120,7 @@ public class Shrdlite {
 			} else {
 				GoalSolver goalSolver;
 				List<Plan> plans;
-				if (false) {
+				if (true) {
 					goalSolver = new ConcurrentGoalSolver(interpreter.world, interpreter.heldEntity, goals);
 				} else if(false) {
 					goalSolver = new ErikTheSolver(interpreter.world, interpreter.heldEntity, goals);

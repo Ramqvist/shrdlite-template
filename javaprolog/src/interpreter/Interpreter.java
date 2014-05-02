@@ -512,7 +512,7 @@ public class Interpreter {
 		for (Goal existingGoal : goalList) {
 			List<Relation> existingGoalRelations = new ArrayList<>(existingGoal.getRelations());
 			existingGoalRelations.retainAll(goal.getRelations());
-			if (existingGoalRelations.size() == existingGoal.getRelations().size()) {
+			if (existingGoalRelations.containsAll(goal.getRelations())) {
 				return false;
 			}
 		}

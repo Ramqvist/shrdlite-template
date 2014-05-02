@@ -51,6 +51,13 @@ public class GibbsPlanner implements Callable<Plan> {
 		
 		int size = 0;
 		Plan plan = new Plan(startState, new ArrayList<Action>(), goal);
+		State prePickedState = null;
+		List<Action> prePickedActions = null;
+		int prePickedActionSize = 0;
+		int rollbackAttempts = 0;
+		for (List<Entity> column : world) {
+			rollbackAttempts += column.size() * 5;
+		}
 		while (true) {
 			count++;
 //			plan = queue.poll();
@@ -71,7 +78,6 @@ public class GibbsPlanner implements Callable<Plan> {
 			// dropped.
 			int i = ran.nextInt(world.size());
 			Action newAction;
-//			Debug.print("Actions: " + plan.actions.size());
 			while (plan.actions.size() != 0 && plan.actions.get(plan.actions.size() - 1).column == i) {
 				i = ran.nextInt(world.size());
 			}
@@ -85,8 +91,13 @@ public class GibbsPlanner implements Callable<Plan> {
 					i = ran.nextInt(world.size());
 				}
 				newAction = new Action(Action.COMMAND.PICK, i);
+				prePickedState = new State(plan.currentState);
+				prePickedActions = new ArrayList<>(plan.actions);
+				prePickedActionSize = plan.actions.size();
 			}
 
+//			Debug.print(newAction);
+			
 			// Take all possible actions.
 //			count++;
 //			List<Action> actionList = new ArrayList<Action>(plan.actions.size() + 1);
@@ -100,6 +111,7 @@ public class GibbsPlanner implements Callable<Plan> {
 				size = plan.actions.size();
 //					Debug.print(this + ": " + size);
 //				if (size > maxDepth) {
+				
 					throw new InterruptedException(this + ": interrupted, my plan is too long: " + size + " > " + maxDepth);
 //				}
 			}
@@ -112,7 +124,17 @@ public class GibbsPlanner implements Callable<Plan> {
 					if (ConstraintCheck.isValidColumn(plan.currentState.world.get(newAction.column))) {
 //						queue.add(p);
 					} else {
-						return null;
+						if (prePickedState != null) {
+							if (rollbackAttempts > 0) {
+								plan.currentState = new State(prePickedState);
+								plan.actions.subList(prePickedActionSize, plan.actions.size()).clear();
+								rollbackAttempts--;
+							} else {
+//								Debug.print("too long " + plan.actions.size());
+								return null;
+							}
+						}
+//						return null;
 					}
 				} else {
 //					queue.add(p);
@@ -153,7 +175,7 @@ public class GibbsPlanner implements Callable<Plan> {
 	@Override
 	public Plan call() throws Exception {
 		
-		int MAX_PLANS = 100;
+		int MAX_PLANS = 10;
 				
 		long start = System.currentTimeMillis();
 		List<Plan> plans = new ArrayList<Plan>();

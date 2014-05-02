@@ -14,10 +14,10 @@ var DialogueHistory = 100;    // max nr. utterances
 var FloorThickness = 10;     // pixels
 var WallSeparation = 4;     // pixels
 var ArmSize = 0.2;         // of stack width
-var AnimationPause = 0.1; // seconds
+var AnimationPause = 0.001; // seconds
 var PromptPause = 0.5;   // seconds
-var AjaxTimeout = 10;    // seconds
-var ArmSpeed = 1000;   // pixels per second
+var AjaxTimeout = 100;    // seconds
+var ArmSpeed = 30000;   // pixels per second
 
 // This only has effect in the latest versions of Chrome and Safari,
 // the only browsers that have implemented the W3C Web Speech API:
