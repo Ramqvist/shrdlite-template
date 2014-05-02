@@ -71,6 +71,7 @@ public class GibbsPlanner implements Callable<Plan> {
 			// dropped.
 			int i = ran.nextInt(world.size());
 			Action newAction;
+//			Debug.print("Actions: " + plan.actions.size());
 			while (plan.actions.size() != 0 && plan.actions.get(plan.actions.size() - 1).column == i) {
 				i = ran.nextInt(world.size());
 			}
@@ -95,11 +96,11 @@ public class GibbsPlanner implements Callable<Plan> {
 			plan.actions.add(newAction);
 			
 			if (plan.actions.size() > maxDepth) {
-				return null;
-//				size = plan.actions.size();
+//				return null;
+				size = plan.actions.size();
 //					Debug.print(this + ": " + size);
 //				if (size > maxDepth) {
-//					throw new InterruptedException(this + ": interrupted, my plan is too long: " + size + " > " + maxDepth);
+					throw new InterruptedException(this + ": interrupted, my plan is too long: " + size + " > " + maxDepth);
 //				}
 			}
 
@@ -122,11 +123,10 @@ public class GibbsPlanner implements Callable<Plan> {
 				// The action was rejected, so we do nothing.
 			}
 		}
-//		Debug.print("No path found for Gibbs");
 //		return null; //No Plan found
 	}
 
-	private boolean hasReachedGoal(Goal goal, State state) {
+	private static boolean hasReachedGoal(Goal goal, State state) {
 		int count = 0;
 		for (Relation relation : goal.getRelations()) {
 			if (relation.getType() == Relation.TYPE.HELD) {
@@ -153,25 +153,35 @@ public class GibbsPlanner implements Callable<Plan> {
 	@Override
 	public Plan call() throws Exception {
 		
-		int MAX_PLANS = 3;
+		int MAX_PLANS = 100;
 				
 		long start = System.currentTimeMillis();
 		List<Plan> plans = new ArrayList<Plan>();
-		while(plans.size() < MAX_PLANS) {
+		int planSize = 0;
+		while(planSize < MAX_PLANS) {
 			Plan plan = null;
-			while(plan == null) {
+			try {
 				plan = solve(goal);
-			}	
-			plans.add(plan);
-			Plan shortestPlan = null;
-			for(Plan p : plans) {
-				if(shortestPlan == null) {
-					shortestPlan = p;
-				} else if(p.actions.size() < shortestPlan.actions.size()) {
-					shortestPlan = p;
+				if(plan != null) {
+					planSize++;
+					setMaxDepth(plan.actions.size());
+					plans.add(plan);
 				}
+			} catch (Exception e) {
+//				Debug.print(e);
+				planSize++;
+//				return getShortestPlan(plans);
 			}
-			setMaxDepth(shortestPlan.actions.size());
+		}
+		long elapsed = System.currentTimeMillis() - start;
+		Debug.print(this + ": Plan solved in: " + elapsed + " ms.");
+		return getShortestPlan(plans);
+	}
+	
+	
+	private static Plan getShortestPlan(List<Plan> plans) {
+		if(plans == null || plans.isEmpty()) {
+			return null;
 		}
 		Plan shortestPlan = plans.remove(0);
 		for(Plan p : plans) {
@@ -179,9 +189,6 @@ public class GibbsPlanner implements Callable<Plan> {
 				shortestPlan = p;
 			}
 		}
-		setMaxDepth(shortestPlan.actions.size());
-		long elapsed = System.currentTimeMillis() - start;
-		Debug.print(this + ": Plan solved in: " + elapsed + " ms.");
 		return shortestPlan;
 	}
 

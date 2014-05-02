@@ -41,7 +41,9 @@ public class GibbsSolver implements GoalSolver {
 		for (Future<Plan> future : futureSet) {
 			try {
 				Plan plan = future.get();
-				plans.add(plan);
+				if(plan != null) {
+					plans.add(plan);
+				}
 				Debug.print(plan + " received!");
 			} catch (InterruptedException | ExecutionException e) {
 				Debug.print(e.getMessage());

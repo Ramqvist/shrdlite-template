@@ -8,6 +8,8 @@ package src;
 
 //Then test from the command line:
 //java -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. src.Shrdlite < ../examples/complex.json
+
+// python -m CGIHTTPServer 8000
 import java.util.List;
 import java.util.ArrayList;
 import java.io.InputStreamReader;
