@@ -122,9 +122,9 @@ public class Shrdlite {
 				List<Plan> plans;
 				if (false) {
 					goalSolver = new ConcurrentGoalSolver(interpreter.world, interpreter.heldEntity, goals);
-				} else if(false) {
-					goalSolver = new ErikTheSolver(interpreter.world, interpreter.heldEntity, goals);
 				} else if(true) {
+					goalSolver = new ErikTheSolver(interpreter.world, interpreter.heldEntity, goals);
+				} else if(false) {
 					goalSolver = new GibbsSolver(interpreter.world, interpreter.heldEntity, goals);
 				} else {
 					goalSolver = new StandardGoalSolver(interpreter.world, interpreter.heldEntity, goals);

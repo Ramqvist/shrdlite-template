@@ -153,7 +153,7 @@ public class GibbsPlanner implements Callable<Plan> {
 	@Override
 	public Plan call() throws Exception {
 		
-		int MAX_PLANS = 100;
+		int MAX_PLANS = 1000;
 				
 		long start = System.currentTimeMillis();
 		List<Plan> plans = new ArrayList<Plan>();

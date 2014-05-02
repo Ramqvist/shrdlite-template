@@ -1,6 +1,7 @@
 package src.planner;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.Callable;
@@ -16,7 +17,7 @@ public class ErikThePlanner implements Callable<Plan> {
 	private List<List<Entity>> world;
 	private Entity heldEntity;
 	private Goal goal;
-	private HashSet<Plan> tabuList = new HashSet<>();
+//	private HashSet<Plan> tabuList = new HashSet<>();
 	
 	private static Integer maxDepth = Integer.MAX_VALUE;
 
@@ -34,7 +35,7 @@ public class ErikThePlanner implements Callable<Plan> {
 	
 	private Plan solve(Goal goal) throws InterruptedException {
 		// We use a PriorityQueue to order all possible plans by their cost.
-		PriorityQueue<Plan> queue = new PriorityQueue<>();
+		LimitedPriorityQueue queue = new LimitedPriorityQueue(500);
 
 		// TODO: We've discussed this before, but as we've currently tried to
 		// solve the planner, are relations in state necessary?
@@ -59,6 +60,7 @@ public class ErikThePlanner implements Callable<Plan> {
 				Debug.print(this + ": Planning finished!");
 				Debug.print(this + ": Actions: " + plan.actions);
 				Debug.print(this + ": Total iteration count: " + count);
+//				Debug.print(this + ": Tabu List size: " + tabuList.size());
 				setMaxDepth(size);
 				return plan;
 			}
@@ -98,6 +100,8 @@ public class ErikThePlanner implements Callable<Plan> {
 				if (actionList.size() > size) {
 					size = actionList.size();
 					Debug.print(this + ": " + size);
+//					Debug.print(this + ": Tabu List size: " + tabuList.size());
+					Debug.print(this + ": Queue size: " + queue.size());
 					if (size > maxDepth) {
 						throw new InterruptedException(this + ": interrupted, my plan is too long: " + size + " > " + maxDepth);
 					}
@@ -107,14 +111,10 @@ public class ErikThePlanner implements Callable<Plan> {
 					Plan p = new Plan(plan.currentState.takeAction(newAction), actionList, goal);
 					if (newAction.command == Action.COMMAND.DROP) {
 						if (ConstraintCheck.isValidColumn(p.currentState.world.get(newAction.column))) {
-							if(tabuList.add(p)) {
-								queue.add(p);
-							}
+							queue.limitedAdd(p);
 						}
 					} else {
-						if(tabuList.add(p)) {
-							queue.add(p);
-						}
+						queue.limitedAdd(p);
 					}
 				} catch (Exception e) {
 					Debug.print(e);
@@ -146,6 +146,36 @@ public class ErikThePlanner implements Callable<Plan> {
 		}
 		
 		return count == goal.getRelations().size();
+	}
+	
+	private class LimitedPriorityQueue extends PriorityQueue<Plan> {
+		private static final long serialVersionUID = 1L;
+		private int maxSize;
+		private int r = 0;
+		private static final int GROWTH_RATE = 10;
+
+		public LimitedPriorityQueue(int maxSize) {
+			super();
+			this.maxSize = maxSize;
+		}
+		
+		public void limitedAdd(Plan e) {
+			if(r++ > GROWTH_RATE) {
+				r = 0;
+				maxSize++;
+			}
+			if(size() > maxSize) {
+				int i = 0;
+				Iterator<Plan> it = iterator();
+				Plan last = null;
+				while(it.hasNext() && i < maxSize) {
+					last = it.next();
+				}
+				remove(last);
+			} else {
+				add(e);
+			}
+		}
 	}
 
 	@Override

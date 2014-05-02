@@ -42,7 +42,7 @@ public class ConcurrentGoalSolver implements GoalSolver {
 			try {
 				Plan plan = future.get();
 				plans.add(plan);
-				Debug.print(plan + " received!");;
+				Debug.print(plan + " received!");
 			} catch (InterruptedException | ExecutionException e) {
 				Debug.print(e.getMessage());
 			}
