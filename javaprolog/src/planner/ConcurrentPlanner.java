@@ -96,6 +96,7 @@ public class ConcurrentPlanner implements Callable<Plan> {
 				if (actionList.size() > size) {
 					size = actionList.size();
 					Debug.print(this + ": " + size);
+					Debug.print(this + ": Queue size: " + queue.size());
 					if (size > maxDepth) {
 						throw new InterruptedException(this + ": interrupted, my plan is too long: " + size + " > " + maxDepth);
 					}

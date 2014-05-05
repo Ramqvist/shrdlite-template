@@ -56,7 +56,7 @@ public class GibbsPlanner implements Callable<Plan> {
 		int prePickedActionSize = 0;
 		int rollbackAttempts = 0;
 		for (List<Entity> column : world) {
-			rollbackAttempts += column.size() * 5;
+			rollbackAttempts += column.size() * 100;
 		}
 		while (true) {
 			count++;
@@ -188,6 +188,7 @@ public class GibbsPlanner implements Callable<Plan> {
 					planSize++;
 					setMaxDepth(plan.actions.size());
 					plans.add(plan);
+					Debug.print(plan.actions.size());
 				}
 			} catch (Exception e) {
 //				Debug.print(e);
