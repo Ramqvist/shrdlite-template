@@ -1,21 +1,20 @@
-package src;
+package src.planner;
 import java.util.ArrayList;
 import java.util.List;
 
-import src.planner.GoalSolver;
-import src.planner.Plan;
-import src.planner.Planner;
+import src.Debug;
+import src.planner.data.Plan;
 import src.world.Entity;
 import src.world.Goal;
 
 
-public class StandardGoalSolver implements GoalSolver {
+public class SingleGoalSolver implements IGoalSolver {
 
 	private List<List<Entity>> world;
 	private Entity heldEntity;
 	private List<Goal> goals;
 	
-	public StandardGoalSolver(List<List<Entity>> world, Entity heldEntity, List<Goal> goals) {
+	public SingleGoalSolver(List<List<Entity>> world, Entity heldEntity, List<Goal> goals) {
 		this.world = world;
 		this.heldEntity = heldEntity;
 		this.goals = goals;
@@ -23,7 +22,7 @@ public class StandardGoalSolver implements GoalSolver {
 	
 	@Override
 	public List<Plan> solve() {
-		Planner planner = new Planner(world, heldEntity);
+		HeuristicPlanner planner = new HeuristicPlanner(world, heldEntity);
 		List<Plan> plans = new ArrayList<Plan>();
 		int maxDepth = Integer.MAX_VALUE;
 

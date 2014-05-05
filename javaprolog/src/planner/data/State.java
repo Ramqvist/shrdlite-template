@@ -1,4 +1,4 @@
-package src.planner;
+package src.planner.data;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,9 +12,9 @@ import src.world.Relation;
 
 public class State {
 	
-	List<List<Entity>> world;
-	List<Relation> relations;
-	Entity holding = null;
+	public List<List<Entity>> world;
+	public List<Relation> relations;
+	public Entity holding = null;
 
 	public State(List<List<Entity>> world, List<Relation> relations, Entity heldEntity) {
 		this.world = world;

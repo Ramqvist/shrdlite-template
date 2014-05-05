@@ -9,41 +9,45 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import src.Debug;
-import src.planner.data.IPlan;
-import src.planner.data.Plan;
+import src.planner.data.SimplePlan;
 import src.world.Entity;
 import src.world.Goal;
 
-
-public class ConcurrentGoalSolver implements IGoalSolver {
+/**
+ * A planner that uses Randomized planner that uses Markov chain 
+ * Monte Carlo methods to determine the next step with probabilities.
+ */
+public class ProbabilisticSolver implements IGoalSolver {
 	
 	private List<List<Entity>> world;
 	private Entity heldEntity;
 	private List<Goal> goals;
 	
-	public ConcurrentGoalSolver(List<List<Entity>> world, Entity heldEntity, List<Goal> goals) {
+	public ProbabilisticSolver(List<List<Entity>> world, Entity heldEntity, List<Goal> goals) {
 		this.world = world;
 		this.heldEntity = heldEntity;
 		this.goals = goals;
 	}
 	
-	public List<Plan> solve() {
-		List<Plan> plans = new ArrayList<Plan>();
+	public List<SimplePlan> solve() {
+		List<SimplePlan> plans = new ArrayList<SimplePlan>();
 		
 		Debug.print("Attempting to solve " + goals.size() + " goals.");
 		ExecutorService executorService = Executors.newFixedThreadPool(goals.size());
-		Set<Future<Plan>> futureSet = new HashSet<>();
+		Set<Future<SimplePlan>> futureSet = new HashSet<>();
 		for (Goal goal : goals) {
-			ConcurrentPlanner planner = new ConcurrentPlanner(world, heldEntity, goal);
-			Future<Plan> future = executorService.submit(planner);
+			ProbabilisticPlanner planner = new ProbabilisticPlanner(world, heldEntity, goal);
+			Future<SimplePlan> future = executorService.submit(planner);
 			futureSet.add(future);
 			Debug.print("Submitted " + planner + " to be solve " + goal);
 		}
 
-		for (Future<Plan> future : futureSet) {
+		for (Future<SimplePlan> future : futureSet) {
 			try {
-				Plan plan = future.get();
-				plans.add(plan);
+				SimplePlan plan = future.get();
+				if(plan != null) {
+					plans.add(plan);
+				}
 				Debug.print(plan + " received!");
 			} catch (InterruptedException | ExecutionException e) {
 				Debug.print(e.getMessage());

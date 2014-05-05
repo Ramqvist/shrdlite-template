@@ -1,17 +1,27 @@
 package src.planner;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
 import src.Debug;
 import src.constraints.ConstraintCheck;
+import src.planner.data.Action;
+import src.planner.data.SimplePlan;
+import src.planner.data.State;
 import src.world.Entity;
 import src.world.Goal;
 import src.world.Relation;
 
-public class GibbsPlanner implements Callable<Plan> {
+/**
+ * Planner that takes steps based on the probabilities.
+ * 
+ * http://www2.informatik.uni-freiburg.de/~ki/teaching/ss05/aip/s05.pdf
+ * 
+ * @author Erik
+ *
+ */
+public class ProbabilisticPlanner implements Callable<SimplePlan> {
 
 	private List<List<Entity>> world;
 	private Entity heldEntity;
@@ -21,7 +31,7 @@ public class GibbsPlanner implements Callable<Plan> {
 	private static Integer maxDepth = Integer.MAX_VALUE;
 	private Random ran = new Random();	
 
-	public GibbsPlanner(List<List<Entity>> world, Entity heldEntity, Goal goal) {
+	public ProbabilisticPlanner(List<List<Entity>> world, Entity heldEntity, Goal goal) {
 		this.world = world;
 		this.heldEntity = heldEntity;
 		this.goal = goal;
@@ -33,13 +43,31 @@ public class GibbsPlanner implements Callable<Plan> {
 		}
 	}
 	
-	private Plan solve(Goal goal) throws InterruptedException {
+	private int getProbability(List<Relation> relations, List<List<Entity>> world, Entity holding) {
+		int compareCount = 0;
+		compareCount += compareWithGoal(world, holding);
+		for (Relation relation : goal.getRelations()) {
+			compareCount += relation.compareToWorld(world);
+		}
+		return compareCount;
+	}
+	
+	private int compareWithGoal(List<List<Entity>> world, Entity holding) {
+		int count = 0;
+		for (List<Entity> column : world) {
+			for (Entity entity : column) {
+				for (Relation relation : goal.getRelations()) {
+					if (!Relation.matchEntityAndRelationExact(entity, relation, world, holding).isEmpty()) {
+						count++;
+					}
+				}
+			}
+		}
+		return count;
+	}
+	
+	private SimplePlan solve(Goal goal) throws InterruptedException {
 //		Debug.print("Started Planning using Gibbs!");
-		// We use a PriorityQueue to order all possible plans by their cost.
-//		PriorityQueue<Plan> queue = new PriorityQueue<>();
-
-		// TODO: We've discussed this before, but as we've currently tried to
-		// solve the planner, are relations in state necessary?
 		List<Relation> relations = new ArrayList<Relation>();
 		State startState = new State(world, relations, heldEntity);
 
@@ -50,14 +78,7 @@ public class GibbsPlanner implements Callable<Plan> {
 		}
 		
 		int size = 0;
-		Plan plan = new Plan(startState, new ArrayList<Action>(), goal);
-		State prePickedState = null;
-		List<Action> prePickedActions = null;
-		int prePickedActionSize = 0;
-		int rollbackAttempts = 0;
-		for (List<Entity> column : world) {
-			rollbackAttempts += column.size() * 100;
-		}
+		SimplePlan plan = new SimplePlan(startState, new ArrayList<Action>(), goal);
 		while (true) {
 			count++;
 //			plan = queue.poll();
@@ -76,73 +97,49 @@ public class GibbsPlanner implements Callable<Plan> {
 			// Small optimization. No point in dropping in the same location
 			// we last picked, or picking in the same location we last
 			// dropped.
-			int i = ran.nextInt(world.size());
-			Action newAction;
-			while (plan.actions.size() != 0 && plan.actions.get(plan.actions.size() - 1).column == i) {
-				i = ran.nextInt(world.size());
-			}
-			if (plan.currentState.isHolding()) {
-				newAction = new Action(Action.COMMAND.DROP, i);
-			} else {
-				// Big optimization. No need to try to pick something
-				// from
-				// an empty column.
-				while(plan.currentState.world.get(i).isEmpty()) {
-					i = ran.nextInt(world.size());
+
+			List<Action> possibleActions = new ArrayList<Action>();
+			for(int i = 0 ; i < world.size() ; i++) {
+				if (plan.currentState.isHolding()) {
+					possibleActions.add(new Action(Action.COMMAND.DROP, i));
+				} else {
+					// Big optimization. No need to try to pick something
+					// from
+					// an empty column.
+					possibleActions.add(new Action(Action.COMMAND.PICK, i));
 				}
-				newAction = new Action(Action.COMMAND.PICK, i);
-				prePickedState = new State(plan.currentState);
-				prePickedActions = new ArrayList<>(plan.actions);
-				prePickedActionSize = plan.actions.size();
 			}
 
-//			Debug.print(newAction);
-			
 			// Take all possible actions.
 //			count++;
-//			List<Action> actionList = new ArrayList<Action>(plan.actions.size() + 1);
-//			for (Action c : plan.actions) {
-//				actionList.add(c);
-//			}
-			plan.actions.add(newAction);
+			
+			List<Action> actionList = new ArrayList<Action>(plan.actions.size() + 1);
+			for (Action c : plan.actions) {
+				actionList.add(c);
+			}
 			
 			if (plan.actions.size() > maxDepth) {
 //				return null;
 				size = plan.actions.size();
 //					Debug.print(this + ": " + size);
 //				if (size > maxDepth) {
-				
 					throw new InterruptedException(this + ": interrupted, my plan is too long: " + size + " > " + maxDepth);
 //				}
 			}
-
-			try {
-				plan.currentState = plan.currentState.takeAction(newAction);
-//				Plan p = new Plan(plan.currentState.takeAction(newAction), actionList, goal);
-//
-				if (newAction.command == Action.COMMAND.DROP) {
-					if (ConstraintCheck.isValidColumn(plan.currentState.world.get(newAction.column))) {
-//						queue.add(p);
-					} else {
-						if (prePickedState != null) {
-							if (rollbackAttempts > 0) {
-								plan.currentState = new State(prePickedState);
-								plan.actions.subList(prePickedActionSize, plan.actions.size()).clear();
-								rollbackAttempts--;
-							} else {
-//								Debug.print("too long " + plan.actions.size());
-								return null;
-							}
+			for(Action newAction : possibleActions) {
+				try {
+					SimplePlan p = new SimplePlan(plan.currentState.takeAction(newAction), actionList, goal);
+	//
+					if (newAction.command == Action.COMMAND.DROP) {
+						if (!ConstraintCheck.isValidColumn(plan.currentState.world.get(newAction.column))) {
+							return null;
 						}
-//						return null;
-					}
-				} else {
-//					queue.add(p);
+					} 
+				} catch (Exception e) {
+					Debug.print(e);
+					continue;
+					// The action was rejected, so we do nothing.
 				}
-			} catch (Exception e) {
-				Debug.print(e);
-				return null;
-				// The action was rejected, so we do nothing.
 			}
 		}
 //		return null; //No Plan found
@@ -173,22 +170,21 @@ public class GibbsPlanner implements Callable<Plan> {
 	}
 
 	@Override
-	public Plan call() throws Exception {
+	public SimplePlan call() throws Exception {
 		
-		int MAX_PLANS = 10;
+		int MAX_PLANS = 1000;
 				
 		long start = System.currentTimeMillis();
-		List<Plan> plans = new ArrayList<Plan>();
+		List<SimplePlan> plans = new ArrayList<SimplePlan>();
 		int planSize = 0;
 		while(planSize < MAX_PLANS) {
-			Plan plan = null;
+			SimplePlan plan = null;
 			try {
 				plan = solve(goal);
 				if(plan != null) {
 					planSize++;
 					setMaxDepth(plan.actions.size());
 					plans.add(plan);
-					Debug.print(plan.actions.size());
 				}
 			} catch (Exception e) {
 //				Debug.print(e);
@@ -202,12 +198,12 @@ public class GibbsPlanner implements Callable<Plan> {
 	}
 	
 	
-	private static Plan getShortestPlan(List<Plan> plans) {
+	private static SimplePlan getShortestPlan(List<SimplePlan> plans) {
 		if(plans == null || plans.isEmpty()) {
 			return null;
 		}
-		Plan shortestPlan = plans.remove(0);
-		for(Plan p : plans) {
+		SimplePlan shortestPlan = plans.remove(0);
+		for(SimplePlan p : plans) {
 			if(p.actions.size() < shortestPlan.actions.size()) {
 				shortestPlan = p;
 			}

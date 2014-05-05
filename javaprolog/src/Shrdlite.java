@@ -1,15 +1,22 @@
 package src;
-// First compile the program:
-// javac -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. src.Shrdlite.java
+/** 
+ * 
+First compile the program:
+javac -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. src.Shrdlite.java
 
-// Then test from the command line:
-// java -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. src.Shrdlite < ../examples/medium.json
+- MEDIUM:
+java -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. src.Shrdlite < ../examples/medium.json
 
+- COMPLEX:
+java -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. src.Shrdlite < ../examples/complex.json
 
-// Then test from the command line:
-// java -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. src.Shrdlite < ../examples/complex.json
+- SMALL:
+java -cp gnuprologjava-0.2.6.jar:json-simple-1.1.1.jar:. src.Shrdlite < ../examples/small.json
 
-// python -m CGIHTTPServer 8000
+Run Server from Console
+python -m CGIHTTPServer 8000
+ 
+ */
 import java.util.List;
 import java.util.ArrayList;
 import java.io.InputStreamReader;
@@ -25,12 +32,15 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 
 import src.interpreter.Interpreter;
-import src.planner.Action;
+import src.planner.BreathFirstSolver;
 import src.planner.ConcurrentGoalSolver;
-import src.planner.ErikTheSolver;
-import src.planner.GibbsSolver;
-import src.planner.GoalSolver;
-import src.planner.Plan;
+import src.planner.LimitedHeuristicSolver;
+import src.planner.SingleGoalSolver;
+import src.planner.StochasticSolver;
+import src.planner.IGoalSolver;
+import src.planner.data.Action;
+import src.planner.data.IPlan;
+import src.planner.data.Plan;
 import src.world.Goal;
 
 public class Shrdlite {
@@ -118,25 +128,27 @@ public class Shrdlite {
 				result.put("state", state);
 				result.put("output", "Ambiguity error!");
 			} else {
-				GoalSolver goalSolver;
-				List<Plan> plans;
+				IGoalSolver goalSolver;
+				List<? extends IPlan> plans;
 				if (false) {
 					goalSolver = new ConcurrentGoalSolver(interpreter.world, interpreter.heldEntity, goals);
-				} else if(true) {
-					goalSolver = new ErikTheSolver(interpreter.world, interpreter.heldEntity, goals);
-				} else if(true) {
-					goalSolver = new GibbsSolver(interpreter.world, interpreter.heldEntity, goals);
+				} else if (true) {
+					goalSolver = new LimitedHeuristicSolver(interpreter.world, interpreter.heldEntity, goals);
+				} else if (false) {
+					goalSolver = new StochasticSolver(interpreter.world, interpreter.heldEntity, goals);
+				} else if (false) {
+					goalSolver = new BreathFirstSolver(interpreter.world, interpreter.heldEntity, goals);
 				} else {
-					goalSolver = new StandardGoalSolver(interpreter.world, interpreter.heldEntity, goals);
+					goalSolver = new SingleGoalSolver(interpreter.world, interpreter.heldEntity, goals);
 				}
 				plans = goalSolver.solve();
 
 				List<String> actionStrings = new ArrayList<>();
 				if (!plans.isEmpty()) {
-					List<Action> smallestPlan = plans.get(0).actions;
-					for(Plan p : plans) {
-						if(p.actions.size() < smallestPlan.size()) {
-							smallestPlan = p.actions;
+					List<Action> smallestPlan = plans.get(0).getActions();
+					for(IPlan p : plans) {
+						if(p.getActions().size() < smallestPlan.size()) {
+							smallestPlan = p.getActions();
 						}
 					}
 

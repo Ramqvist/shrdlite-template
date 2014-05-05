@@ -1,6 +1,5 @@
 package src.planner;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -8,11 +7,14 @@ import java.util.concurrent.Callable;
 
 import src.Debug;
 import src.constraints.ConstraintCheck;
+import src.planner.data.Action;
+import src.planner.data.Plan;
+import src.planner.data.State;
 import src.world.Entity;
 import src.world.Goal;
 import src.world.Relation;
 
-public class ErikThePlanner implements Callable<Plan> {
+public class LimitedHeuristicPlanner implements Callable<Plan> {
 
 	private List<List<Entity>> world;
 	private Entity heldEntity;
@@ -21,7 +23,7 @@ public class ErikThePlanner implements Callable<Plan> {
 	
 	private static Integer maxDepth = Integer.MAX_VALUE;
 
-	public ErikThePlanner(List<List<Entity>> world, Entity heldEntity, Goal goal) {
+	public LimitedHeuristicPlanner(List<List<Entity>> world, Entity heldEntity, Goal goal) {
 		this.world = world;
 		this.heldEntity = heldEntity;
 		this.goal = goal;
@@ -160,15 +162,14 @@ public class ErikThePlanner implements Callable<Plan> {
 		}
 		
 		public void limitedAdd(Plan e) {
-			if(r++ > GROWTH_RATE) {
-				r = 0;
-				maxSize++;
-			}
+//			if(r++ > GROWTH_RATE) {
+//				r = 0;
+//				maxSize++;
+//			}
 			if(size() > maxSize) {
-				int i = 0;
 				Iterator<Plan> it = iterator();
-				Plan last = null;
-				while(it.hasNext() && i < maxSize) {
+				Plan last = it.next();
+				while(it.hasNext()) {
 					last = it.next();
 				}
 				remove(last);

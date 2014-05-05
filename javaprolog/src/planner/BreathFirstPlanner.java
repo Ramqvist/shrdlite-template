@@ -5,30 +5,32 @@ import java.util.PriorityQueue;
 
 import src.Debug;
 import src.constraints.ConstraintCheck;
+import src.planner.data.Action;
+import src.planner.data.SimplePlan;
+import src.planner.data.State;
 import src.world.Entity;
 import src.world.Goal;
 import src.world.Relation;
-import src.world.Relation.TYPE;
 
-public class Planner {
+public class BreathFirstPlanner {
 
 	List<List<Entity>> world;
 	Entity heldEntity;
 
-	public Planner(List<List<Entity>> world, Entity heldEntity) {
+	public BreathFirstPlanner(List<List<Entity>> world, Entity heldEntity) {
 		this.world = world;
 		this.heldEntity = heldEntity;
 	}
 
-	public Plan solve(Goal goal, int maxDepth) {
+	public SimplePlan solve(Goal goal, int maxDepth) {
 		// We use a PriorityQueue to order all possible plans by their cost.
-		PriorityQueue<Plan> queue = new PriorityQueue<>();
+		PriorityQueue<SimplePlan> queue = new PriorityQueue<>();
 
 		// TODO: We've discussed this before, but as we've currently tried to
 		// solve the planner, are relations in state necessary?
 		List<Relation> relations = new ArrayList<Relation>();
 		State startState = new State(world, relations, heldEntity);
-		queue.add(new Plan(startState, new ArrayList<Action>(), goal));
+		queue.add(new SimplePlan(startState, new ArrayList<Action>(), goal));
 
 		if (!ConstraintCheck.isValidWorld(world)) {
 			Debug.print("World is not valid!");
@@ -38,10 +40,10 @@ public class Planner {
 		int count = 0;
 		int size = 0;
 		boolean reachedGoal = false;
-		Plan goalPlan = null;
+		SimplePlan goalPlan = null;
 		while (true) {
 			count++;
-			Plan plan = queue.poll();
+			SimplePlan plan = queue.poll();
 			reachedGoal = hasReachedGoal(goal, plan.currentState);
 			if (reachedGoal) {
 				Debug.print(plan + " reached the goal state " + goal);
@@ -99,7 +101,7 @@ public class Planner {
 				}
 
 				try {
-					Plan p = new Plan(plan.currentState.takeAction(newAction), actionList, goal);
+					SimplePlan p = new SimplePlan(plan.currentState.takeAction(newAction), actionList, goal);
 
 					if (newAction.command == Action.COMMAND.DROP) {
 						if (ConstraintCheck.isValidColumn(p.currentState.world.get(newAction.column))) {
