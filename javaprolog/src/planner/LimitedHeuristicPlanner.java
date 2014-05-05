@@ -1,6 +1,5 @@
 package src.planner;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -163,15 +162,14 @@ public class LimitedHeuristicPlanner implements Callable<Plan> {
 		}
 		
 		public void limitedAdd(Plan e) {
-			if(r++ > GROWTH_RATE) {
-				r = 0;
-				maxSize++;
-			}
+//			if(r++ > GROWTH_RATE) {
+//				r = 0;
+//				maxSize++;
+//			}
 			if(size() > maxSize) {
-				int i = 0;
 				Iterator<Plan> it = iterator();
-				Plan last = null;
-				while(it.hasNext() && i < maxSize) {
+				Plan last = it.next();
+				while(it.hasNext()) {
 					last = it.next();
 				}
 				remove(last);

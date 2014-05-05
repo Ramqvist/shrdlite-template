@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import src.Debug;
-import src.planner.data.Plan;
+import src.planner.data.SimplePlan;
 import src.world.Entity;
 import src.world.Goal;
 
@@ -29,22 +29,22 @@ public class StochasticSolver implements IGoalSolver {
 		this.goals = goals;
 	}
 	
-	public List<Plan> solve() {
-		List<Plan> plans = new ArrayList<Plan>();
+	public List<SimplePlan> solve() {
+		List<SimplePlan> plans = new ArrayList<SimplePlan>();
 		
 		Debug.print("Attempting to solve " + goals.size() + " goals.");
 		ExecutorService executorService = Executors.newFixedThreadPool(goals.size());
-		Set<Future<Plan>> futureSet = new HashSet<>();
+		Set<Future<SimplePlan>> futureSet = new HashSet<>();
 		for (Goal goal : goals) {
 			StochasticPlanner planner = new StochasticPlanner(world, heldEntity, goal);
-			Future<Plan> future = executorService.submit(planner);
+			Future<SimplePlan> future = executorService.submit(planner);
 			futureSet.add(future);
 			Debug.print("Submitted " + planner + " to be solve " + goal);
 		}
 
-		for (Future<Plan> future : futureSet) {
+		for (Future<SimplePlan> future : futureSet) {
 			try {
-				Plan plan = future.get();
+				SimplePlan plan = future.get();
 				if(plan != null) {
 					plans.add(plan);
 				}

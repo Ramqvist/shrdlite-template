@@ -2,9 +2,7 @@ package src.planner.data;
 import java.util.ArrayList;
 import java.util.List;
 
-import src.world.Entity;
 import src.world.Goal;
-import src.world.Relation;
 
 /**
  * Simple Plan to not use heuristics to compare with other objects.

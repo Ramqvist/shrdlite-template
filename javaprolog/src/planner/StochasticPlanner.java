@@ -7,13 +7,13 @@ import java.util.concurrent.Callable;
 import src.Debug;
 import src.constraints.ConstraintCheck;
 import src.planner.data.Action;
-import src.planner.data.Plan;
+import src.planner.data.SimplePlan;
 import src.planner.data.State;
 import src.world.Entity;
 import src.world.Goal;
 import src.world.Relation;
 
-public class StochasticPlanner implements Callable<Plan> {
+public class StochasticPlanner implements Callable<SimplePlan> {
 
 	private List<List<Entity>> world;
 	private Entity heldEntity;
@@ -35,7 +35,7 @@ public class StochasticPlanner implements Callable<Plan> {
 		}
 	}
 	
-	private Plan solve(Goal goal) throws InterruptedException {
+	private SimplePlan solve(Goal goal) throws InterruptedException {
 //		Debug.print("Started Planning using Gibbs!");
 		// We use a PriorityQueue to order all possible plans by their cost.
 //		PriorityQueue<Plan> queue = new PriorityQueue<>();
@@ -52,7 +52,7 @@ public class StochasticPlanner implements Callable<Plan> {
 		}
 		
 		int size = 0;
-		Plan plan = new Plan(startState, new ArrayList<Action>(), goal);
+		SimplePlan plan = new SimplePlan(startState, new ArrayList<Action>(), goal);
 		while (true) {
 			count++;
 //			plan = queue.poll();
@@ -153,15 +153,15 @@ public class StochasticPlanner implements Callable<Plan> {
 	}
 
 	@Override
-	public Plan call() throws Exception {
+	public SimplePlan call() throws Exception {
 		
 		int MAX_PLANS = 1000;
 				
 		long start = System.currentTimeMillis();
-		List<Plan> plans = new ArrayList<Plan>();
+		List<SimplePlan> plans = new ArrayList<SimplePlan>();
 		int planSize = 0;
 		while(planSize < MAX_PLANS) {
-			Plan plan = null;
+			SimplePlan plan = null;
 			try {
 				plan = solve(goal);
 				if(plan != null) {
@@ -181,12 +181,12 @@ public class StochasticPlanner implements Callable<Plan> {
 	}
 	
 	
-	private static Plan getShortestPlan(List<Plan> plans) {
+	private static SimplePlan getShortestPlan(List<SimplePlan> plans) {
 		if(plans == null || plans.isEmpty()) {
 			return null;
 		}
-		Plan shortestPlan = plans.remove(0);
-		for(Plan p : plans) {
+		SimplePlan shortestPlan = plans.remove(0);
+		for(SimplePlan p : plans) {
 			if(p.actions.size() < shortestPlan.actions.size()) {
 				shortestPlan = p;
 			}
