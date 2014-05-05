@@ -9,17 +9,21 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import src.Debug;
+import src.planner.data.Plan;
 import src.world.Entity;
 import src.world.Goal;
 
-
-public class ErikTheSolver implements GoalSolver {
+/**
+ * A planner that uses Randomized planner that uses Markov chain Monte Carlo
+ * methods to determine the next step.
+ */
+public class StochasticSolver implements IGoalSolver {
 	
 	private List<List<Entity>> world;
 	private Entity heldEntity;
 	private List<Goal> goals;
 	
-	public ErikTheSolver(List<List<Entity>> world, Entity heldEntity, List<Goal> goals) {
+	public StochasticSolver(List<List<Entity>> world, Entity heldEntity, List<Goal> goals) {
 		this.world = world;
 		this.heldEntity = heldEntity;
 		this.goals = goals;
@@ -32,7 +36,7 @@ public class ErikTheSolver implements GoalSolver {
 		ExecutorService executorService = Executors.newFixedThreadPool(goals.size());
 		Set<Future<Plan>> futureSet = new HashSet<>();
 		for (Goal goal : goals) {
-			ErikThePlanner planner = new ErikThePlanner(world, heldEntity, goal);
+			StochasticPlanner planner = new StochasticPlanner(world, heldEntity, goal);
 			Future<Plan> future = executorService.submit(planner);
 			futureSet.add(future);
 			Debug.print("Submitted " + planner + " to be solve " + goal);
@@ -41,7 +45,9 @@ public class ErikTheSolver implements GoalSolver {
 		for (Future<Plan> future : futureSet) {
 			try {
 				Plan plan = future.get();
-				plans.add(plan);
+				if(plan != null) {
+					plans.add(plan);
+				}
 				Debug.print(plan + " received!");
 			} catch (InterruptedException | ExecutionException e) {
 				Debug.print(e.getMessage());

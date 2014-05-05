@@ -9,17 +9,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import src.Debug;
+import src.planner.data.Plan;
 import src.world.Entity;
 import src.world.Goal;
 
 
-public class GibbsSolver implements GoalSolver {
+public class LimitedHeuristicSolver implements IGoalSolver {
 	
 	private List<List<Entity>> world;
 	private Entity heldEntity;
 	private List<Goal> goals;
 	
-	public GibbsSolver(List<List<Entity>> world, Entity heldEntity, List<Goal> goals) {
+	public LimitedHeuristicSolver(List<List<Entity>> world, Entity heldEntity, List<Goal> goals) {
 		this.world = world;
 		this.heldEntity = heldEntity;
 		this.goals = goals;
@@ -32,7 +33,7 @@ public class GibbsSolver implements GoalSolver {
 		ExecutorService executorService = Executors.newFixedThreadPool(goals.size());
 		Set<Future<Plan>> futureSet = new HashSet<>();
 		for (Goal goal : goals) {
-			GibbsPlanner planner = new GibbsPlanner(world, heldEntity, goal);
+			LimitedHeuristicPlanner planner = new LimitedHeuristicPlanner(world, heldEntity, goal);
 			Future<Plan> future = executorService.submit(planner);
 			futureSet.add(future);
 			Debug.print("Submitted " + planner + " to be solve " + goal);
@@ -41,9 +42,7 @@ public class GibbsSolver implements GoalSolver {
 		for (Future<Plan> future : futureSet) {
 			try {
 				Plan plan = future.get();
-				if(plan != null) {
-					plans.add(plan);
-				}
+				plans.add(plan);
 				Debug.print(plan + " received!");
 			} catch (InterruptedException | ExecutionException e) {
 				Debug.print(e.getMessage());

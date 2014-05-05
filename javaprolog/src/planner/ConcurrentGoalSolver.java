@@ -9,11 +9,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import src.Debug;
+import src.planner.data.IPlan;
+import src.planner.data.Plan;
 import src.world.Entity;
 import src.world.Goal;
 
 
-public class ConcurrentGoalSolver implements GoalSolver {
+public class ConcurrentGoalSolver implements IGoalSolver {
 	
 	private List<List<Entity>> world;
 	private Entity heldEntity;

@@ -1,4 +1,4 @@
-package src.planner;
+package src.planner.data;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +9,7 @@ import src.world.Relation;
 /**
  *  A plan is represented by a list of Actions and a current state.
  */
-public class Plan implements Comparable<Plan>{
+public class Plan implements Comparable<Plan>, IPlan {
 
 	public final List<Action> actions;
 	public State currentState;
@@ -111,6 +111,11 @@ public class Plan implements Comparable<Plan>{
 			return false;
 		}
 		return true;
+	}
+	
+	@Override
+	public List<Action> getActions() {
+		return actions;
 	}
 	
 	

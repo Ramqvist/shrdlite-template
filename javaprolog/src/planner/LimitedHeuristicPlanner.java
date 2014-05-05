@@ -8,11 +8,14 @@ import java.util.concurrent.Callable;
 
 import src.Debug;
 import src.constraints.ConstraintCheck;
+import src.planner.data.Action;
+import src.planner.data.Plan;
+import src.planner.data.State;
 import src.world.Entity;
 import src.world.Goal;
 import src.world.Relation;
 
-public class ErikThePlanner implements Callable<Plan> {
+public class LimitedHeuristicPlanner implements Callable<Plan> {
 
 	private List<List<Entity>> world;
 	private Entity heldEntity;
@@ -21,7 +24,7 @@ public class ErikThePlanner implements Callable<Plan> {
 	
 	private static Integer maxDepth = Integer.MAX_VALUE;
 
-	public ErikThePlanner(List<List<Entity>> world, Entity heldEntity, Goal goal) {
+	public LimitedHeuristicPlanner(List<List<Entity>> world, Entity heldEntity, Goal goal) {
 		this.world = world;
 		this.heldEntity = heldEntity;
 		this.goal = goal;

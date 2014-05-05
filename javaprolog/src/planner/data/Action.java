@@ -1,4 +1,4 @@
-package src.planner;
+package src.planner.data;
 public class Action {
 
 	public enum COMMAND {
