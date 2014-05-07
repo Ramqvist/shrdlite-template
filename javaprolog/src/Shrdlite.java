@@ -32,7 +32,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 
 import src.interpreter.Interpreter;
-import src.planner.BreathFirstSolver;
+import src.planner.BreadthFirstSolver;
 import src.planner.ConcurrentGoalSolver;
 import src.planner.LimitedHeuristicSolver;
 import src.planner.ProbabilisticPlanner;
@@ -134,14 +134,14 @@ public class Shrdlite {
 				List<? extends IPlan> plans;
 				if (false) {
 					goalSolver = new ConcurrentGoalSolver(interpreter.world, interpreter.heldEntity, goals);
-				} else if (false) {
-					goalSolver = new LimitedHeuristicSolver(interpreter.world, interpreter.heldEntity, goals);
 				} else if (true) {
 					goalSolver = new ProbabilisticSolver(interpreter.world, interpreter.heldEntity, goals);
 				} else if (false) {
+					goalSolver = new LimitedHeuristicSolver(interpreter.world, interpreter.heldEntity, goals);
+				} else if (true) {
 					goalSolver = new StochasticSolver(interpreter.world, interpreter.heldEntity, goals);
 				} else if (false) {
-					goalSolver = new BreathFirstSolver(interpreter.world, interpreter.heldEntity, goals);
+					goalSolver = new BreadthFirstSolver(interpreter.world, interpreter.heldEntity, goals);
 				} else {
 					goalSolver = new SingleGoalSolver(interpreter.world, interpreter.heldEntity, goals);
 				}
