@@ -8,13 +8,13 @@ import src.world.Entity;
 import src.world.Goal;
 
 
-public class BreathFirstSolver implements IGoalSolver {
+public class BreadthFirstSolver implements IGoalSolver {
 
 	private List<List<Entity>> world;
 	private Entity heldEntity;
 	private List<Goal> goals;
 	
-	public BreathFirstSolver(List<List<Entity>> world, Entity heldEntity, List<Goal> goals) {
+	public BreadthFirstSolver(List<List<Entity>> world, Entity heldEntity, List<Goal> goals) {
 		this.world = world;
 		this.heldEntity = heldEntity;
 		this.goals = goals;
@@ -22,7 +22,7 @@ public class BreathFirstSolver implements IGoalSolver {
 	
 	@Override
 	public List<SimplePlan> solve() {
-		BreathFirstPlanner planner = new BreathFirstPlanner(world, heldEntity);
+		BreadthFirstPlanner planner = new BreadthFirstPlanner(world, heldEntity);
 		List<SimplePlan> plans = new ArrayList<SimplePlan>();
 		int maxDepth = Integer.MAX_VALUE;
 

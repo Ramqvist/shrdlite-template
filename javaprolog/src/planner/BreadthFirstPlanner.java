@@ -12,12 +12,12 @@ import src.world.Entity;
 import src.world.Goal;
 import src.world.Relation;
 
-public class BreathFirstPlanner {
+public class BreadthFirstPlanner {
 
 	List<List<Entity>> world;
 	Entity heldEntity;
 
-	public BreathFirstPlanner(List<List<Entity>> world, Entity heldEntity) {
+	public BreadthFirstPlanner(List<List<Entity>> world, Entity heldEntity) {
 		this.world = world;
 		this.heldEntity = heldEntity;
 	}
