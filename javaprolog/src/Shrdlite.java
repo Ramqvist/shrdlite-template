@@ -35,6 +35,8 @@ import src.interpreter.Interpreter;
 import src.planner.BreathFirstSolver;
 import src.planner.ConcurrentGoalSolver;
 import src.planner.LimitedHeuristicSolver;
+import src.planner.ProbabilisticPlanner;
+import src.planner.ProbabilisticSolver;
 import src.planner.SingleGoalSolver;
 import src.planner.StochasticSolver;
 import src.planner.IGoalSolver;
@@ -132,8 +134,10 @@ public class Shrdlite {
 				List<? extends IPlan> plans;
 				if (false) {
 					goalSolver = new ConcurrentGoalSolver(interpreter.world, interpreter.heldEntity, goals);
-				} else if (true) {
+				} else if (false) {
 					goalSolver = new LimitedHeuristicSolver(interpreter.world, interpreter.heldEntity, goals);
+				} else if (true) {
+					goalSolver = new ProbabilisticSolver(interpreter.world, interpreter.heldEntity, goals);
 				} else if (false) {
 					goalSolver = new StochasticSolver(interpreter.world, interpreter.heldEntity, goals);
 				} else if (false) {

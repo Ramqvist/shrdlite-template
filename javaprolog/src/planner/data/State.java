@@ -26,10 +26,10 @@ public class State {
 	 * Clone constructor.
 	 */
 	public State(State state) {
-		this.relations = new ArrayList<Relation>();
-		for (Relation r : state.relations) {
-			this.relations.add(r.copy());
-		}
+//		this.relations = new ArrayList<Relation>();
+//		for (Relation r : state.relations) {
+//			this.relations.add(r.copy());
+//		}
 		this.world = new ArrayList<List<Entity>>(state.world.size());
 		for (List<Entity> entityList : state.world) {
 			List<Entity> l = new ArrayList<Entity>(entityList.size());
@@ -105,8 +105,8 @@ public class State {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((holding == null) ? 0 : holding.hashCode());
-		result = prime * result + ((relations == null) ? 0 : relations.hashCode());
-//		result = prime * result + ((world == null) ? 0 : world.hashCode());
+//		result = prime * result + ((relations == null) ? 0 : relations.hashCode());
+		result = prime * result + ((world == null) ? 0 : world.hashCode());
 		return result;
 	}
 
