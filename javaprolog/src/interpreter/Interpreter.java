@@ -195,6 +195,8 @@ public class Interpreter {
 	
 	private Object walkCompoundTerm(CompoundTerm cterm) throws InterpretationException {
 		switch (cterm.tag.functor.toString()) {
+		case "answer":
+			return answer(cterm);
 		case "take":
 			return take(cterm);
 		case "move":
@@ -227,6 +229,17 @@ public class Interpreter {
 		}
 		// This static method handles the parsing of type values.
 		return Relation.parseType(aterm.value);
+	}
+	
+	private Object answer(CompoundTerm cterm) throws InterpretationException {
+		Debug.print("saw answer");
+		List<List<Pair<Entity, Relation>>> matchedEntitiesList = (List<List<Pair<Entity, Relation>>>) walkTree(cterm.args[0]);
+		for (List<Pair<Entity, Relation>> matchedEntities : matchedEntitiesList) {
+			for (Pair<Entity, Relation> matchedEntity : matchedEntities) {
+				goalList.add(new Goal(new Relation(matchedEntity.a, new Entity(), Relation.TYPE.UNDEFINED)));
+			}
+		}
+		return null;
 	}
 	
 	/**
@@ -579,11 +592,17 @@ public class Interpreter {
 
 		List<List<Pair<Entity, Relation>>> matchedEntitiesPruned = new ArrayList<>();
 		if (quantifier.equals("the")) {
-			Entity temp = matchedEntities.get(0);
-			Pair<Entity, Relation> pair = new Pair<>(temp, null);
-			List<Pair<Entity, Relation>> matchedEntitiesPair = new ArrayList<>();
-			matchedEntitiesPair.add(pair);
-			matchedEntitiesPruned.add(matchedEntitiesPair);
+//			Entity temp = matchedEntities.get(0);
+//			Pair<Entity, Relation> pair = new Pair<>(temp, null);
+//			List<Pair<Entity, Relation>> matchedEntitiesPair = new ArrayList<>();
+//			matchedEntitiesPair.add(pair);
+//			matchedEntitiesPruned.add(matchedEntitiesPair);
+			for (Entity matchedEntity : matchedEntities) {
+				Pair<Entity, Relation> pair = new Pair<>(matchedEntity, null);
+				List<Pair<Entity, Relation>> matchedEntitiesPair = new ArrayList<>();
+				matchedEntitiesPair.add(pair);
+				matchedEntitiesPruned.add(matchedEntitiesPair);
+			}
 		} else if (quantifier.equals("any")) {
 			for (Entity matchedEntity : matchedEntities) {
 				Pair<Entity, Relation> pair = new Pair<>(matchedEntity, null);
@@ -667,10 +686,15 @@ public class Interpreter {
 
 		List<List<Pair<Entity, Relation>>> matchedEntitiesPruned = new ArrayList<>();
 		if (quantifier.equals("the")) {
-			Pair<Entity, Relation> temp = matchedEntitiesPair.get(0);
-			matchedEntitiesPair.clear();
-			matchedEntitiesPair.add(temp);
-			matchedEntitiesPruned.add(matchedEntitiesPair);
+//			Pair<Entity, Relation> temp = matchedEntitiesPair.get(0);
+//			matchedEntitiesPair.clear();
+//			matchedEntitiesPair.add(temp);
+//			matchedEntitiesPruned.add(matchedEntitiesPair);
+			for (Pair<Entity, Relation> matchedEntityPair : matchedEntitiesPair) {
+				List<Pair<Entity, Relation>> tempMatchedEntitiesPair = new ArrayList<>();
+				tempMatchedEntitiesPair.add(matchedEntityPair);
+				matchedEntitiesPruned.add(tempMatchedEntitiesPair);
+			}
 		} else if (quantifier.equals("any")) {
 			for (Pair<Entity, Relation> matchedEntityPair : matchedEntitiesPair) {
 				List<Pair<Entity, Relation>> tempMatchedEntitiesPair = new ArrayList<>();

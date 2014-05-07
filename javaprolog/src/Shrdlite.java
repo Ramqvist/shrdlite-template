@@ -17,31 +17,31 @@ Run Server from Console
 python -m CGIHTTPServer 8000
  
  */
-import java.util.List;
-import java.util.ArrayList;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.io.IOException;
-
 import gnu.prolog.term.Term;
 import gnu.prolog.vm.PrologException;
 
-import org.json.simple.parser.ParseException;
-import org.json.simple.JSONValue;
-import org.json.simple.JSONObject;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.ParseException;
 
 import src.interpreter.Interpreter;
 import src.planner.BreadthFirstSolver;
 import src.planner.ConcurrentGoalSolver;
+import src.planner.IGoalSolver;
 import src.planner.LimitedHeuristicSolver;
 import src.planner.SingleGoalSolver;
 import src.planner.StochasticSolver;
-import src.planner.IGoalSolver;
 import src.planner.data.Action;
 import src.planner.data.IPlan;
-import src.planner.data.Plan;
 import src.world.Goal;
+import src.world.Relation;
 
 public class Shrdlite {
 
@@ -51,7 +51,7 @@ public class Shrdlite {
 		JSONArray world = (JSONArray) jsinput.get("world");
 		String holding = (String) jsinput.get("holding");
 		JSONObject objects = (JSONObject) jsinput.get("objects");
-		JSONObject state = (JSONObject) jsinput.get("state");
+		JSONArray state = (JSONArray) jsinput.get("state");
 		
 		JSONObject result = new JSONObject();
 		result.put("utterance", utterance);
@@ -74,17 +74,6 @@ public class Shrdlite {
 			Debug.print();
 		}
 
-		// TODO: Use state to handle ambiguity resolution.
-		if (state != null && !state.isEmpty()) {
-			Debug.print("State given: " + state.toString());
-//			JSONArray stateUtterance = (JSONArray) state.get("utterance");
-//			List<Term> statetrees = parser.parseSentence("command", stateUtterance);
-//			List<String> statetstrs = new ArrayList<String>();
-//			Debug.print(stateUtterance);
-		} else {
-			Debug.print("State was empty.");
-		}
-		
 		if (trees.isEmpty()) {
 			result.put("output", "Parse error!");
 		} else {
@@ -95,6 +84,71 @@ public class Shrdlite {
 					goals.add(goal);
 				}
 			}
+			
+			// TODO: Use state to handle ambiguity resolution.
+			if (state != null && !state.isEmpty()) {
+				Debug.print("State given: " + state.toString());
+				Debug.print();
+				
+				List<Goal> previousGoals = new ArrayList<>();
+				
+				for (Object object : state) {
+					JSONArray stateUtterance = (JSONArray) object;
+					
+					List<Term> statetrees = parser.parseSentence("command", stateUtterance);
+					List<String> statetstrs = new ArrayList<String>();
+					for (Term t : statetrees) {
+						statetstrs.add(t.toString());
+						Debug.print("State Tree " + (statetrees.indexOf(t) + 1));
+						Debug.print(t.toString());
+						Debug.print();
+					}
+
+					Interpreter stateInterpreter = new Interpreter(world, holding, objects);
+					List<Goal> newGoals = new ArrayList<>();
+					for (Term tree : statetrees) {
+						if (previousGoals.isEmpty()) {
+							for (Goal stateGoal : stateInterpreter.interpret(tree)) {
+								previousGoals.add(stateGoal);
+							}
+						} else {
+							for (Goal stateGoal : stateInterpreter.interpret(tree)) {
+								for (Goal goal : previousGoals) {
+									for (Relation stateGoalRelation : stateGoal.getRelations()) {
+										for (Relation goalRelation : goal.getRelations()) {
+											if (stateGoalRelation.getEntityA().equals(goalRelation.getEntityA())
+													|| stateGoalRelation.getEntityA().equals(goalRelation.getEntityB())) {
+												newGoals.add(goal);
+												Debug.print("Added goal: " + goal);
+											}
+										}
+									}
+								}
+							}
+							Debug.print(newGoals);
+							previousGoals = newGoals;
+						}
+					}
+				}
+				List<Goal> newGoals = new ArrayList<>();
+				for (Goal goal : goals) {
+					for (Goal stateGoal : previousGoals) {
+						for (Relation stateGoalRelation : stateGoal.getRelations()) {
+							for (Relation goalRelation : goal.getRelations()) {
+								if (stateGoalRelation.getEntityA().equals(goalRelation.getEntityA())
+										|| stateGoalRelation.getEntityB().equals(goalRelation.getEntityA())) {
+									newGoals.add(stateGoal);
+									Debug.print("Later Added goal: " + stateGoal);
+								}
+							}
+						}
+					}
+				}
+				goals = newGoals;
+			} else {
+				Debug.print("State was empty.");
+				Debug.print();
+			}
 
 			JSONArray goalArray = new JSONArray();
 			for (Goal g : goals) {
@@ -104,33 +158,21 @@ public class Shrdlite {
 
 			if (goals.isEmpty()) {
 				result.put("output", "Interpretation error!");
-			} else if (goals.size() > 1337) {
+			} else if (goals.size() > 1) {
 				Debug.print("Ambiguity error!");
 				for (Goal goal : goals) {
 					Debug.print(goal);
 				}
 				Debug.print();
-				state = new JSONObject();
-				state.put("utterance", utterance);
-				
-//				JSONArray parsetrees = new JSONArray();
-//				for (Term tree : trees) {
-//					parsetrees.add(tree.toString());
-//				}
-//				state.put("parsetrees", parsetrees);
-				
-//				JSONArray stategoals = new JSONArray();
-//				for (Goal goal : goals) {
-//					stategoals.add(goal.toString());
-//				}
-//				state.put("stategoals", stategoals);
-				
+				state.add(utterance);
 				result.put("state", state);
 				result.put("output", "Ambiguity error!");
 			} else {
+				state.clear();
+				result.put("state", state);
 				IGoalSolver goalSolver;
 				List<? extends IPlan> plans;
-				if (false) {
+				if (true) {
 					goalSolver = new ConcurrentGoalSolver(interpreter.world, interpreter.heldEntity, goals);
 				} else if (false) {
 					goalSolver = new LimitedHeuristicSolver(interpreter.world, interpreter.heldEntity, goals);

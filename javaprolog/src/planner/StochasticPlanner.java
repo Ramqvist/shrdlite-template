@@ -156,7 +156,7 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 	@Override
 	public SimplePlan call() throws Exception {
 		
-		int MAX_PLANS = 1000;
+		int MAX_PLANS = 1;
 				
 		long start = System.currentTimeMillis();
 		List<SimplePlan> plans = new ArrayList<SimplePlan>();
