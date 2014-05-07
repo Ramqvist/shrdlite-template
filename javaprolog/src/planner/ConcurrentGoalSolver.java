@@ -9,7 +9,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import src.Debug;
-import src.planner.data.IPlan;
 import src.planner.data.Plan;
 import src.world.Entity;
 import src.world.Goal;

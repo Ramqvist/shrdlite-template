@@ -19,7 +19,6 @@ public class LimitedHeuristicPlanner implements Callable<Plan> {
 	private List<List<Entity>> world;
 	private Entity heldEntity;
 	private Goal goal;
-//	private HashSet<Plan> tabuList = new HashSet<>();
 	
 	private static Integer maxDepth = Integer.MAX_VALUE;
 
@@ -154,7 +153,8 @@ public class LimitedHeuristicPlanner implements Callable<Plan> {
 		private static final long serialVersionUID = 1L;
 		private int maxSize;
 		private int r = 0;
-		private static final int GROWTH_RATE = 10;
+		private static final int 		GROWTH_RATE 	= 10;
+		private static final boolean 	ENABLE_GROWTH	= false;
 
 		public LimitedPriorityQueue(int maxSize) {
 			super();
@@ -162,10 +162,12 @@ public class LimitedHeuristicPlanner implements Callable<Plan> {
 		}
 		
 		public void limitedAdd(Plan e) {
-//			if(r++ > GROWTH_RATE) {
-//				r = 0;
-//				maxSize++;
-//			}
+			if(ENABLE_GROWTH) {
+				if(r++ > GROWTH_RATE) {
+					r = 0;
+					maxSize++;
+				}
+			}
 			if(size() > maxSize) {
 				Iterator<Plan> it = iterator();
 				Plan last = it.next();
