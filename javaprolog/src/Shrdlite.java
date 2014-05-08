@@ -77,99 +77,110 @@ public class Shrdlite {
 			Debug.print();
 		}
 
+		boolean cancel = false;
+		
 		if (trees.isEmpty()) {
 			result.put("output", "Parse error!");
-		} else {
+			return;
+		}
 			List<Goal> goals = new ArrayList<>();
 			Interpreter interpreter = new Interpreter(world, holding, objects);
-			if (trees.size() > 1) {
+			if (trees.size() > 2) {
 				result.put("output", "That sentence is ambiguous. Please specify with more clarity what you wish me to do.");
 			} else {
 				for (Term tree : trees) {
-					for (Goal goal : interpreter.interpret(tree)) {
-						goals.add(goal);
+					cancel = interpreter.checkForCancel(tree);
+					if (!cancel) {
+						for (Goal goal : interpreter.interpret(tree)) {
+							goals.add(goal);
+						}
 					}
 				}
-			
-				// TODO: Use state to handle ambiguity resolution.
-				if (state != null) {
-					statearray = (JSONArray) state.get("utterances");
-					if (statearray != null && !statearray.isEmpty()) {
-						Debug.print("State given: " + state.toString());
-						Debug.print();
-						
-						List<Goal> previousGoals = new ArrayList<>();
-						
-						for (Object object : statearray) {
-							JSONArray stateUtterance = (JSONArray) object;
+				
+				if (cancel) {
+					if (state != null) {
+						statearray = (JSONArray) state.get("utterances");
+						if (statearray != null && !statearray.isEmpty()) {
+							Debug.print("State given: " + state.toString());
+							Debug.print();
 							
-							List<Term> statetrees = parser.parseSentence("command", stateUtterance);
-							List<String> statetstrs = new ArrayList<String>();
-							for (Term t : statetrees) {
-								statetstrs.add(t.toString());
-								Debug.print("State Tree " + (statetrees.indexOf(t) + 1));
-								Debug.print(t.toString());
-								Debug.print();
-							}
-		
-							Interpreter stateInterpreter = new Interpreter(world, holding, objects);
-							List<Goal> newGoals = new ArrayList<>();
-							for (Term tree : statetrees) {
-								if (previousGoals.isEmpty()) {
-									for (Goal stateGoal : stateInterpreter.interpret(tree)) {
-										previousGoals.add(stateGoal);
-									}
-								} else {
-									for (Goal stateGoal : stateInterpreter.interpret(tree)) {
-										for (Goal goal : previousGoals) {
-											for (Relation stateGoalRelation : stateGoal.getRelations()) {
-												for (Relation goalRelation : goal.getRelations()) {
-													if (stateGoalRelation.getEntityA().equals(goalRelation.getEntityA())
-															|| stateGoalRelation.getEntityA().equals(goalRelation.getEntityB())) {
-														newGoals.add(goal);
-														Debug.print("Added goal: " + goal);
+							List<Goal> previousGoals = new ArrayList<>();
+							
+							for (Object object : statearray) {
+								JSONArray stateUtterance = (JSONArray) object;
+								
+								List<Term> statetrees = parser.parseSentence("command", stateUtterance);
+								List<String> statetstrs = new ArrayList<String>();
+								for (Term t : statetrees) {
+									statetstrs.add(t.toString());
+									Debug.print("State Tree " + (statetrees.indexOf(t) + 1));
+									Debug.print(t.toString());
+									Debug.print();
+								}
+			
+								Interpreter stateInterpreter = new Interpreter(world, holding, objects);
+								List<Goal> newGoals = new ArrayList<>();
+								for (Term tree : statetrees) {
+									if (previousGoals.isEmpty()) {
+										for (Goal stateGoal : stateInterpreter.interpret(tree)) {
+											previousGoals.add(stateGoal);
+										}
+									} else {
+										for (Goal stateGoal : stateInterpreter.interpret(tree)) {
+											for (Goal goal : previousGoals) {
+												for (Relation stateGoalRelation : stateGoal.getRelations()) {
+													for (Relation goalRelation : goal.getRelations()) {
+														if (stateGoalRelation.getEntityA().equals(goalRelation.getEntityA())
+																|| stateGoalRelation.getEntityA().equals(goalRelation.getEntityB())) {
+															newGoals.add(goal);
+															Debug.print("Added goal: " + goal);
+														}
 													}
 												}
 											}
 										}
+										Debug.print(newGoals);
+										previousGoals = newGoals;
 									}
-									Debug.print(newGoals);
-									previousGoals = newGoals;
 								}
 							}
-						}
-						List<Goal> newGoals = new ArrayList<>();
-						for (Goal goal : goals) {
-							for (Goal stateGoal : previousGoals) {
-								for (Relation stateGoalRelation : stateGoal.getRelations()) {
-									for (Relation goalRelation : goal.getRelations()) {
-										if (stateGoalRelation.getEntityA().equals(goalRelation.getEntityA())
-												|| stateGoalRelation.getEntityB().equals(goalRelation.getEntityA())) {
-											newGoals.add(stateGoal);
-											Debug.print("Later Added goal: " + stateGoal);
+							List<Goal> newGoals = new ArrayList<>();
+							for (Goal goal : goals) {
+								for (Goal stateGoal : previousGoals) {
+									for (Relation stateGoalRelation : stateGoal.getRelations()) {
+										for (Relation goalRelation : goal.getRelations()) {
+											if (stateGoalRelation.getEntityA().equals(goalRelation.getEntityA())
+													|| stateGoalRelation.getEntityB().equals(goalRelation.getEntityA())) {
+												newGoals.add(stateGoal);
+												Debug.print("Later Added goal: " + stateGoal);
+											}
 										}
 									}
 								}
 							}
+							goals = newGoals;
 						}
-						goals = newGoals;
+					} else {
+						Debug.print("State was empty.");
+						Debug.print();
 					}
-				} else {
-					Debug.print("State was empty.");
-					Debug.print();
+		
+					JSONArray goalArray = new JSONArray();
+					for (Goal g : goals) {
+						goalArray.add(g.toString());
+					}
+					result.put("goals", goalArray);
 				}
-	
-				JSONArray goalArray = new JSONArray();
-				for (Goal g : goals) {
-					goalArray.add(g.toString());
-				}
-				result.put("goals", goalArray);
 			}
-			if (goals.isEmpty()) {
+			
+			if (cancel) {
+				result.put("output", "Okay, I will forget the last things you've said.");
+				result.put("state", new JSONObject());
+			} else if (goals.isEmpty()) {
 				if (result.get("output") == null) {
 					result.put("output", "Interpretation error!");
 				}
-			} else if (goals.size() > 1) {
+			} else if (goals.size() > 2) {
 				Debug.print("Ambiguity error!");
 				for (Goal goal : goals) {
 					Debug.print(goal);

@@ -126,7 +126,20 @@ public class Interpreter {
 		}
 		objects.close();
 	}
+	
+	private boolean cancel;
 
+	public boolean checkForCancel(Term tree) {
+		cancel = false;
+		goalList = new ArrayList<>();
+		try {
+			walkTree(tree);
+		} catch (InterpretationException e) {
+			Debug.print("Error checking for cancel.");
+		}
+		return cancel;
+	}
+	
 	private List<Goal> goalList;
 
 	/**
@@ -226,6 +239,8 @@ public class Interpreter {
 		case "all":
 			Debug.print("saw all");
 			return "all";
+		case "nevermind":
+			cancel = true;
 		}
 		// This static method handles the parsing of type values.
 		return Relation.parseType(aterm.value);
