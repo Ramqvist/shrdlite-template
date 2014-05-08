@@ -47,7 +47,7 @@ import src.world.Relation;
 
 public class Shrdlite {
 	
-	public static PlannerAlgorithm algorithm = PlannerAlgorithm.HEURISTIC;
+	public static PlannerAlgorithm algorithm = PlannerAlgorithm.STOCHASTIC;
 	
 	private static JSONArray utterance;
 	private static JSONArray world;
@@ -75,16 +75,17 @@ public class Shrdlite {
 		System.out.print(result);
 	}
 	
+	private static List<Goal> goals = new ArrayList<>();
+	
 	private static void parseAndPlan() throws PrologException, IOException {
-		List<Goal> goals = new ArrayList<>();
-		Interpreter interpreter = parse(goals);
+		Interpreter interpreter = parse();
 		if (interpreter != null) {
-			plan(interpreter.world, interpreter.heldEntity, goals);
+			plan(interpreter.world, interpreter.heldEntity);
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static Interpreter parse(List<Goal> goals) throws PrologException, IOException {
+	private static Interpreter parse() throws PrologException, IOException {
 		DCGParser parser = new DCGParser("shrdlite_grammar.pl");
 		
 		//************
@@ -105,12 +106,10 @@ public class Shrdlite {
 
 		if (trees.isEmpty()) {
 			result.put("output", "Parse error!");
-			System.out.print(result);
 			return null;
 		} else if (trees.size() > 1000) {
 			// TODO: Decide if we want to keep this.
 			result.put("output", "That sentence is ambiguous. Please specify with more clarity what you wish me to do.");
-			System.out.print(result);
 			return null;
 		}
 		
@@ -120,7 +119,6 @@ public class Shrdlite {
 			if (interpreter.checkForCancel(tree)) {
 				result.put("output", "Okay, I will forget the last things you've said.");
 				result.put("state", new JSONObject());
-				System.out.print(result);
 				return null;
 			}
 			for (Goal goal : interpreter.interpret(tree)) {
@@ -182,7 +180,7 @@ public class Shrdlite {
 								if (stateGoalRelation.getEntityA().equals(goalRelation.getEntityA())
 										|| stateGoalRelation.getEntityB().equals(goalRelation.getEntityA())) {
 									newGoals.add(stateGoal);
-									Debug.print("Later Added goal: " + stateGoal);
+									Debug.print("Kept goal: " + stateGoal);
 								}
 							}
 						}
@@ -206,7 +204,7 @@ public class Shrdlite {
 				result.put("output", "Interpretation error!");
 			}
 			return null;
-		} else if (goals.size() > 2) {
+		} else if (goals.size() > 1) {
 			Debug.print("Ambiguity error!");
 			for (Goal goal : goals) {
 				Debug.print(goal);
@@ -230,7 +228,7 @@ public class Shrdlite {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void plan(List<List<Entity>> world, Entity heldEntity, List<Goal> goals) {
+	private static void plan(List<List<Entity>> world, Entity heldEntity) {
 		IGoalSolver goalSolver;
 		List<? extends IPlan> plans;
 		if (algorithm == PlannerAlgorithm.HEURISTIC) {
