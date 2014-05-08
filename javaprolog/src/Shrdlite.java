@@ -281,5 +281,56 @@ public class Shrdlite {
 		}
 		return data.toString();
 	}
+	
+	public static int getMeanValue(List<Long> testList) {
+		int sum = 0;
+		for(long i : testList) 
+			sum += i;
+			
+		return sum / testList.size();
+	}
+	
+	public static void runBenchmark(List<List<Entity>> world, Entity heldEntity, List<Goal> goals, int runs) {
+		
+		Debug.print("==========================================================");
+		Debug.print("======== ADVANCED PLANNER ALGORITHMS BENCHMARK STARTED ");
+		Debug.print("==========================================================");
+		Debug.print();
+		List<? extends IPlan> plans;
+		IGoalSolver goalSolver;
+		if (algorithm == PlannerAlgorithm.HEURISTIC) {
+			goalSolver = new HeuristicGoalSolver(world, heldEntity, goals);
+		} else if (algorithm == PlannerAlgorithm.PROBABILITY) {
+			goalSolver = new ProbabilisticSolver(world, heldEntity, goals);
+		} else if (algorithm == PlannerAlgorithm.LIMITED_HEURISTIC) {
+			goalSolver = new LimitedHeuristicSolver(world, heldEntity, goals);
+		} else if (algorithm == PlannerAlgorithm.STOCHASTIC) {
+			goalSolver = new StochasticSolver(world, heldEntity, goals);
+		} else {
+			goalSolver = new BreadthFirstSolver(world, heldEntity, goals);
+		}
+		List<Long> times = new ArrayList<>();
+		for(int i = 0 ; i < runs ; i++ ) {
+			long start = System.currentTimeMillis();
+			plans = goalSolver.solve();
+			long elapsed = System.currentTimeMillis() - start;
+			if(plans == null || plans.isEmpty()) Debug.print("Plans was NULL! Call the 911!");
+			times.add(elapsed);
+			Debug.print("RUN " + String.valueOf(i+1) + " finished : " + elapsed + " ms");
+		}
+		Debug.print();
+		Debug.print("==========================================================");
+		Debug.print("======== ADVANCED PLANNER ALGORITHMS BENCHMARK FINISHED ");
+		Debug.print("==========================================================");
+		Debug.print();
+		for(int i = 0 ; i < times.size() ; i++) {
+			Debug.print("RUN " + String.valueOf(i+1) + " : " + times.get(i) + " ms");
+		}
+		Debug.print();
+		Debug.print("MEAN VALUE " + getMeanValue(times) + " ms");
+		
+	}
+	
+	
 
 }
