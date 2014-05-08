@@ -126,6 +126,43 @@ public class Shrdlite {
 			}
 		}
 		
+		tryToResolveAmbiguity(parser);
+
+		JSONArray goalArray = new JSONArray();
+		for (Goal g : goals) {
+			goalArray.add(g.toString());
+		}
+		result.put("goals", goalArray);
+		
+		if (goals.isEmpty()) {
+			if (result.get("output") == null) {
+				result.put("output", "Interpretation error!");
+			}
+			return null;
+		} else if (goals.size() > 1000) {
+			Debug.print("Ambiguity error!");
+			for (Goal goal : goals) {
+				Debug.print(goal);
+			}
+			Debug.print();
+			if (statearray == null) {
+				statearray = new JSONArray();
+			}
+			statearray.add(utterance);
+			if (state == null) {
+				state = new JSONObject();
+			}
+			state.put("utterances", statearray);
+			result.put("state", state);
+			result.put("output", "Ambiguity error!");
+			return null;
+		}
+		state.put("utterances", new JSONArray());
+		result.put("state", state);
+		return interpreter;
+	}
+
+	private static void tryToResolveAmbiguity(DCGParser parser) throws PrologException, IOException {
 		if (state != null) {
 			statearray = (JSONArray) state.get("utterances");
 			if (statearray != null && !statearray.isEmpty()) {
@@ -192,39 +229,6 @@ public class Shrdlite {
 			Debug.print("State was empty.");
 			Debug.print();
 		}
-
-		JSONArray goalArray = new JSONArray();
-		for (Goal g : goals) {
-			goalArray.add(g.toString());
-		}
-		result.put("goals", goalArray);
-		
-		if (goals.isEmpty()) {
-			if (result.get("output") == null) {
-				result.put("output", "Interpretation error!");
-			}
-			return null;
-		} else if (goals.size() > 1) {
-			Debug.print("Ambiguity error!");
-			for (Goal goal : goals) {
-				Debug.print(goal);
-			}
-			Debug.print();
-			if (statearray == null) {
-				statearray = new JSONArray();
-			}
-			statearray.add(utterance);
-			if (state == null) {
-				state = new JSONObject();
-			}
-			state.put("utterances", statearray);
-			result.put("state", state);
-			result.put("output", "Ambiguity error!");
-			return null;
-		}
-		state.put("utterances", new JSONArray());
-		result.put("state", state);
-		return interpreter;
 	}
 
 	@SuppressWarnings("unchecked")
