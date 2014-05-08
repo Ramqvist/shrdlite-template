@@ -33,12 +33,11 @@ import org.json.simple.parser.ParseException;
 
 import src.interpreter.Interpreter;
 import src.planner.BreadthFirstSolver;
-import src.planner.ConcurrentGoalSolver;
+import src.planner.HeuristicGoalSolver;
 import src.planner.IGoalSolver;
+import src.planner.IGoalSolver.PlannerAlgorithm;
 import src.planner.LimitedHeuristicSolver;
-import src.planner.ProbabilisticPlanner;
 import src.planner.ProbabilisticSolver;
-import src.planner.SingleGoalSolver;
 import src.planner.StochasticSolver;
 import src.planner.data.Action;
 import src.planner.data.IPlan;
@@ -46,6 +45,8 @@ import src.world.Goal;
 import src.world.Relation;
 
 public class Shrdlite {
+	
+	public static PlannerAlgorithm algorithm = PlannerAlgorithm.HEURISTIC;
 
 	public static void main(String[] args) throws PrologException, ParseException, IOException {
 		JSONObject jsinput = (JSONObject) JSONValue.parse(readFromStdin());
@@ -58,6 +59,7 @@ public class Shrdlite {
 		
 		JSONObject result = new JSONObject();
 		result.put("utterance", utterance);
+		
 
 		DCGParser parser = new DCGParser("shrdlite_grammar.pl");
 		
@@ -189,18 +191,16 @@ public class Shrdlite {
 				result.put("state", statearray);
 				IGoalSolver goalSolver;
 				List<? extends IPlan> plans;
-				if (false) {
-					goalSolver = new ConcurrentGoalSolver(interpreter.world, interpreter.heldEntity, goals);
-				} else if (true) {
+				if (algorithm == PlannerAlgorithm.HEURISTIC) {
+					goalSolver = new HeuristicGoalSolver(interpreter.world, interpreter.heldEntity, goals);
+				} else if (algorithm == PlannerAlgorithm.PROBABILITY) {
 					goalSolver = new ProbabilisticSolver(interpreter.world, interpreter.heldEntity, goals);
-				} else if (false) {
+				} else if (algorithm == PlannerAlgorithm.LIMITED_HEURISTIC) {
 					goalSolver = new LimitedHeuristicSolver(interpreter.world, interpreter.heldEntity, goals);
-				} else if (true) {
+				} else if (algorithm == PlannerAlgorithm.STOCHASTIC) {
 					goalSolver = new StochasticSolver(interpreter.world, interpreter.heldEntity, goals);
-				} else if (false) {
-					goalSolver = new BreadthFirstSolver(interpreter.world, interpreter.heldEntity, goals);
 				} else {
-					goalSolver = new SingleGoalSolver(interpreter.world, interpreter.heldEntity, goals);
+					goalSolver = new BreadthFirstSolver(interpreter.world, interpreter.heldEntity, goals);
 				}
 				plans = goalSolver.solve();
 
