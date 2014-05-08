@@ -20,7 +20,7 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 	private Goal goal;
 	private int count = 0;
 	
-	private static Integer maxDepth = Integer.MAX_VALUE;
+	public static Integer maxDepth = Integer.MAX_VALUE;
 	private Random ran = new Random();	
 
 	public StochasticPlanner(List<List<Entity>> world, Entity heldEntity, Goal goal) {

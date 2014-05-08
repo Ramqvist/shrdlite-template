@@ -20,7 +20,7 @@ public class LimitedHeuristicPlanner implements Callable<Plan> {
 	private Entity heldEntity;
 	private Goal goal;
 	
-	private static Integer maxDepth = Integer.MAX_VALUE;
+	public static Integer maxDepth = Integer.MAX_VALUE;
 
 	public LimitedHeuristicPlanner(List<List<Entity>> world, Entity heldEntity, Goal goal) {
 		this.world = world;

@@ -20,7 +20,6 @@ public class Goal {
 		for (Relation relation : relations) {
 			this.relations.add(relation.copy());
 		}
-//		this.relations = relations;
 	}
 
 	public List<Relation> getRelations() {

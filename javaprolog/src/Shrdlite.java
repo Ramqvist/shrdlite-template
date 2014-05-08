@@ -34,7 +34,10 @@ import org.json.simple.parser.ParseException;
 import src.interpreter.Interpreter;
 import src.planner.BreadthFirstSolver;
 import src.planner.HeuristicGoalSolver;
+import src.planner.HeuristicPlanner;
 import src.planner.IGoalSolver;
+import src.planner.ProbabilisticPlanner;
+import src.planner.StochasticPlanner;
 import src.planner.IGoalSolver.PlannerAlgorithm;
 import src.planner.LimitedHeuristicSolver;
 import src.planner.ProbabilisticSolver;
@@ -79,7 +82,11 @@ public class Shrdlite {
 		List<Goal> goals = new ArrayList<>();
 		Interpreter interpreter = parse(goals);
 		if (interpreter != null) {
-			plan(interpreter.world, interpreter.heldEntity, goals);
+			if(Debug.benchmark) {
+				runBenchmark(interpreter.world, interpreter.heldEntity, goals, 5);
+			} else {
+				plan(interpreter.world, interpreter.heldEntity, goals);
+			}
 		}
 	}
 	
@@ -224,7 +231,6 @@ public class Shrdlite {
 			result.put("output", "Ambiguity error!");
 			return null;
 		}
-		state.put("utterances", new JSONArray());
 		result.put("state", state);
 		return interpreter;
 	}
@@ -319,6 +325,7 @@ public class Shrdlite {
 			if(plans == null || plans.isEmpty()) Debug.print("Plans was NULL! Call the 911!");
 			times.add(elapsed);
 			Debug.print("RUN " + String.valueOf(i+1) + " finished : " + elapsed + " ms");
+			resetPlanners();
 		}
 		Debug.print();
 		Debug.print("==========================================================");
@@ -333,6 +340,12 @@ public class Shrdlite {
 		
 	}
 	
+	
+	private static void resetPlanners() {
+		HeuristicPlanner.maxDepth = Integer.MAX_VALUE;
+		StochasticPlanner.maxDepth = Integer.MAX_VALUE;
+		ProbabilisticPlanner.maxDepth = Integer.MAX_VALUE;
+	}
 	
 
 }

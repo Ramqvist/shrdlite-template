@@ -28,7 +28,7 @@ public class ProbabilisticPlanner implements Callable<SimplePlan> {
 	private Goal goal;
 	private int count = 0;
 	
-	private static Integer maxDepth = Integer.MAX_VALUE;
+	public static Integer maxDepth = Integer.MAX_VALUE;
 	private double maxSize = 1.0;
 	private Random ran = new Random();	
 
