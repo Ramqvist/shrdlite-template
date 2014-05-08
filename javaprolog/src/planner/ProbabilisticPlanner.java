@@ -199,13 +199,13 @@ public class ProbabilisticPlanner implements Callable<SimplePlan> {
 	@Override
 	public SimplePlan call() throws Exception {
 		
-		int MAX_PLANS = 1000;
+		int MAX_SAMPLES = 1000;
 		boolean hasNonNullPlan = false;
 				
 		long start = System.currentTimeMillis();
 		List<SimplePlan> plans = new ArrayList<SimplePlan>();
 		int planSize = 0;
-		while(planSize < MAX_PLANS || !hasNonNullPlan) {
+		while(planSize < MAX_SAMPLES || !hasNonNullPlan) {
 			SimplePlan plan = null;
 			try {
 				plan = solve(goal);

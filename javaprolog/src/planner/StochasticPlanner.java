@@ -156,17 +156,19 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 	@Override
 	public SimplePlan call() throws Exception {
 		
-		int MAX_PLANS = 1;
+		int MAX_SAMPLES = 10;
+		boolean foundPlan = false;
 				
 		long start = System.currentTimeMillis();
 		List<SimplePlan> plans = new ArrayList<SimplePlan>();
 		int planSize = 0;
-		while(planSize < MAX_PLANS) {
+		while(planSize < MAX_SAMPLES || !foundPlan) {
 			SimplePlan plan = null;
 			try {
 				plan = solve(goal);
 				if(plan != null) {
 					planSize++;
+					foundPlan = true;
 					setMaxDepth(plan.actions.size());
 					plans.add(plan);
 					Debug.print(plan.actions.size());

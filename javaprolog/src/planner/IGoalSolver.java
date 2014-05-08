@@ -9,11 +9,11 @@ public interface IGoalSolver {
 	List<? extends IPlan> solve();
 	
 	public enum PlannerAlgorithm {
-		BREADTH_FIRST_PLANNER,
-		CONCURRENT_PLANNER,
-		HEURISTIC_PLANNER,
-		LIMITED_HEURISTIC_PLANNER,
-		PROBABILITY_PLANNER
+		BREADTH_FIRST,
+		HEURISTIC,
+		PROBABILITY,
+		LIMITED_HEURISTIC,
+		STOCHASTIC
 	}
 	
 }

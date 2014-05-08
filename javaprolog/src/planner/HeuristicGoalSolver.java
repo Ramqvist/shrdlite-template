@@ -14,13 +14,13 @@ import src.world.Entity;
 import src.world.Goal;
 
 
-public class ConcurrentGoalSolver implements IGoalSolver {
+public class HeuristicGoalSolver implements IGoalSolver {
 	
 	private List<List<Entity>> world;
 	private Entity heldEntity;
 	private List<Goal> goals;
 	
-	public ConcurrentGoalSolver(List<List<Entity>> world, Entity heldEntity, List<Goal> goals) {
+	public HeuristicGoalSolver(List<List<Entity>> world, Entity heldEntity, List<Goal> goals) {
 		this.world = world;
 		this.heldEntity = heldEntity;
 		this.goals = goals;
@@ -33,7 +33,7 @@ public class ConcurrentGoalSolver implements IGoalSolver {
 		ExecutorService executorService = Executors.newFixedThreadPool(goals.size());
 		Set<Future<Plan>> futureSet = new HashSet<>();
 		for (Goal goal : goals) {
-			ConcurrentPlanner planner = new ConcurrentPlanner(world, heldEntity, goal);
+			HeuristicPlanner planner = new HeuristicPlanner(world, heldEntity, goal);
 			Future<Plan> future = executorService.submit(planner);
 			futureSet.add(future);
 			Debug.print("Submitted " + planner + " to be solve " + goal);
