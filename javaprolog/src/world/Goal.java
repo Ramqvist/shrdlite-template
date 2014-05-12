@@ -9,6 +9,8 @@ import java.util.List;
 public class Goal {
 
 	private List<Relation> relations;
+	
+	public String quantifier;
 
 	public Goal(Relation relation) {
 		this.relations = new ArrayList<>();
