@@ -146,7 +146,7 @@ public class Shrdlite {
 				result.put("output", "Interpretation error!");
 			}
 			return null;
-		} else if (goals.size() > 1000) {
+		} else if (goals.size() > 1) {
 			Debug.print("Ambiguity error!");
 			for (Goal goal : goals) {
 				Debug.print(goal);
@@ -164,6 +164,7 @@ public class Shrdlite {
 			result.put("output", "Ambiguity error!");
 			return null;
 		}
+		state = new JSONObject();
 		state.put("utterances", new JSONArray());
 		result.put("state", state);
 		return interpreter;
