@@ -1,0 +1,54 @@
+==========================================================
+======== BENCHMARK RUN AT: 14:00
+==========================================================
+
+Algorithm: BREADTH_FIRST
+
+RUN 1 : 5 ms
+RUN 2 : 1 ms
+RUN 3 : 1 ms
+RUN 4 : 1 ms
+RUN 5 : 0 ms
+
+MEAN VALUE 1 ms
+
+Algorithm: HEURISTIC
+
+RUN 1 : 6 ms
+RUN 2 : 3 ms
+RUN 3 : 3 ms
+RUN 4 : 3 ms
+RUN 5 : 3 ms
+
+MEAN VALUE 3 ms
+
+Algorithm: LIMITED_HEURISTIC
+
+RUN 1 : 6 ms
+RUN 2 : 4 ms
+RUN 3 : 5 ms
+RUN 4 : 5 ms
+RUN 5 : 6 ms
+
+MEAN VALUE 5 ms
+
+Algorithm: STOCHASTIC
+
+RUN 1 : 13 ms
+RUN 2 : 29 ms
+RUN 3 : 3 ms
+RUN 4 : 4 ms
+RUN 5 : 7 ms
+
+MEAN VALUE 11 ms
+
+Algorithm: PROBABILITY
+
+RUN 1 : 97 ms
+RUN 2 : 54 ms
+RUN 3 : 36 ms
+RUN 4 : 54 ms
+RUN 5 : 34 ms
+
+MEAN VALUE 55 ms
+
