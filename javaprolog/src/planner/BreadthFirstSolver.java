@@ -39,5 +39,9 @@ public class BreadthFirstSolver implements IGoalSolver {
 		
 		return plans;
 	}
+	
+	@Override
+	public void reset() {
+	}
 
 }

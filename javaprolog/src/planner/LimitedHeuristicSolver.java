@@ -56,5 +56,10 @@ public class LimitedHeuristicSolver implements IGoalSolver {
 		Debug.print("Received the following plans: " + plans);
 		return plans;
 	}
+
+	@Override
+	public void reset() {
+		LimitedHeuristicPlanner.setMaxDepth(Integer.MAX_VALUE);
+	}
 	
 }

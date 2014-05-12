@@ -62,4 +62,9 @@ public class ProbabilisticSolver implements IGoalSolver {
 		return plans;
 	}
 	
+	@Override
+	public void reset() {
+		ProbabilisticPlanner.setMaxDepth(Integer.MAX_VALUE);
+	}
+	
 }

@@ -8,6 +8,8 @@ public interface IGoalSolver {
 
 	List<? extends IPlan> solve();
 	
+	void reset();
+	
 	public enum PlannerAlgorithm {
 		BREADTH_FIRST,
 		HEURISTIC,

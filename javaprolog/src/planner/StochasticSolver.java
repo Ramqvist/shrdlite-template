@@ -61,5 +61,10 @@ public class StochasticSolver implements IGoalSolver {
 		Debug.print("Received the following plans: " + plans);
 		return plans;
 	}
+
+	@Override
+	public void reset() {
+		StochasticPlanner.setMaxDepth(Integer.MAX_VALUE);
+	}
 	
 }

@@ -57,4 +57,9 @@ public class HeuristicGoalSolver implements IGoalSolver {
 		return plans;
 	}
 	
+	@Override
+	public void reset() {
+		HeuristicPlanner.setMaxDepth(Integer.MAX_VALUE);
+	}
+	
 }
