@@ -135,7 +135,7 @@ public class Interpreter {
 		try {
 			walkTree(tree);
 		} catch (InterpretationException e) {
-			Debug.print("Error checking for cancel.");
+			Debug.print("Error checking for cancel: " + e);
 		}
 		return cancel;
 	}
@@ -474,6 +474,13 @@ public class Interpreter {
 			tempGoal = new Goal(goalRelationList);
 			Debug.print("move: Added to goalList, which is now: " + goalList);
 		}
+		for (Pair<Entity, Relation> matchedEntity : matchedEntities) {
+			if (matchedEntity.quantifier != null) {
+				if (matchedEntity.quantifier.equalsIgnoreCase("the")) {
+					tempGoal.quantifier = "the";
+				}
+			}
+		}
 		return tempGoal;
 	}
 	
@@ -614,6 +621,7 @@ public class Interpreter {
 //			matchedEntitiesPruned.add(matchedEntitiesPair);
 			for (Entity matchedEntity : matchedEntities) {
 				Pair<Entity, Relation> pair = new Pair<>(matchedEntity, null);
+				pair.quantifier = "the";
 				List<Pair<Entity, Relation>> matchedEntitiesPair = new ArrayList<>();
 				matchedEntitiesPair.add(pair);
 				matchedEntitiesPruned.add(matchedEntitiesPair);
@@ -706,6 +714,7 @@ public class Interpreter {
 //			matchedEntitiesPair.add(temp);
 //			matchedEntitiesPruned.add(matchedEntitiesPair);
 			for (Pair<Entity, Relation> matchedEntityPair : matchedEntitiesPair) {
+				matchedEntityPair.quantifier = "the";
 				List<Pair<Entity, Relation>> tempMatchedEntitiesPair = new ArrayList<>();
 				tempMatchedEntitiesPair.add(matchedEntityPair);
 				matchedEntitiesPruned.add(tempMatchedEntitiesPair);
@@ -897,6 +906,7 @@ public class Interpreter {
 		
 		public final A a;
 		public final B b;
+		public String quantifier;
 		
 		public Pair(A a, B b) {
 			this.a = a;

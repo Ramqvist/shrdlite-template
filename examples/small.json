@@ -18,7 +18,7 @@
         "m": { "form":"box",     "size":"small",  "color":"blue"  }
     },
     "utterance": 
-        ["the","yellow","box"],
+        ["the","yellow","ball"],
     "examples": [
         ["put","the","white","ball","in","a","box","on","the","floor"],
         ["put","the","black","ball","in","a","box","on","the","floor"],
@@ -29,8 +29,7 @@
     ],
     "state": {
         "utterances": [
-            ["put","a","ball","in","a","box"],
-            ["the","white","ball"]
+            ["put","the","ball","in","a","box"],
         ]
     }
 }

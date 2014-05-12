@@ -23,7 +23,7 @@ public class Entity {
 	private FORM form;
 	private COLOR color;
 	private SIZE size;
-
+	
 	/**
 	 * Returns a new Entity with UNDEFINED form, UNDEFINED color and UNDEFINED
 	 * size.

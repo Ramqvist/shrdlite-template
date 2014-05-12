@@ -18,7 +18,7 @@
         "n": { "form":"ball",    "size":"large",  "color":"red"   }
     },
     "utterance": 
-        ["put","a","box","beside","all","objects"],
+        ["put","all","balls","beside","every","ball"],
     "examples": [
         ["put","all","balls","on","the","floor"],
         ["take","the","yellow","box"],
