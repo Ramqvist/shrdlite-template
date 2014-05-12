@@ -31,6 +31,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -328,6 +330,9 @@ public class Shrdlite {
 			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.LIMITED_HEURISTIC, out);
 			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.STOCHASTIC, out);
 			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.PROBABILITY, out);
+			
+			out.println();
+			out.println("======== FINISHED AT: "+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} finally {
@@ -339,7 +344,7 @@ public class Shrdlite {
 	public static void runBenchmark(List<List<Entity>> world, Entity heldEntity, List<Goal> goals, int runs, PlannerAlgorithm alg, PrintStream pw) {
 		
 		print("==========================================================");
-		print("======== ADVANCED PLANNER ALGORITHMS BENCHMARK STARTED    ");
+		print("======== ADVANCED PLANNER ALGORITHMS BENCHMARK STARTED USING : "+alg.toString());
 		print("==========================================================");
 		print();
 		List<? extends IPlan> plans;
@@ -355,20 +360,36 @@ public class Shrdlite {
 		} else {
 			goalSolver = new BreadthFirstSolver(world, heldEntity, goals);
 		}
+		final Thread currThread = Thread.currentThread();
 		List<Long> times = new ArrayList<Long>();
+		Timer t = new Timer();
 		for(int i = 0 ; i < runs ; i++ ) {
+			final int MAX_PLANNING_TIME = 10 * 1000;
+			t.schedule(new TimerTask() {
+				public void run() {
+					print("Planner took to long, sending interrupt...");
+					currThread.interrupt();
+				}
+			}, MAX_PLANNING_TIME);
 			long start = System.currentTimeMillis();
-			plans = goalSolver.solve();
-			long elapsed = System.currentTimeMillis() - start;
-			if(plans == null || plans.isEmpty())  {
-				print("Plans was NULL! Call the 911!");
+			try {
+				plans = goalSolver.solve();
+				long elapsed = System.currentTimeMillis() - start;
+				if(plans == null || plans.isEmpty())  {
+					print("Plans was NULL! Call the 911!");
+					times.add(Long.MAX_VALUE);
+				} else {
+					times.add(elapsed);
+				}
+				print("RUN " + String.valueOf(i+1) + " finished : " + elapsed + " ms");
+			} catch (Exception e) {
 				times.add(Long.MAX_VALUE);
-			} else {
-				times.add(elapsed);
+				print("RUN " + String.valueOf(i+1) + " FAILED TO FINISH TOOK TO LONG");
 			}
-			print("RUN " + String.valueOf(i+1) + " finished : " + elapsed + " ms");
+			t.cancel();
 			goalSolver.reset();
 		}
+		t.purge();
 		print();
 		print("==========================================================");
 		print("======== ADVANCED PLANNER ALGORITHMS BENCHMARK FINISHED   ");

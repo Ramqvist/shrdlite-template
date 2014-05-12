@@ -36,7 +36,6 @@ public class BreadthFirstSolver implements IGoalSolver {
 			long elapsed = System.currentTimeMillis() - start;
 			Debug.print("Plan solved in: " + elapsed + " ms.");
 		}
-		
 		return plans;
 	}
 	

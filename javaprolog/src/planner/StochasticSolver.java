@@ -45,6 +45,9 @@ public class StochasticSolver implements IGoalSolver {
 		for (Future<SimplePlan> future : futureSet) {
 			try {
 				SimplePlan plan = future.get();
+				if (Thread.interrupted()) {
+					return null;
+				}
 				if(plan != null) {
 					plans.add(plan);
 				}

@@ -42,6 +42,14 @@ public class BreadthFirstPlanner {
 		boolean reachedGoal = false;
 		SimplePlan goalPlan = null;
 		while (true) {
+			if (Thread.interrupted()) {
+				try {
+					throw new InterruptedException();
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+				return null;
+			}
 			count++;
 			SimplePlan plan = queue.poll();
 			reachedGoal = hasReachedGoal(goal, plan.currentState);
@@ -120,7 +128,7 @@ public class BreadthFirstPlanner {
 						Debug.print(count);
 						return p;
 					}
-				} catch (Exception e) {
+				} catch (RuntimeException e) {
 					Debug.print(e);
 					// The action was rejected, so we do nothing.
 				}

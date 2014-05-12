@@ -7,6 +7,7 @@ import java.util.concurrent.Callable;
 import src.Debug;
 import src.constraints.ConstraintCheck;
 import src.planner.data.Action;
+import src.planner.data.PlannerException;
 import src.planner.data.SimplePlan;
 import src.planner.data.State;
 import src.world.Entity;
@@ -35,7 +36,7 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 		}
 	}
 	
-	private SimplePlan solve(Goal goal) throws InterruptedException {
+	private SimplePlan solve(Goal goal) throws PlannerException {
 		// TODO: We've discussed this before, but as we've currently tried to
 		// solve the planner, are relations in state necessary?
 		List<Relation> relations = new ArrayList<Relation>();
@@ -44,7 +45,7 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 		if (!ConstraintCheck.isValidWorld(world)) {
 			Debug.print("World is not valid!");
 			Debug.print(world);
-			throw new InterruptedException(this + ": World is not valid!");
+			throw new PlannerException(this + ": World is not valid!");
 		}
 		
 		int size = 0;
@@ -99,7 +100,7 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 			
 			if (plan.actions.size() > maxDepth) {
 				size = plan.actions.size();
-				throw new InterruptedException(this + ": interrupted, my plan is too long: " + size + " > " + maxDepth);
+				throw new PlannerException(this + ": interrupted, my plan is too long: " + size + " > " + maxDepth);
 			}
 
 			try {

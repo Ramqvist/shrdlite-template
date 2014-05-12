@@ -42,6 +42,9 @@ public class LimitedHeuristicSolver implements IGoalSolver {
 		for (Future<Plan> future : futureSet) {
 			try {
 				Plan plan = future.get();
+				if (Thread.interrupted()) {
+					return null;
+				}
 				plans.add(plan);
 				Debug.print(plan + " received!");
 			} catch (InterruptedException | ExecutionException e) {

@@ -7,6 +7,7 @@ import java.util.concurrent.Callable;
 import src.Debug;
 import src.constraints.ConstraintCheck;
 import src.planner.data.Action;
+import src.planner.data.PlannerException;
 import src.planner.data.SimplePlan;
 import src.planner.data.State;
 import src.world.Entity;
@@ -67,14 +68,14 @@ public class ProbabilisticPlanner implements Callable<SimplePlan> {
 		return count;
 	}
 	
-	private SimplePlan solve(Goal goal) throws InterruptedException {
+	private SimplePlan solve(Goal goal) throws PlannerException {
 		List<Relation> relations = new ArrayList<Relation>();
 		State startState = new State(world, relations, heldEntity);
 		
 		if (!ConstraintCheck.isValidWorld(world)) {
 			Debug.print("World is not valid!");
 			Debug.print(world);
-			throw new InterruptedException(this + ": World is not valid!");
+			throw new PlannerException(this + ": World is not valid!");
 		}
 		
 		int size = 0;

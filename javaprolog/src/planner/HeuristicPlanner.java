@@ -8,6 +8,7 @@ import src.Debug;
 import src.constraints.ConstraintCheck;
 import src.planner.data.Action;
 import src.planner.data.Plan;
+import src.planner.data.PlannerException;
 import src.planner.data.State;
 import src.world.Entity;
 import src.world.Goal;
@@ -33,7 +34,7 @@ public class HeuristicPlanner implements Callable<Plan> {
 		}
 	}
 	
-	private Plan solve(Goal goal) throws InterruptedException {
+	private Plan solve(Goal goal) throws PlannerException {
 		// We use a PriorityQueue to order all possible plans by their cost.
 		PriorityQueue<Plan> queue = new PriorityQueue<>();
 
@@ -46,7 +47,7 @@ public class HeuristicPlanner implements Callable<Plan> {
 		if (!ConstraintCheck.isValidWorld(world)) {
 			Debug.print("World is not valid!");
 			Debug.print(world);
-			throw new InterruptedException(this + ": World is not valid!");
+			throw new PlannerException(this + ": World is not valid!");
 		}
 		
 		int count = 0;
@@ -101,7 +102,7 @@ public class HeuristicPlanner implements Callable<Plan> {
 					Debug.print(this + ": " + size);
 					Debug.print(this + ": Queue size: " + queue.size());
 					if (size > maxDepth) {
-						throw new InterruptedException(this + ": interrupted, my plan is too long: " + size + " > " + maxDepth);
+						throw new PlannerException(this + ": interrupted, my plan is too long: " + size + " > " + maxDepth);
 					}
 				}
 
