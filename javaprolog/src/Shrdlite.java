@@ -173,6 +173,7 @@ public class Shrdlite {
 			result.put("output", "Ambiguity error!");
 			return null;
 		}
+		state = new JSONObject();
 		state.put("utterances", new JSONArray());
 		result.put("state", state);
 		return interpreter;
