@@ -21,9 +21,15 @@ import gnu.prolog.term.Term;
 import gnu.prolog.vm.PrologException;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.json.simple.JSONArray;
@@ -36,17 +42,19 @@ import src.planner.BreadthFirstSolver;
 import src.planner.HeuristicGoalSolver;
 import src.planner.HeuristicPlanner;
 import src.planner.IGoalSolver;
-import src.planner.ProbabilisticPlanner;
-import src.planner.StochasticPlanner;
 import src.planner.IGoalSolver.PlannerAlgorithm;
 import src.planner.LimitedHeuristicSolver;
+import src.planner.ProbabilisticPlanner;
 import src.planner.ProbabilisticSolver;
+import src.planner.StochasticPlanner;
 import src.planner.StochasticSolver;
 import src.planner.data.Action;
 import src.planner.data.IPlan;
 import src.world.Entity;
 import src.world.Goal;
 import src.world.Relation;
+
+import static src.Debug.print;
 
 public class Shrdlite {
 	
@@ -84,13 +92,14 @@ public class Shrdlite {
 		Interpreter interpreter = parse();
 		if (interpreter != null) {
 			if(Debug.benchmark) {
-				runBenchmark(interpreter.world, interpreter.heldEntity, goals, 5);
+//				runBenchmark(interpreter.world, interpreter.heldEntity, goals, 5);
+				runFullBenchmark(interpreter.world, interpreter.heldEntity, goals, 5);
 			} else {
 				plan(interpreter.world, interpreter.heldEntity);
 			}
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private static Interpreter parse() throws PrologException, IOException {
 		DCGParser parser = new DCGParser("shrdlite_grammar.pl");
@@ -103,12 +112,12 @@ public class Shrdlite {
 		List<Term> trees = parser.parseSentence("command", utterance);
 		List<String> tstrs = new ArrayList<String>();
 		result.put("trees", tstrs);
-		Debug.print();
+		print();
 		for (Term t : trees) {
 			tstrs.add(t.toString());
-			Debug.print("Tree " + (trees.indexOf(t) + 1));
-			Debug.print(t.toString());
-			Debug.print();
+			print("Tree " + (trees.indexOf(t) + 1));
+			print(t.toString());
+			print();
 		}
 
 		if (trees.isEmpty()) {
@@ -196,8 +205,8 @@ public class Shrdlite {
 		if (state != null) {
 			statearray = (JSONArray) state.get("utterances");
 			if (statearray != null && !statearray.isEmpty()) {
-				Debug.print("State given: " + state.toString());
-				Debug.print();
+				print("State given: " + state.toString());
+				print();
 				
 				List<Goal> previousGoals = new ArrayList<>();
 				
@@ -208,9 +217,9 @@ public class Shrdlite {
 					List<String> statetstrs = new ArrayList<String>();
 					for (Term t : statetrees) {
 						statetstrs.add(t.toString());
-						Debug.print("State Tree " + (statetrees.indexOf(t) + 1));
-						Debug.print(t.toString());
-						Debug.print();
+						print("State Tree " + (statetrees.indexOf(t) + 1));
+						print(t.toString());
+						print();
 					}
 
 					Interpreter stateInterpreter = new Interpreter(world, holding, objects);
@@ -228,13 +237,13 @@ public class Shrdlite {
 											if (stateGoalRelation.getEntityA().equals(goalRelation.getEntityA())
 													|| stateGoalRelation.getEntityA().equals(goalRelation.getEntityB())) {
 												newGoals.add(goal);
-												Debug.print("Added goal: " + goal);
+												print("Added goal: " + goal);
 											}
 										}
 									}
 								}
 							}
-							Debug.print(newGoals);
+							print(newGoals);
 							previousGoals = newGoals;
 						}
 					}
@@ -247,7 +256,7 @@ public class Shrdlite {
 								if (stateGoalRelation.getEntityA().equals(goalRelation.getEntityA())
 										|| stateGoalRelation.getEntityB().equals(goalRelation.getEntityA())) {
 									newGoals.add(stateGoal);
-									Debug.print("Kept goal: " + stateGoal);
+									print("Kept goal: " + stateGoal);
 								}
 							}
 						}
@@ -256,8 +265,8 @@ public class Shrdlite {
 				goals = newGoals;
 			}
 		} else {
-			Debug.print("State was empty.");
-			Debug.print();
+			print("State was empty.");
+			print();
 		}
 	}
 
@@ -287,9 +296,9 @@ public class Shrdlite {
 				}
 			}
 
-			Debug.print();
-			Debug.print("Picked " + smallestPlan + "!");
-			Debug.print();
+			print();
+			print("Picked " + smallestPlan + "!");
+			print();
 			
 			for (Action action: smallestPlan) {
 				actionStrings.add(action.toString());
@@ -324,46 +333,89 @@ public class Shrdlite {
 		return sum / testList.size();
 	}
 	
-	public static void runBenchmark(List<List<Entity>> world, Entity heldEntity, List<Goal> goals, int runs) {
+	private static void runFullBenchmark(List<List<Entity>> world, Entity heldEntity, List<Goal> goals, int i) {
+		PrintStream out  = null;
+		print("Full Benchmarking started!");
+		try {
+			DateFormat dateFormat = new SimpleDateFormat("HH:mm");
+			Calendar cal = Calendar.getInstance();
+			out = new PrintStream(new FileOutputStream("Benchmark-"+dateFormat.format(cal.getTime())+".txt"));
+			final int RUNS_PER_ALGORITHM = 10;
+			out.println("==========================================================");
+			out.println("======== BENCHMARK RUN AT: "+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(cal.getTime()));
+			out.println("==========================================================");
+			out.println();
+			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.BREADTH_FIRST, out);
+			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.HEURISTIC, out);
+			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.LIMITED_HEURISTIC, out);
+			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.STOCHASTIC, out);
+			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.PROBABILITY, out);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} finally {
+			if(out != null) out.close();
+		}
 		
-		Debug.print("==========================================================");
-		Debug.print("======== ADVANCED PLANNER ALGORITHMS BENCHMARK STARTED ");
-		Debug.print("==========================================================");
-		Debug.print();
+	}
+	
+	public static void runBenchmark(List<List<Entity>> world, Entity heldEntity, List<Goal> goals, int runs, PlannerAlgorithm alg, PrintStream pw) {
+		
+		print("==========================================================");
+		print("======== ADVANCED PLANNER ALGORITHMS BENCHMARK STARTED    ");
+		print("==========================================================");
+		print();
 		List<? extends IPlan> plans;
 		IGoalSolver goalSolver;
-		if (algorithm == PlannerAlgorithm.HEURISTIC) {
+		if (alg == PlannerAlgorithm.HEURISTIC) {
 			goalSolver = new HeuristicGoalSolver(world, heldEntity, goals);
-		} else if (algorithm == PlannerAlgorithm.PROBABILITY) {
+		} else if (alg == PlannerAlgorithm.PROBABILITY) {
 			goalSolver = new ProbabilisticSolver(world, heldEntity, goals);
-		} else if (algorithm == PlannerAlgorithm.LIMITED_HEURISTIC) {
-			goalSolver = new LimitedHeuristicSolver(world, heldEntity, goals);
-		} else if (algorithm == PlannerAlgorithm.STOCHASTIC) {
+		} else if (alg == PlannerAlgorithm.LIMITED_HEURISTIC) {
+			goalSolver = new LimitedHeuristicSolver(world, heldEntity, goals);	
+		} else if (alg == PlannerAlgorithm.STOCHASTIC) {
 			goalSolver = new StochasticSolver(world, heldEntity, goals);
 		} else {
 			goalSolver = new BreadthFirstSolver(world, heldEntity, goals);
 		}
-		List<Long> times = new ArrayList<>();
+		List<Long> times = new ArrayList<Long>();
 		for(int i = 0 ; i < runs ; i++ ) {
 			long start = System.currentTimeMillis();
 			plans = goalSolver.solve();
 			long elapsed = System.currentTimeMillis() - start;
-			if(plans == null || plans.isEmpty()) Debug.print("Plans was NULL! Call the 911!");
-			times.add(elapsed);
-			Debug.print("RUN " + String.valueOf(i+1) + " finished : " + elapsed + " ms");
-			resetPlanners();
+			if(plans == null || plans.isEmpty())  {
+				print("Plans was NULL! Call the 911!");
+				times.add(Long.MAX_VALUE);
+			} else {
+				times.add(elapsed);
+			}
+			print("RUN " + String.valueOf(i+1) + " finished : " + elapsed + " ms");
+			goalSolver.reset();
 		}
-		Debug.print();
-		Debug.print("==========================================================");
-		Debug.print("======== ADVANCED PLANNER ALGORITHMS BENCHMARK FINISHED ");
-		Debug.print("==========================================================");
-		Debug.print();
+		print();
+		print("==========================================================");
+		print("======== ADVANCED PLANNER ALGORITHMS BENCHMARK FINISHED   ");
+		print("==========================================================");
+		print();
 		for(int i = 0 ; i < times.size() ; i++) {
-			Debug.print("RUN " + String.valueOf(i+1) + " : " + times.get(i) + " ms");
+			print("RUN " + String.valueOf(i+1) + " : " + times.get(i) + " ms");
 		}
-		Debug.print();
-		Debug.print("MEAN VALUE " + getMeanValue(times) + " ms");
+		print();
+		print("MEAN VALUE " + getMeanValue(times) + " ms");
 		
+		if(pw != null) {
+			pw.println("- Algorithm: " + alg.toString());
+			for(int i = 0 ; i < times.size() ; i++) {
+				long time = times.get(i);
+				if(time == Long.MAX_VALUE) {
+					pw.println("\tRUN " + String.valueOf(i+1) + " : " + '\u221e');
+				} else {
+					pw.println("\tRUN " + String.valueOf(i+1) + " : " + times.get(i) + " ms");
+				}
+			}
+			pw.println();
+			pw.println("MEAN VALUE " + getMeanValue(times) + " ms");
+			pw.println();
+		}
 	}
 	
 	
