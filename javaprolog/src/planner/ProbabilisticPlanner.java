@@ -78,11 +78,9 @@ public class ProbabilisticPlanner implements Callable<SimplePlan> {
 			throw new PlannerException(this + ": World is not valid!");
 		}
 		
-		int size = 0;
 		SimplePlan currentPlan = new SimplePlan(startState, new ArrayList<Action>(), goal);
 		while (true) {
 			count++;
-//			plan = queue.poll();
 			if (hasReachedGoal(goal, currentPlan.currentState)) {
 //				Debug.print(this + ": " + plan + " reached the goal state " + goal);
 				Debug.print(this + ": Planning finished!");
@@ -214,22 +212,24 @@ public class ProbabilisticPlanner implements Callable<SimplePlan> {
 		List<SimplePlan> plans = new ArrayList<SimplePlan>();
 		int planSize = 0;
 		while(planSize < MAX_SAMPLES || !hasNonNullPlan) {
+			Debug.print("Size: " + planSize);
 			SimplePlan plan = null;
 			try {
 				plan = solve(goal);
+				planSize++;
 				if(plan != null) {
 					hasNonNullPlan = true;
 					setMaxDepth(plan.actions.size());
 					plans.add(plan);
 				} else {
-					planSize++;
+					
 //					Debug.print("No plan found max Size: " + maxSize);
 				}
 			} catch (InterruptedException e) {
 //				Debug.print(e);
 //				planSize++;
-				return null;
-//				return getShortestPlan(plans);
+//				return null;
+				return getShortestPlan(plans);
 			} catch (Exception e) {
 //				Debug.print(e);
 				planSize++;

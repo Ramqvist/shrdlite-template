@@ -17,6 +17,7 @@ Run Server from Console
 python -m CGIHTTPServer 8000
  
  */
+import static src.Debug.print;
 import gnu.prolog.term.Term;
 import gnu.prolog.vm.PrologException;
 
@@ -42,21 +43,16 @@ import org.json.simple.parser.ParseException;
 import src.interpreter.Interpreter;
 import src.planner.BreadthFirstSolver;
 import src.planner.HeuristicGoalSolver;
-import src.planner.HeuristicPlanner;
 import src.planner.IGoalSolver;
 import src.planner.IGoalSolver.PlannerAlgorithm;
 import src.planner.LimitedHeuristicSolver;
-import src.planner.ProbabilisticPlanner;
 import src.planner.ProbabilisticSolver;
-import src.planner.StochasticPlanner;
 import src.planner.StochasticSolver;
 import src.planner.data.Action;
 import src.planner.data.IPlan;
 import src.world.Entity;
 import src.world.Goal;
 import src.world.Relation;
-
-import static src.Debug.print;
 
 public class Shrdlite {
 	
@@ -343,7 +339,7 @@ public class Shrdlite {
 			Calendar cal = Calendar.getInstance();
 			out = new PrintStream(new FileOutputStream("Benchmark-"+dateFormat.format(cal.getTime())+".txt"));
 			final int RUNS_PER_ALGORITHM = 10;
-			final int MAX_PLANNING_TIME = 30 * 1000;
+			final int MAX_PLANNING_TIME = 2 * 1000;
 			out.println("==========================================================");
 			out.println("======== BENCHMARK STARTED AT: "+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(cal.getTime()));
 			out.println("==========================================================");
@@ -449,13 +445,5 @@ public class Shrdlite {
 			pw.println();
 		}
 	}
-	
-	
-	private static void resetPlanners() {
-		HeuristicPlanner.maxDepth = Integer.MAX_VALUE;
-		StochasticPlanner.maxDepth = Integer.MAX_VALUE;
-		ProbabilisticPlanner.maxDepth = Integer.MAX_VALUE;
-	}
-	
 
 }
