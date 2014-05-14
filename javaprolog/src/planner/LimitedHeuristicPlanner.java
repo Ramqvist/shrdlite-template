@@ -35,7 +35,7 @@ public class LimitedHeuristicPlanner implements Callable<Plan> {
 		}
 	}
 	
-	private Plan solve(Goal goal) throws PlannerException {
+	private Plan solve(Goal goal) throws PlannerException, InterruptedException {
 		// We use a PriorityQueue to order all possible plans by their cost.
 		LimitedPriorityQueue queue = new LimitedPriorityQueue(500);
 
@@ -65,6 +65,9 @@ public class LimitedHeuristicPlanner implements Callable<Plan> {
 //				Debug.print(this + ": Tabu List size: " + tabuList.size());
 				setMaxDepth(size);
 				return plan;
+			}
+			if (Thread.interrupted()) {
+				throw new InterruptedException();
 			}
 
 			/*
@@ -184,11 +187,15 @@ public class LimitedHeuristicPlanner implements Callable<Plan> {
 
 	@Override
 	public Plan call() throws Exception {
-		long start = System.currentTimeMillis();
-		Plan plan = solve(goal);		
-		long elapsed = System.currentTimeMillis() - start;
-		Debug.print(this + ": Plan solved in: " + elapsed + " ms.");
-		return plan;
+		try {
+			long start = System.currentTimeMillis();
+			Plan plan = solve(goal);
+			long elapsed = System.currentTimeMillis() - start;
+			Debug.print(this + ": Plan solved in: " + elapsed + " ms.");
+			return plan;
+		} catch (InterruptedException e) {
+			return null;
+		}
 	}
 
 }

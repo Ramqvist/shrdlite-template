@@ -19,6 +19,7 @@ public class LimitedHeuristicSolver implements IGoalSolver {
 	private List<List<Entity>> world;
 	private Entity heldEntity;
 	private List<Goal> goals;
+	private ExecutorService executorService;
 	
 	public LimitedHeuristicSolver(List<List<Entity>> world, Entity heldEntity, List<Goal> goals) {
 		this.world = world;
@@ -30,7 +31,7 @@ public class LimitedHeuristicSolver implements IGoalSolver {
 		List<Plan> plans = new ArrayList<Plan>();
 		
 		Debug.print("Attempting to solve " + goals.size() + " goals.");
-		ExecutorService executorService = Executors.newFixedThreadPool(goals.size());
+		executorService = Executors.newFixedThreadPool(goals.size());
 		Set<Future<Plan>> futureSet = new HashSet<>();
 		for (Goal goal : goals) {
 			LimitedHeuristicPlanner planner = new LimitedHeuristicPlanner(world, heldEntity, goal);
@@ -45,7 +46,9 @@ public class LimitedHeuristicSolver implements IGoalSolver {
 				if (Thread.interrupted()) {
 					return null;
 				}
-				plans.add(plan);
+				if(plan != null) {
+					plans.add(plan);
+				}
 				Debug.print(plan + " received!");
 			} catch (InterruptedException | ExecutionException e) {
 				Debug.print(e.getMessage());
@@ -53,6 +56,7 @@ public class LimitedHeuristicSolver implements IGoalSolver {
 		}
 		
 		executorService.shutdownNow();
+		executorService = null;
 		
 		Debug.print();
 		Debug.print("All goals solved!");
@@ -63,6 +67,9 @@ public class LimitedHeuristicSolver implements IGoalSolver {
 	@Override
 	public void reset() {
 		LimitedHeuristicPlanner.setMaxDepth(Integer.MAX_VALUE);
+		if(executorService != null) {
+			executorService.shutdownNow();
+		}
 	}
 	
 }

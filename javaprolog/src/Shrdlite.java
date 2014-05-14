@@ -343,15 +343,20 @@ public class Shrdlite {
 			Calendar cal = Calendar.getInstance();
 			out = new PrintStream(new FileOutputStream("Benchmark-"+dateFormat.format(cal.getTime())+".txt"));
 			final int RUNS_PER_ALGORITHM = 10;
+			final int MAX_PLANNING_TIME = 30 * 1000;
 			out.println("==========================================================");
-			out.println("======== BENCHMARK RUN AT: "+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(cal.getTime()));
+			out.println("======== BENCHMARK STARTED AT: "+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(cal.getTime()));
 			out.println("==========================================================");
 			out.println();
-			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.BREADTH_FIRST, out);
-			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.HEURISTIC, out);
-			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.LIMITED_HEURISTIC, out);
-			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.STOCHASTIC, out);
-			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.PROBABILITY, out);
+			out.println("RUNS PER ALGORITHM: " + RUNS_PER_ALGORITHM);
+			out.println("MAX PLANNING TIME: " + MAX_PLANNING_TIME);
+			out.println();
+			
+			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.BREADTH_FIRST, out, MAX_PLANNING_TIME);
+			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.HEURISTIC, out, MAX_PLANNING_TIME);
+			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.LIMITED_HEURISTIC, out, MAX_PLANNING_TIME);
+			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.STOCHASTIC, out, MAX_PLANNING_TIME);
+			runBenchmark(world, heldEntity, goals, RUNS_PER_ALGORITHM, PlannerAlgorithm.PROBABILITY, out, MAX_PLANNING_TIME);
 			
 			out.println();
 			out.println("======== FINISHED AT: "+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()));
@@ -363,14 +368,14 @@ public class Shrdlite {
 		
 	}
 	
-	public static void runBenchmark(List<List<Entity>> world, Entity heldEntity, List<Goal> goals, int runs, PlannerAlgorithm alg, PrintStream pw) {
+	public static void runBenchmark(List<List<Entity>> world, Entity heldEntity, List<Goal> goals, int runs, PlannerAlgorithm alg, PrintStream pw, int maxPlanningTime) {
 		
 		print("==========================================================");
-		print("======== ADVANCED PLANNER ALGORITHMS BENCHMARK STARTED USING : "+alg.toString());
+		print("======== PLANNER ALGORITHM BENCHMARK STARTED USING : "+alg.toString());
 		print("==========================================================");
 		print();
 		List<? extends IPlan> plans;
-		IGoalSolver goalSolver;
+		final IGoalSolver goalSolver;
 		if (alg == PlannerAlgorithm.HEURISTIC) {
 			goalSolver = new HeuristicGoalSolver(world, heldEntity, goals);
 		} else if (alg == PlannerAlgorithm.PROBABILITY) {
@@ -384,21 +389,21 @@ public class Shrdlite {
 		}
 		final Thread currThread = Thread.currentThread();
 		List<Long> times = new ArrayList<Long>();
-		Timer t = new Timer();
 		for(int i = 0 ; i < runs ; i++ ) {
-			final int MAX_PLANNING_TIME = 10 * 1000;
+			Timer t = new Timer();
 			t.schedule(new TimerTask() {
 				public void run() {
 					print("Planner took to long, sending interrupt...");
 					currThread.interrupt();
+					goalSolver.reset();
 				}
-			}, MAX_PLANNING_TIME);
+			}, maxPlanningTime);
 			long start = System.currentTimeMillis();
 			try {
 				plans = goalSolver.solve();
 				long elapsed = System.currentTimeMillis() - start;
 				if(plans == null || plans.isEmpty())  {
-					print("Plans was NULL! Call the 911!");
+					print("Plans was null!");
 					times.add(Long.MAX_VALUE);
 				} else {
 					times.add(elapsed);
@@ -408,13 +413,14 @@ public class Shrdlite {
 				times.add(Long.MAX_VALUE);
 				print("RUN " + String.valueOf(i+1) + " FAILED TO FINISH TOOK TO LONG");
 			}
-			t.cancel();
+			try {
+				t.cancel();
+			} catch (Exception e) {}
 			goalSolver.reset();
 		}
-		t.purge();
 		print();
 		print("==========================================================");
-		print("======== ADVANCED PLANNER ALGORITHMS BENCHMARK FINISHED   ");
+		print("======== PLANNER ALGORITHM BENCHMARK FINISHED   ");
 		print("==========================================================");
 		print();
 		for(int i = 0 ; i < times.size() ; i++) {
@@ -434,7 +440,12 @@ public class Shrdlite {
 				}
 			}
 			pw.println();
-			pw.println("MEAN VALUE " + getMeanValue(times) + " ms");
+			int meanValue = getMeanValue(times);
+			if(meanValue >= 0) {
+				pw.println("MEAN VALUE " + getMeanValue(times) + " ms");
+			} else {
+				pw.println("MEAN VALUE " + '\u221e');
+			}
 			pw.println();
 		}
 	}

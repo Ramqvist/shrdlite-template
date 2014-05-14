@@ -22,6 +22,7 @@ public class StochasticSolver implements IGoalSolver {
 	private List<List<Entity>> world;
 	private Entity heldEntity;
 	private List<Goal> goals;
+	private ExecutorService executorService;
 	
 	public StochasticSolver(List<List<Entity>> world, Entity heldEntity, List<Goal> goals) {
 		this.world = world;
@@ -33,7 +34,7 @@ public class StochasticSolver implements IGoalSolver {
 		List<SimplePlan> plans = new ArrayList<SimplePlan>();
 		
 		Debug.print("Attempting to solve " + goals.size() + " goals.");
-		ExecutorService executorService = Executors.newFixedThreadPool(goals.size());
+		executorService = Executors.newFixedThreadPool(goals.size());
 		Set<Future<SimplePlan>> futureSet = new HashSet<>();
 		for (Goal goal : goals) {
 			StochasticPlanner planner = new StochasticPlanner(world, heldEntity, goal);
@@ -58,6 +59,7 @@ public class StochasticSolver implements IGoalSolver {
 		}
 		
 		executorService.shutdownNow();
+		executorService = null;
 		
 		Debug.print();
 		Debug.print("All goals solved!");
@@ -68,6 +70,9 @@ public class StochasticSolver implements IGoalSolver {
 	@Override
 	public void reset() {
 		StochasticPlanner.setMaxDepth(Integer.MAX_VALUE);
+		if (executorService != null) {
+			executorService.shutdownNow();
+		}
 	}
 	
 }

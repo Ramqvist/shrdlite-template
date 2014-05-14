@@ -36,7 +36,7 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 		}
 	}
 	
-	private SimplePlan solve(Goal goal) throws PlannerException {
+	private SimplePlan solve(Goal goal) throws PlannerException, InterruptedException {
 		// TODO: We've discussed this before, but as we've currently tried to
 		// solve the planner, are relations in state necessary?
 		List<Relation> relations = new ArrayList<Relation>();
@@ -65,6 +65,9 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 				Debug.print(this + ": Actions: " + plan.actions);
 				Debug.print(this + ": Total iteration count: " + count);
 				return plan;
+			}
+			if (Thread.interrupted()) {
+				throw new InterruptedException();
 			}
 
 			/*
@@ -174,6 +177,8 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 					plans.add(plan);
 					Debug.print(plan.actions.size());
 				}
+			} catch (InterruptedException e) {
+				return null;
 			} catch (Exception e) {
 //				Debug.print(e);
 				planSize++;

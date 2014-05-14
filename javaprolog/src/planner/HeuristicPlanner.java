@@ -64,6 +64,13 @@ public class HeuristicPlanner implements Callable<Plan> {
 				setMaxDepth(size);
 				return plan;
 			}
+			if (Thread.interrupted()) {
+				try {
+					throw new InterruptedException();
+				} catch (InterruptedException e1) {
+				}
+				return null;
+			}
 
 			/*
 			 * Fill a list of possible actions to take. We only pick the actions

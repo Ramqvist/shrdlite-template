@@ -22,6 +22,7 @@ public class ProbabilisticSolver implements IGoalSolver {
 	private List<List<Entity>> world;
 	private Entity heldEntity;
 	private List<Goal> goals;
+	private ExecutorService executorService;
 	
 	public ProbabilisticSolver(List<List<Entity>> world, Entity heldEntity, List<Goal> goals) {
 		this.world = world;
@@ -33,7 +34,7 @@ public class ProbabilisticSolver implements IGoalSolver {
 		List<SimplePlan> plans = new ArrayList<SimplePlan>();
 		
 		Debug.print("Attempting to solve " + goals.size() + " goals.");
-		ExecutorService executorService = Executors.newFixedThreadPool(goals.size());
+		executorService = Executors.newFixedThreadPool(goals.size());
 		Set<Future<SimplePlan>> futureSet = new HashSet<>();
 		for (Goal goal : goals) {
 			ProbabilisticPlanner planner = new ProbabilisticPlanner(world, heldEntity, goal);
@@ -58,6 +59,7 @@ public class ProbabilisticSolver implements IGoalSolver {
 		}
 		
 		executorService.shutdownNow();
+		executorService = null;
 		
 		Debug.print();
 		Debug.print("All goals solved!");
@@ -68,6 +70,9 @@ public class ProbabilisticSolver implements IGoalSolver {
 	@Override
 	public void reset() {
 		ProbabilisticPlanner.setMaxDepth(Integer.MAX_VALUE);
+		if (executorService != null) {
+			executorService.shutdownNow();
+		}
 	}
 	
 }

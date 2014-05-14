@@ -1,4 +1,79 @@
 ==========================================================
-======== BENCHMARK RUN AT: 2014/05/12 14:38:16
+======== BENCHMARK STARTED AT: 2014/05/14 14:38:14
 ==========================================================
 
+RUNS PER ALGORITHM: 10
+MAX PLANNING TIME: 30000
+
+- Algorithm: BREADTH_FIRST
+	RUN 1 : ∞
+	RUN 2 : ∞
+	RUN 3 : ∞
+	RUN 4 : ∞
+	RUN 5 : ∞
+	RUN 6 : ∞
+	RUN 7 : ∞
+	RUN 8 : ∞
+	RUN 9 : ∞
+	RUN 10 : ∞
+
+MEAN VALUE ∞
+
+- Algorithm: HEURISTIC
+	RUN 1 : 14001 ms
+	RUN 2 : 16929 ms
+	RUN 3 : 16128 ms
+	RUN 4 : 19244 ms
+	RUN 5 : 22221 ms
+	RUN 6 : 19921 ms
+	RUN 7 : 22202 ms
+	RUN 8 : 22281 ms
+	RUN 9 : 22523 ms
+	RUN 10 : 20382 ms
+
+MEAN VALUE 19583 ms
+
+- Algorithm: LIMITED_HEURISTIC
+	RUN 1 : 594 ms
+	RUN 2 : 238 ms
+	RUN 3 : 195 ms
+	RUN 4 : 406 ms
+	RUN 5 : 174 ms
+	RUN 6 : 393 ms
+	RUN 7 : 167 ms
+	RUN 8 : 399 ms
+	RUN 9 : 165 ms
+	RUN 10 : 163 ms
+
+MEAN VALUE 289 ms
+
+- Algorithm: STOCHASTIC
+	RUN 1 : 57 ms
+	RUN 2 : 22 ms
+	RUN 3 : 28 ms
+	RUN 4 : 6 ms
+	RUN 5 : 13 ms
+	RUN 6 : 10 ms
+	RUN 7 : 11 ms
+	RUN 8 : 40 ms
+	RUN 9 : 381 ms
+	RUN 10 : 119 ms
+
+MEAN VALUE 68 ms
+
+- Algorithm: PROBABILITY
+	RUN 1 : 670 ms
+	RUN 2 : 583 ms
+	RUN 3 : 357 ms
+	RUN 4 : 600 ms
+	RUN 5 : 681 ms
+	RUN 6 : 1232 ms
+	RUN 7 : 437 ms
+	RUN 8 : 928 ms
+	RUN 9 : 1347 ms
+	RUN 10 : 434 ms
+
+MEAN VALUE 726 ms
+
+
+======== FINISHED AT: 2014/05/14 14:47:39
