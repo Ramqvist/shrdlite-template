@@ -159,10 +159,10 @@ public class Shrdlite {
 			return null;
 		} else if (goals.size() > 1000) {
 			// TODO: ööööööööö fixa ambiguity
-			boolean containsThe = false;
-			for (Goal goal : goals) {
-				if (goal.quantifier != null && goal.quantifier.equalsIgnoreCase("the")) {
-					containsThe = true;
+//			boolean containsThe = false;
+//			for (Goal goal : goals) {
+//				if (goal.quantifier != null && goal.quantifier.equalsIgnoreCase("the")) {
+//					containsThe = true;
 //					for (Goal anotherGoal : goals) {
 //						if (!anotherGoal.equals(goal)) {
 //							for (Relation relation : goal.getRelations()) {
@@ -175,9 +175,9 @@ public class Shrdlite {
 //							}
 //						}
 //					}
-				}
-			}
-			if (containsThe) {
+//				}
+//			}
+//			if (containsThe) {
 				Debug.print();
 				Debug.print("Ambiguity error!");
 				for (Goal goal : goals) {
@@ -195,7 +195,7 @@ public class Shrdlite {
 				result.put("state", state);
 				result.put("output", "Ambiguity error!");
 				return null;
-			}
+//			}
 		}
 		state = new JSONObject();
 		state.put("utterances", new JSONArray());
@@ -342,7 +342,7 @@ public class Shrdlite {
 			DateFormat dateFormat = new SimpleDateFormat("HH:mm");
 			Calendar cal = Calendar.getInstance();
 			out = new PrintStream(new FileOutputStream("Benchmark-"+dateFormat.format(cal.getTime())+".txt"));
-			final int RUNS_PER_ALGORITHM = 10;
+			final int RUNS_PER_ALGORITHM = 2;
 			out.println("==========================================================");
 			out.println("======== BENCHMARK RUN AT: "+new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(cal.getTime()));
 			out.println("==========================================================");
@@ -387,12 +387,16 @@ public class Shrdlite {
 		Timer t = new Timer();
 		for(int i = 0 ; i < runs ; i++ ) {
 			final int MAX_PLANNING_TIME = 10 * 1000;
-			t.schedule(new TimerTask() {
-				public void run() {
-					print("Planner took to long, sending interrupt...");
-					currThread.interrupt();
-				}
-			}, MAX_PLANNING_TIME);
+			try {
+				t.schedule(new TimerTask() {
+					public void run() {
+						print("Planner took to long, sending interrupt...");
+						currThread.interrupt();
+					}
+				}, MAX_PLANNING_TIME);
+			} catch (Exception e) {
+				System.out.println("Timer interrupted.");
+			}
 			long start = System.currentTimeMillis();
 			try {
 				plans = goalSolver.solve();
