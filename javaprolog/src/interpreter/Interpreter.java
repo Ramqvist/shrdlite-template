@@ -474,13 +474,13 @@ public class Interpreter {
 			tempGoal = new Goal(goalRelationList);
 			Debug.print("move: Added to goalList, which is now: " + goalList);
 		}
-		for (Pair<Entity, Relation> matchedEntity : matchedEntities) {
-			if (matchedEntity.quantifier != null) {
-				if (matchedEntity.quantifier.equalsIgnoreCase("the")) {
-					tempGoal.quantifier = "the";
-				}
-			}
-		}
+//		for (Pair<Entity, Relation> matchedEntity : matchedEntities) {
+//			if (matchedEntity.quantifier != null) {
+//				if (matchedEntity.quantifier.equalsIgnoreCase("the")) {
+//					tempGoal.quantifier = "the";
+//				}
+//			}
+//		}
 		return tempGoal;
 	}
 	
@@ -621,7 +621,7 @@ public class Interpreter {
 //			matchedEntitiesPruned.add(matchedEntitiesPair);
 			for (Entity matchedEntity : matchedEntities) {
 				Pair<Entity, Relation> pair = new Pair<>(matchedEntity, null);
-				pair.quantifier = "the";
+//				pair.quantifier = "the";
 				List<Pair<Entity, Relation>> matchedEntitiesPair = new ArrayList<>();
 				matchedEntitiesPair.add(pair);
 				matchedEntitiesPruned.add(matchedEntitiesPair);
@@ -714,7 +714,7 @@ public class Interpreter {
 //			matchedEntitiesPair.add(temp);
 //			matchedEntitiesPruned.add(matchedEntitiesPair);
 			for (Pair<Entity, Relation> matchedEntityPair : matchedEntitiesPair) {
-				matchedEntityPair.quantifier = "the";
+//				matchedEntityPair.quantifier = "the";
 				List<Pair<Entity, Relation>> tempMatchedEntitiesPair = new ArrayList<>();
 				tempMatchedEntitiesPair.add(matchedEntityPair);
 				matchedEntitiesPruned.add(tempMatchedEntitiesPair);

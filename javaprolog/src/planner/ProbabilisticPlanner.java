@@ -68,7 +68,7 @@ public class ProbabilisticPlanner implements Callable<SimplePlan> {
 		return count;
 	}
 	
-	private SimplePlan solve(Goal goal) throws PlannerException {
+	private SimplePlan solve(Goal goal) throws PlannerException, InterruptedException {
 		List<Relation> relations = new ArrayList<Relation>();
 		State startState = new State(world, relations, heldEntity);
 		
@@ -89,6 +89,13 @@ public class ProbabilisticPlanner implements Callable<SimplePlan> {
 //				Debug.print(this + ": Actions: " + plan.actions);
 				Debug.print(this + ": Total iteration count: " + count);
 				return currentPlan;
+			}
+			if (Thread.interrupted()) {
+				try {
+					throw new InterruptedException();
+				} catch (InterruptedException e1) {
+				}
+				throw new InterruptedException();
 			}
 
 			/*
@@ -218,6 +225,11 @@ public class ProbabilisticPlanner implements Callable<SimplePlan> {
 					planSize++;
 //					Debug.print("No plan found max Size: " + maxSize);
 				}
+			} catch (InterruptedException e) {
+//				Debug.print(e);
+//				planSize++;
+				return null;
+//				return getShortestPlan(plans);
 			} catch (Exception e) {
 //				Debug.print(e);
 				planSize++;

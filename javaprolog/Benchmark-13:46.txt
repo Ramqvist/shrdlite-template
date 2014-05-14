@@ -1,0 +1,22 @@
+==========================================================
+======== BENCHMARK RUN AT: 2014/05/14 13:46:16
+==========================================================
+
+- Algorithm: BREADTH_FIRST
+	RUN 1 : 18157 ms
+	RUN 2 : 18258 ms
+
+MEAN VALUE 18207 ms
+
+- Algorithm: HEURISTIC
+	RUN 1 : ∞
+	RUN 2 : ∞
+
+MEAN VALUE -1 ms
+
+- Algorithm: LIMITED_HEURISTIC
+	RUN 1 : 7 ms
+	RUN 2 : 6 ms
+
+MEAN VALUE 6 ms
+

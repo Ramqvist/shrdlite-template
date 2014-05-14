@@ -32,6 +32,8 @@ public class BreadthFirstSolver implements IGoalSolver {
 			if (aPlan != null) {
 				maxDepth = aPlan.actions.size();
 				plans.add(aPlan);
+			} else {
+				return plans;
 			}
 			long elapsed = System.currentTimeMillis() - start;
 			Debug.print("Plan solved in: " + elapsed + " ms.");

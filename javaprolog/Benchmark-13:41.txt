@@ -1,0 +1,46 @@
+==========================================================
+======== BENCHMARK RUN AT: 2014/05/14 13:41:05
+==========================================================
+
+- Algorithm: BREADTH_FIRST
+	RUN 1 : 18097 ms
+	RUN 2 : 17185 ms
+	RUN 3 : 15535 ms
+	RUN 4 : 14582 ms
+	RUN 5 : 14857 ms
+	RUN 6 : 13603 ms
+	RUN 7 : 13716 ms
+	RUN 8 : 12911 ms
+	RUN 9 : 12897 ms
+	RUN 10 : 13164 ms
+
+MEAN VALUE 14654 ms
+
+- Algorithm: HEURISTIC
+	RUN 1 : ∞
+	RUN 2 : ∞
+	RUN 3 : ∞
+	RUN 4 : ∞
+	RUN 5 : ∞
+	RUN 6 : ∞
+	RUN 7 : ∞
+	RUN 8 : ∞
+	RUN 9 : ∞
+	RUN 10 : ∞
+
+MEAN VALUE -1 ms
+
+- Algorithm: LIMITED_HEURISTIC
+	RUN 1 : 33 ms
+	RUN 2 : 23 ms
+	RUN 3 : 16 ms
+	RUN 4 : 18 ms
+	RUN 5 : 5 ms
+	RUN 6 : 17 ms
+	RUN 7 : 25 ms
+	RUN 8 : 14 ms
+	RUN 9 : 9 ms
+	RUN 10 : 11 ms
+
+MEAN VALUE 17 ms
+

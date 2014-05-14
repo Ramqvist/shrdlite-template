@@ -46,7 +46,6 @@ public class BreadthFirstPlanner {
 				try {
 					throw new InterruptedException();
 				} catch (InterruptedException e1) {
-					e1.printStackTrace();
 				}
 				return null;
 			}
