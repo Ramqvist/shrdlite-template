@@ -37,10 +37,7 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 	}
 	
 	private SimplePlan solve(Goal goal) throws PlannerException, InterruptedException {
-		// TODO: We've discussed this before, but as we've currently tried to
-		// solve the planner, are relations in state necessary?
-		List<Relation> relations = new ArrayList<Relation>();
-		State startState = new State(world, relations, heldEntity);
+		State startState = new State(world, heldEntity);
 
 		if (!ConstraintCheck.isValidWorld(world)) {
 			Debug.print("World is not valid!");
@@ -50,7 +47,6 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 		
 		int size = 0;
 		State prePickedState = null;
-//		List<Action> prePickedActions = null;
 		int prePickedActionSize = 0;
 		int rollbackAttempts = 0;
 		for (List<Entity> column : world) {
@@ -93,12 +89,9 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 				}
 				newAction = new Action(Action.COMMAND.PICK, i);
 				prePickedState = new State(plan.currentState);
-//				prePickedActions = new ArrayList<>(plan.actions);
 				prePickedActionSize = plan.actions.size();
 			}
 
-//			Debug.print(newAction);
-			
 			plan.actions.add(newAction);
 			
 			if (plan.actions.size() > maxDepth) {
@@ -108,7 +101,6 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 
 			try {
 				plan.currentState = plan.currentState.takeAction(newAction);
-//				Plan p = new Plan(plan.currentState.takeAction(newAction), actionList, goal);
 				
 				if (newAction.command == Action.COMMAND.DROP) {
 					if (!ConstraintCheck.isValidColumn(plan.currentState.world.get(newAction.column))) {
@@ -118,7 +110,6 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 								plan.actions.subList(prePickedActionSize, plan.actions.size()).clear();
 								rollbackAttempts--;
 							} else {
-//								Debug.print("too long " + plan.actions.size());
 								return null;
 							}
 						}
@@ -130,7 +121,6 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 				// The action was rejected, so we do nothing.
 			}
 		}
-//		return null; //No Plan found
 	}
 
 	private static boolean hasReachedGoal(Goal goal, State state) {
@@ -180,9 +170,7 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 			} catch (InterruptedException e) {
 				return null;
 			} catch (Exception e) {
-//				Debug.print(e);
 				planSize++;
-//				return getShortestPlan(plans);
 			}
 		}
 		long elapsed = System.currentTimeMillis() - start;
@@ -197,10 +185,14 @@ public class StochasticPlanner implements Callable<SimplePlan> {
 		}
 		SimplePlan shortestPlan = plans.remove(0);
 		for(SimplePlan p : plans) {
-			if(p.actions.size() < shortestPlan.actions.size()) {
+			if (p.actions.isEmpty()) {
+				continue;
+			}
+			if (p.actions.size() < shortestPlan.actions.size()) {
 				shortestPlan = p;
 			}
 		}
+		Debug.print("Picked the shortest plan: " + shortestPlan);
 		return shortestPlan;
 	}
 

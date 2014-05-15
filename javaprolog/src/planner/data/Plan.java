@@ -34,10 +34,6 @@ public class Plan implements Comparable<Plan>, IPlan {
 	public void add(Action a){
 		actions.add(a);
 	}
-
-	public boolean isEmpty() {
-		return true;
-	}
 	
 	private int compareWithGoal() {
 		int count = 0;
@@ -117,7 +113,5 @@ public class Plan implements Comparable<Plan>, IPlan {
 	public List<Action> getActions() {
 		return actions;
 	}
-	
-	
 	
 }

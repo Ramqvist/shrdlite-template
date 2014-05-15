@@ -45,12 +45,14 @@ public class HeuristicGoalSolver implements IGoalSolver {
 				Plan plan = future.get();
 				if (Thread.interrupted()) {
 					return plans;
-//					return null;
 				}
-				plans.add(plan);
+				if (plan != null) {
+					plans.add(plan);
+				}
 				Debug.print(plan + " received!");
 			} catch (InterruptedException | ExecutionException e) {
-				return null;
+//				reset();
+//				return plans;
 			}
 		}
 		

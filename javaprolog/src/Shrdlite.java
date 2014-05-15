@@ -154,44 +154,23 @@ public class Shrdlite {
 			}
 			return null;
 		} else if (goals.size() > 1000) {
-			// TODO: ööööööööö fixa ambiguity
-//			boolean containsThe = false;
-//			for (Goal goal : goals) {
-//				if (goal.quantifier != null && goal.quantifier.equalsIgnoreCase("the")) {
-//					containsThe = true;
-//					for (Goal anotherGoal : goals) {
-//						if (!anotherGoal.equals(goal)) {
-//							for (Relation relation : goal.getRelations()) {
-//								for (Relation anotherRelation : anotherGoal.getRelations()) {
-//									if (relation.getEntityA().equalsExact(anotherRelation.getEntityA())) {
-//										Debug.print("1: " + relation);
-//										Debug.print("2: " + anotherRelation);
-//									}
-//								}
-//							}
-//						}
-//					}
-//				}
-//			}
-//			if (containsThe) {
-				Debug.print();
-				Debug.print("Ambiguity error!");
-				for (Goal goal : goals) {
-					Debug.print(goal);
-				}
-				Debug.print();
-				if (statearray == null) {
-					statearray = new JSONArray();
-				}
-				statearray.add(utterance);
-				if (state == null) {
-					state = new JSONObject();
-				}
-				state.put("utterances", statearray);
-				result.put("state", state);
-				result.put("output", "Ambiguity error!");
-				return null;
-//			}
+			Debug.print();
+			Debug.print("Ambiguity error!");
+			for (Goal goal : goals) {
+				Debug.print(goal);
+			}
+			Debug.print();
+			if (statearray == null) {
+				statearray = new JSONArray();
+			}
+			statearray.add(utterance);
+			if (state == null) {
+				state = new JSONObject();
+			}
+			state.put("utterances", statearray);
+			result.put("state", state);
+			result.put("output", "Ambiguity error!");
+			return null;
 		}
 		state = new JSONObject();
 		state.put("utterances", new JSONArray());
@@ -270,7 +249,7 @@ public class Shrdlite {
 
 	@SuppressWarnings("unchecked")
 	private static void plan(List<List<Entity>> world, Entity heldEntity) {
-		IGoalSolver goalSolver;
+		final IGoalSolver goalSolver;
 		List<? extends IPlan> plans;
 		if (algorithm == PlannerAlgorithm.HEURISTIC) {
 			goalSolver = new HeuristicGoalSolver(world, heldEntity, goals);
@@ -283,7 +262,32 @@ public class Shrdlite {
 		} else {
 			goalSolver = new BreadthFirstSolver(world, heldEntity, goals);
 		}
+		
+		final int MAX_PLANNING_TIME = 5 * 1000;
+		
+		final Thread currThread = Thread.currentThread();
+		Timer t = new Timer();
+		t.schedule(new TimerTask() {
+			
+			public void run() {
+				print("Planner took to long, sending interrupt...");
+				currThread.interrupt();
+				goalSolver.reset();
+			}
+			
+		}, MAX_PLANNING_TIME);
+		
 		plans = goalSolver.solve();
+		
+		try {
+			t.cancel();
+		} catch (Exception e) {
+			
+		}
+		
+		if (plans == null) {
+			plans = new ArrayList<>();
+		}
 
 		List<String> actionStrings = new ArrayList<>();
 		if (!plans.isEmpty()) {

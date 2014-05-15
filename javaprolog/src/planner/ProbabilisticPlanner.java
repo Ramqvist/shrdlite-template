@@ -69,8 +69,7 @@ public class ProbabilisticPlanner implements Callable<SimplePlan> {
 	}
 	
 	private SimplePlan solve(Goal goal) throws PlannerException, InterruptedException {
-		List<Relation> relations = new ArrayList<Relation>();
-		State startState = new State(world, relations, heldEntity);
+		State startState = new State(world, heldEntity);
 		
 		if (!ConstraintCheck.isValidWorld(world)) {
 			Debug.print("World is not valid!");
@@ -103,8 +102,6 @@ public class ProbabilisticPlanner implements Callable<SimplePlan> {
 			// Small optimization. No point in dropping in the same location
 			// we last picked, or picking in the same location we last
 			// dropped.
-
-
 			List<Action> possibleActions = new ArrayList<Action>();
 			for (int i = 0; i < world.size(); i++) {
 				if (currentPlan.actions.size() == 0 || currentPlan.actions.get(currentPlan.actions.size() - 1).column != i) {
@@ -212,7 +209,6 @@ public class ProbabilisticPlanner implements Callable<SimplePlan> {
 		List<SimplePlan> plans = new ArrayList<SimplePlan>();
 		int planSize = 0;
 		while(planSize < MAX_SAMPLES || !hasNonNullPlan) {
-			Debug.print("Size: " + planSize);
 			SimplePlan plan = null;
 			try {
 				plan = solve(goal);
@@ -221,19 +217,11 @@ public class ProbabilisticPlanner implements Callable<SimplePlan> {
 					hasNonNullPlan = true;
 					setMaxDepth(plan.actions.size());
 					plans.add(plan);
-				} else {
-					
-//					Debug.print("No plan found max Size: " + maxSize);
 				}
 			} catch (InterruptedException e) {
-//				Debug.print(e);
-//				planSize++;
-//				return null;
 				return getShortestPlan(plans);
 			} catch (Exception e) {
-//				Debug.print(e);
 				planSize++;
-//				return getShortestPlan(plans);
 			}
 		}
 		long elapsed = System.currentTimeMillis() - start;

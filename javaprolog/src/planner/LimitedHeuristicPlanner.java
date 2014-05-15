@@ -41,8 +41,7 @@ public class LimitedHeuristicPlanner implements Callable<Plan> {
 
 		// TODO: We've discussed this before, but as we've currently tried to
 		// solve the planner, are relations in state necessary?
-		List<Relation> relations = new ArrayList<Relation>();
-		State startState = new State(world, relations, heldEntity);
+		State startState = new State(world, heldEntity);
 		queue.add(new Plan(startState, new ArrayList<Action>(), goal));
 		
 		if (!ConstraintCheck.isValidWorld(world)) {

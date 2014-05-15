@@ -28,8 +28,7 @@ public class BreadthFirstPlanner {
 
 		// TODO: We've discussed this before, but as we've currently tried to
 		// solve the planner, are relations in state necessary?
-		List<Relation> relations = new ArrayList<Relation>();
-		State startState = new State(world, relations, heldEntity);
+		State startState = new State(world, heldEntity);
 		queue.add(new SimplePlan(startState, new ArrayList<Action>(), goal));
 
 		if (!ConstraintCheck.isValidWorld(world)) {
@@ -101,10 +100,10 @@ public class BreadthFirstPlanner {
 				if (actionList.size() > size) {
 					size = actionList.size();
 					Debug.print(size);
-				}				
-//				Debug.print(actionList);
+				}
+				
 				if (actionList.size() >= maxDepth) {
-					return null; // TODO Make nicer?
+					return null;
 				}
 
 				try {

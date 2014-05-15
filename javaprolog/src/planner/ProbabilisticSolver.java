@@ -48,7 +48,6 @@ public class ProbabilisticSolver implements IGoalSolver {
 				SimplePlan plan = future.get();
 				if (Thread.interrupted()) {
 					return plans;
-//					return null;
 				}
 				if(plan != null) {
 					plans.add(plan);

@@ -13,23 +13,14 @@ import src.world.Relation;
 public class State {
 	
 	public List<List<Entity>> world;
-	public List<Relation> relations;
 	public Entity holding = null;
 
-	public State(List<List<Entity>> world, List<Relation> relations, Entity heldEntity) {
+	public State(List<List<Entity>> world, Entity heldEntity) {
 		this.world = world;
-		this.relations = relations;
 		this.holding = heldEntity;
 	}
 
-	/**
-	 * Clone constructor.
-	 */
 	public State(State state) {
-//		this.relations = new ArrayList<Relation>();
-//		for (Relation r : state.relations) {
-//			this.relations.add(r.copy());
-//		}
 		this.world = new ArrayList<List<Entity>>(state.world.size());
 		for (List<Entity> entityList : state.world) {
 			List<Entity> l = new ArrayList<Entity>(entityList.size());
@@ -41,13 +32,6 @@ public class State {
 		if (state.holding != null) {
 			this.holding = state.holding;
 		}
-	}
-
-	/**
-	 * Checks if the state has the given relation.
-	 */
-	public boolean exist(Relation r) {
-		return relations.contains(r);
 	}
 
 	/**
@@ -94,7 +78,7 @@ public class State {
 
 	@Override
 	public String toString() {
-		return "(State " + world + " : " + relations + " : HOLDING " + holding + ")";
+		return "(State " + world + " : HOLDING " + holding + ")";
 	}
 
 	/* (non-Javadoc)
@@ -105,7 +89,6 @@ public class State {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((holding == null) ? 0 : holding.hashCode());
-//		result = prime * result + ((relations == null) ? 0 : relations.hashCode());
 		result = prime * result + ((world == null) ? 0 : world.hashCode());
 		return result;
 	}
@@ -130,13 +113,6 @@ public class State {
 				return false;
 			}
 		} else if (!holding.equals(other.holding)) {
-			return false;
-		}
-		if (relations == null) {
-			if (other.relations != null) {
-				return false;
-			}
-		} else if (!relations.equals(other.relations)) {
 			return false;
 		}
 		if (world == null) {
